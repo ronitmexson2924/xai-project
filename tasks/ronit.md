@@ -159,10 +159,27 @@
   MAE vs number of explanations, regret, exploration share, and a comparison
   of the three arms. Output `research/reports/simulation.md` with plots.
 - **Acceptance:**
-  - [ ] Reproducible (seeded); one command regenerates the report
-  - [ ] Constants in `MODEL_SPEC.md` re-tuned from the results and the
+  - [x] Reproducible (seeded); one command regenerates the report
+  - [x] Constants in `MODEL_SPEC.md` re-tuned from the results and the
         changes documented
-- [ ] **R6 done**
+- [x] **R6 done**: `research/reports/simulation.md` (regenerate: see `research/README.md`)
+  - _Findings (40 paired learners per arm, 60 explanations; well-specified world):_
+    1. _With a self-report gap (SD 0.2), the closed loop cuts style-trait error by 36%
+       (0.158 → 0.102) and keeps improving (0.079 after 150). With accurate self-report there
+       is little to learn (0.089 → 0.081). The loop's value depends on how wrong self-report
+       is, so **the pilot should measure that gap**._
+    2. _It does not invent preferences: with no true preference it claims one in 18% of
+       estimates, vs 47% for questionnaire-only (it corrects questionnaire noise)._
+    3. _Short horizons cost: over 60 explanations the closed loop beats generic on learning
+       gain (+0.027, CI +0.006 to +0.047) but trails static (−0.016, CI −0.029 to −0.003),
+       because Thompson sampling explores a lot. Regret only catches up with static after
+       ~100 explanations. **Decision for Ronit:** keep full Thompson sampling (best for
+       identifying traits, the research claim) or exploit more (better short-term
+       learning). See MODEL_SPEC §2.2 "Checked in R6"._
+    4. _The behavioural-trait EWMA made persistence/self-efficacy worse (0.160 → 0.223), so
+       it is now off by default until calibrated (MODEL_SPEC §2.3)._
+    5. _Constants kept (ε = 0.1, questionnaire variance 0.04); the sweep did not justify a
+       change._
 
 ## R7: Hardening (weeks 7–8)
 - **Depends on:** R5

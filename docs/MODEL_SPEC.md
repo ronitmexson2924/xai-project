@@ -113,6 +113,17 @@ observation count `n` are stored in `learner_traits.bandit`. Code:
    `frustration > 0.6`. `include_diagram = concept card has a diagram and
    x_abs = −1`.
 
+> *Checked in R6 (`research/reports/simulation.md` §6):* ε ∈ {0, 0.05, 0.1} ×
+> questionnaire variance ∈ {0.04, 0.09}. **Kept ε = 0.1 and variance = 0.04.**
+> - ε = 0.1 gave the best trait recovery (error 0.101 vs 0.124 at ε = 0, about
+>   2 SE apart) for about 10% more regret (0.149 vs 0.134).
+> - The variance difference was within 1 SE.
+> - The bigger lever is Thompson sampling itself: 53–61% of choices differ from
+>   the posterior-mean best style. That makes the closed loop pay more regret
+>   than the static arm for roughly the first 100 explanations (§3 of the
+>   report). Trading recovery for regret (e.g. greedy on the posterior mean,
+>   plus ε) is a design decision for Ronit, not a constant to tune.
+
 **`static_personalized` arm.** Pick the style that maximises the **prior
 mean** (no sampling, no updates from feedback; `style_source="trait_mapped"`).
 This is the same rule the bandit uses, so the arms differ only in learning.
