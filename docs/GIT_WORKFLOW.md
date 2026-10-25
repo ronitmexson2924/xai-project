@@ -14,7 +14,7 @@ mit            ●──●────●                               (Mit's 
 
 1. **Never commit directly to `main` or `dev`.** Only PRs.
 2. Work on your own branch: `ronit` or `mit`. For bigger tasks you may create
-   short-lived branches off it (e.g. `ronit/r2-bkt`) and merge them back into
+   short-lived branches off it (e.g. `ronit-r2-bkt`; git cannot have both `ronit` and `ronit/...`) and merge them back into
    `ronit`.
 3. **Sync often:** at least every Friday, and before opening a PR, run
    ```bash

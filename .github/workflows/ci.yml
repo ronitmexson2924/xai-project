@@ -12,7 +12,19 @@ jobs:
     defaults:
       run:
         working-directory: backend
-    # Ronit (R0): add a postgres:16 service here and export DATABASE_URL for tests.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: pcg
+          POSTGRES_PASSWORD: pcg
+          POSTGRES_DB: pcg_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pcg" --health-interval 5s --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://pcg:pcg@localhost:5432/pcg_test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

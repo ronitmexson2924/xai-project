@@ -1,0 +1,41 @@
+# Psychometric questionnaire (task R3). DRAFTED BY AGENT, needs Ronit's review.
+#
+# 5-point Likert: 1 = strongly disagree ... 5 = strongly agree. 4 items per trait, 2 reverse-scored.
+# All items are written for this project ("custom"); each names the construct and the published
+# scale it was modelled on. They are NOT verbatim copies of those scales. Before the pilot, Ronit
+# should (a) compare them with the originals, (b) decide whether to use the published items instead
+# (check each scale's licence / terms of use), and (c) report Cronbach's alpha per trait (R3/R8).
+#
+# Trait meanings (docs/MODEL_SPEC.md §2): high abstraction_preference = rule-first (low = example-
+# first); high load_tolerance = comfortable with long/dense text; high depth_preference = wants the
+# "why"; persistence and self_efficacy as usual. No learning-style items (CRITICAL_REVIEW §2.3).
+items:
+  # abstraction_preference (expertise-reversal / worked-example literature)
+  - {id: abs-1, trait: abstraction_preference, reverse_scored: false, text: "I like to understand the general rule before I see any examples.", source: "custom; construct: rule-first vs example-first preference (cf. worked-example / expertise-reversal research, Kalyuga 2007)"}
+  - {id: abs-2, trait: abstraction_preference, reverse_scored: true, text: "I understand a new idea best when I first see a worked example.", source: "custom; construct: rule-first vs example-first preference (cf. Kalyuga 2007)"}
+  - {id: abs-3, trait: abstraction_preference, reverse_scored: false, text: "When learning a new algorithm, I want to read its precise definition first.", source: "custom; construct: rule-first vs example-first preference (cf. Kalyuga 2007)"}
+  - {id: abs-4, trait: abstraction_preference, reverse_scored: true, text: "Explanations that start with abstract definitions lose me quickly.", source: "custom; construct: rule-first vs example-first preference (cf. Kalyuga 2007)"}
+
+  # load_tolerance (cognitive load theory)
+  - {id: load-1, trait: load_tolerance, reverse_scored: false, text: "I can follow long, detailed explanations without losing track.", source: "custom; construct: tolerance for high intrinsic/extraneous load (cf. cognitive load theory, Sweller 1988)"}
+  - {id: load-2, trait: load_tolerance, reverse_scored: true, text: "I prefer explanations broken into small, separate steps.", source: "custom; construct: tolerance for cognitive load (cf. Sweller 1988)"}
+  - {id: load-3, trait: load_tolerance, reverse_scored: false, text: "Dense paragraphs of technical text are fine for me.", source: "custom; construct: tolerance for cognitive load (cf. Sweller 1988)"}
+  - {id: load-4, trait: load_tolerance, reverse_scored: true, text: "When an explanation is long, I tend to skim it or lose focus.", source: "custom; construct: tolerance for cognitive load (cf. Sweller 1988)"}
+
+  # depth_preference (need for cognition)
+  - {id: depth-1, trait: depth_preference, reverse_scored: false, text: "I want to know why an algorithm works, not just how to use it.", source: "custom; construct: need for cognition (cf. NCS-18, Cacioppo, Petty & Kao 1984)"}
+  - {id: depth-2, trait: depth_preference, reverse_scored: true, text: "If my code works, I don't need to understand the theory behind it.", source: "custom; construct: need for cognition (cf. Cacioppo et al. 1984)"}
+  - {id: depth-3, trait: depth_preference, reverse_scored: false, text: "I enjoy arguments that show why a method is correct.", source: "custom; construct: need for cognition (cf. Cacioppo et al. 1984)"}
+  - {id: depth-4, trait: depth_preference, reverse_scored: true, text: "I prefer quick, practical instructions over background explanations.", source: "custom; construct: need for cognition (cf. Cacioppo et al. 1984)"}
+
+  # persistence (grit: perseverance of effort)
+  - {id: pers-1, trait: persistence, reverse_scored: false, text: "I finish problems I start, even when they get hard.", source: "custom; construct: perseverance of effort (cf. Short Grit Scale, Duckworth & Quinn 2009)"}
+  - {id: pers-2, trait: persistence, reverse_scored: true, text: "When I get a problem wrong several times, I usually give up on it.", source: "custom; construct: perseverance of effort (cf. Duckworth & Quinn 2009)"}
+  - {id: pers-3, trait: persistence, reverse_scored: false, text: "Setbacks don't discourage me for long.", source: "custom; construct: perseverance of effort (cf. Duckworth & Quinn 2009)"}
+  - {id: pers-4, trait: persistence, reverse_scored: true, text: "I often switch to something else before finishing a difficult task.", source: "custom; construct: perseverance of effort (cf. Duckworth & Quinn 2009)"}
+
+  # self_efficacy (MSLQ self-efficacy for learning and performance)
+  - {id: eff-1, trait: self_efficacy, reverse_scored: false, text: "I am confident I can understand the hardest topics in data structures and algorithms.", source: "custom; construct: academic self-efficacy (cf. MSLQ self-efficacy subscale, Pintrich et al. 1991)"}
+  - {id: eff-2, trait: self_efficacy, reverse_scored: false, text: "I expect to do well on algorithm problems.", source: "custom; construct: academic self-efficacy (cf. Pintrich et al. 1991)"}
+  - {id: eff-3, trait: self_efficacy, reverse_scored: true, text: "Even when I study, I doubt I can solve algorithm problems on my own.", source: "custom; construct: academic self-efficacy (cf. Pintrich et al. 1991)"}
+  - {id: eff-4, trait: self_efficacy, reverse_scored: true, text: "I worry that programming is something I'm just not good at.", source: "custom; construct: academic self-efficacy (cf. Pintrich et al. 1991)"}

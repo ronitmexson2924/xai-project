@@ -19,6 +19,7 @@ from app.contracts.explanation import (
 from app.contracts.graph import Concept, ConceptEdge, Item
 from app.contracts.learner import AttemptRecord, LearnerState, StateDelta
 from app.contracts.planning import Recommendation
+from app.contracts.xai import BeliefExplanation, ChangeNotice, RecommendationWhy
 
 
 class GraphService(Protocol):
@@ -76,3 +77,15 @@ class FeedbackAnalyzer(Protocol):
         ...
 
     def summarize(self, explanation_id: UUID) -> ExplanationFeedbackSummary: ...
+
+
+class ExplainabilityService(Protocol):
+    """Owner: Ronit (app/planner/xai.py). Learner-facing explanations of the adaptation
+    (docs/XAI_DESIGN.md). Rationales are stored when the planner decides, so `why` returns
+    exactly the reasoning the decision was made with."""
+
+    def why(self, recommendation_id: UUID) -> RecommendationWhy: ...
+
+    def explain_belief(self, user_id: UUID, subject: str) -> BeliefExplanation: ...
+
+    def explain_change(self, delta: StateDelta) -> ChangeNotice: ...

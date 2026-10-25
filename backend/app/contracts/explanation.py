@@ -63,6 +63,8 @@ ExplanationEventType = Literal[
     "clarity_rated",  # payload: {"rating": 1..5}
     "followup_answered",  # payload: {"item_id": str, "correct": bool}
     "dismissed",
+    "why_opened",  # the learner opened the "Why this?" panel (XAI E1-E3)
+    "why_rated",  # payload: {"helpful": bool}, the 1-tap "Did this make sense?" on that panel
 ]
 
 

@@ -12,11 +12,11 @@ Two people build it, each with their own agent:
 ## Step 1: Work out who you are working for
 
 1. Run `git branch --show-current`.
-   - `ronit` or `ronit/*` → you work for **Ronit**. Your task file is
+   - `ronit` or `ronit-*` → you work for **Ronit**. Your task file is
      `tasks/ronit.md`.
-   - `mit` or `mit/*` → you work for **Mit**. Your task file is
+   - `mit` or `mit-*` → you work for **Mit**. Your task file is
      `tasks/mit.md`.
-   - Anything else (`dev`, `main`, a `claude/*` branch) → **ask the user who
+   - Anything else (`dev`, `main`, `contract/*`, a `claude/*` branch) → **ask the user who
      they are** before changing code, and switch to their branch
      (`git checkout <name>`; create it from `origin/dev` if it doesn't
      exist).

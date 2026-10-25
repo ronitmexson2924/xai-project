@@ -27,6 +27,8 @@ Auth: `Authorization: Bearer <jwt>` on everything except `/health` and
 | `POST /explanations/{id}/close` | `{}` → `ExplanationFeedbackSummary` | `summarize` → `apply_explanation_feedback` | Called when the card is dismissed without a micro-check |
 | `GET /learners/me/state` | → `LearnerState` | `get_state` | For the dashboard (open learner model) |
 | `GET /learners/me/history` | → `list[StateUpdateView]` | db | "Why we think this" |
+| `GET /recommendations/{id}/why` | → `RecommendationWhy` | `ExplainabilityService.why` | XAI E1–E3 ("Why this?" panel). The rationale was stored when the planner decided |
+| `GET /learners/me/explain?subject=` | → `BeliefExplanation` | `ExplainabilityService.explain_belief` | XAI E4. `subject` = concept id or trait name |
 | `GET /graph` | → `{concepts: list[Concept], edges: list[ConceptEdge]}` | graph | |
 | `GET /admin/metrics` | → metrics JSON | — | Admin role only |
 | `GET /admin/export.csv?table=...` | → CSV | — | Pseudonymised user IDs |
@@ -40,3 +42,7 @@ Auth: `Authorization: Bearer <jwt>` on everything except `/health` and
   "item":           { "...": "Item (answer field removed)" }
 }
 ```
+
+XAI E5: after `apply_attempt` / `apply_explanation_feedback`, call
+`ExplainabilityService.explain_change(delta)` and return the `ChangeNotice` with the response, so
+the UI can show what the answer or rating changed. See `docs/XAI_DESIGN.md`.

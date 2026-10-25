@@ -1,0 +1,566 @@
+"""LearnerModelService implementation (Module A + the update half of Module C).
+
+Methods flush but never commit: the caller (an API request, the simulator) owns the transaction.
+Every apply_* call is idempotent on (source, source_id) via the state_updates table.
+"""
+
+from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from uuid import UUID
+
+from sqlalchemy import Row, select, update
+from sqlalchemy.orm import Session
+
+from app.contracts.explanation import ExplanationFeedbackSummary
+from app.contracts.learner import (
+    TRAIT_NAMES,
+    AffectiveState,
+    AttemptRecord,
+    ConceptMastery,
+    ExperimentArm,
+    LearnerState,
+    LearnerTraits,
+    StateDelta,
+    StateUpdateSource,
+    TraitEstimate,
+    TraitName,
+)
+from app.db import models as m
+from app.graph.service import GraphSnapshot, is_test_item
+from app.learner_model import bkt, updates
+from app.learner_model.bandit import BanditPosterior
+from app.learner_model.traits import PRIOR_VARIANCE, neutral_traits
+from app.psychometrics.questionnaire import QuestionnaireItem, score
+
+RECENT_ITEMS = 10  # how many recent items the planner avoids repeating
+
+MISCONCEPTION_CLEAR_STREAK = 2  # consecutive correct attempts that clear a misconception flag
+DEFAULT_ARM: ExperimentArm = "generic"  # used only if a user somehow has no assignment
+
+
+@dataclass(frozen=True)
+class Activity:
+    """Per-learner activity the planner needs beyond LearnerState (not part of the contract)."""
+
+    streaks: dict[str, int]  # concept -> >0 consecutive correct, <0 consecutive wrong
+    last_practiced: dict[str, datetime]
+    recent_items: list[str]  # most recent first
+
+
+class LearnerModel:
+    def __init__(
+        self,
+        session: Session,
+        graph: GraphSnapshot,
+        params: bkt.BKTParams = bkt.DEFAULT_PARAMS,
+        questionnaire_variance: float = PRIOR_VARIANCE,
+        behaviour_alpha: float = 0.0,
+    ) -> None:
+        self.session = session
+        self.graph = graph
+        self.params = params
+        # trust in the questionnaire: variance of each questionnaire-based trait prior
+        self.questionnaire_variance = questionnaire_variance
+        # Behavioural-trait EWMA rate. Off by default: R6 showed uncalibrated proxies make
+        # persistence/self-efficacy worse than the questionnaire alone (MODEL_SPEC §2.3).
+        self.behaviour_alpha = behaviour_alpha
+        self._arms: dict[UUID, ExperimentArm] = {}  # arms never change, so cache per instance
+
+    # --- reads -----------------------------------------------------------------------------------
+
+    def get_state(self, user_id: UUID) -> LearnerState:
+        row = self.session.execute(
+            select(m.LearnerTraitsRow, m.LearnerAffectRow, m.ExperimentAssignment.arm)
+            .select_from(m.User)
+            .outerjoin(m.LearnerTraitsRow, m.LearnerTraitsRow.user_id == m.User.id)
+            .outerjoin(m.LearnerAffectRow, m.LearnerAffectRow.user_id == m.User.id)
+            .outerjoin(m.ExperimentAssignment, m.ExperimentAssignment.user_id == m.User.id)
+            .where(m.User.id == user_id, m.User.deleted_at.is_(None))
+        ).one_or_none()
+        if row is None:
+            raise LookupError(f"unknown or deleted user {user_id}")
+        traits_row, affect_row, arm = row
+
+        mastery = {
+            r.concept_id: ConceptMastery(
+                concept_id=r.concept_id,
+                p_mastery=r.p_mastery,
+                n_attempts=r.n_attempts,
+                misconception_ids=list(r.misconception_ids),
+                misconception_suspicion=r.misconception_suspicion,
+            )
+            for r in self.session.scalars(
+                select(m.LearnerConceptStateRow).where(m.LearnerConceptStateRow.user_id == user_id)
+            )
+        }
+        traits = (
+            LearnerTraits(traits=traits_row.traits, version=traits_row.version)
+            if traits_row is not None
+            else neutral_traits()
+        )
+        affect = (
+            AffectiveState(
+                engagement=affect_row.engagement,
+                frustration=affect_row.frustration,
+                fatigue=affect_row.fatigue,
+            )
+            if affect_row is not None
+            else AffectiveState()
+        )
+        return LearnerState(
+            user_id=user_id,
+            arm=arm or DEFAULT_ARM,
+            mastery=mastery,
+            traits=traits,
+            affect=affect,
+            total_attempts=sum(c.n_attempts for c in mastery.values()),
+        )
+
+    def activity(self, user_id: UUID) -> Activity:
+        rows = self.session.execute(
+            select(
+                m.LearnerConceptStateRow.concept_id,
+                m.LearnerConceptStateRow.streak,
+                m.LearnerConceptStateRow.updated_at,
+            ).where(m.LearnerConceptStateRow.user_id == user_id)
+        ).all()
+        recent = self.session.scalars(
+            select(m.AttemptRow.item_id)
+            .where(m.AttemptRow.user_id == user_id)
+            .order_by(m.AttemptRow.created_at.desc())
+            .limit(RECENT_ITEMS)
+        ).all()
+        return Activity(
+            streaks={r.concept_id: r.streak for r in rows},
+            last_practiced={r.concept_id: r.updated_at for r in rows},
+            recent_items=list(recent),
+        )
+
+    def effective_mastery(self, state: LearnerState) -> dict[str, float]:
+        """Mastery for every concept, filling unattempted ones with the prerequisite-based prior."""
+        known = {cid: c.p_mastery for cid, c in state.mastery.items()}
+        return bkt.effective_mastery(self.graph, known, self.params)
+
+    # --- idempotency helpers ---------------------------------------------------------------------
+
+    def _already_applied(self, source: StateUpdateSource, source_id: str) -> StateDelta | None:
+        row = self.session.scalar(
+            select(m.StateUpdateRow).where(
+                m.StateUpdateRow.source == source, m.StateUpdateRow.source_id == source_id
+            )
+        )
+        return StateDelta.model_validate(row.delta) if row is not None else None
+
+    def _record(self, delta: StateDelta) -> StateDelta:
+        self.session.add(
+            m.StateUpdateRow(
+                user_id=delta.user_id,
+                source=delta.source,
+                source_id=delta.source_id,
+                delta=delta.model_dump(mode="json"),
+            )
+        )
+        self.session.flush()
+        return delta
+
+    def _concept_row(self, user_id: UUID, concept_id: str) -> m.LearnerConceptStateRow:
+        row = self.session.get(m.LearnerConceptStateRow, (user_id, concept_id))
+        if row is None:
+            # (not dict(result): a Result has .keys(), so dict() would treat it as a mapping)
+            known = {
+                concept: mastery
+                for concept, mastery in self.session.execute(
+                    select(
+                        m.LearnerConceptStateRow.concept_id, m.LearnerConceptStateRow.p_mastery
+                    ).where(m.LearnerConceptStateRow.user_id == user_id)
+                )
+            }
+            row = m.LearnerConceptStateRow(
+                user_id=user_id,
+                concept_id=concept_id,
+                p_mastery=bkt.effective_mastery(self.graph, known, self.params)[concept_id],
+                n_attempts=0,
+                streak=0,
+                misconception_ids=[],
+                misconception_suspicion=0.0,
+            )
+            self.session.add(row)
+        return row
+
+    # --- updates ---------------------------------------------------------------------------------
+
+    def apply_attempt(self, attempt: AttemptRecord) -> StateDelta:
+        """Store the graded attempt and update the concept's mastery and misconception flags."""
+        source_id = str(attempt.id)
+        if (done := self._already_applied("attempt", source_id)) is not None:
+            return done
+        arm = self._arm(attempt.user_id)  # also rejects unknown or deleted users
+        if is_test_item(attempt.item_id):
+            raise ValueError("pre/post-test answers go through record_test_attempt()")
+        try:
+            item = self.graph.get_item(attempt.item_id)
+        except KeyError:
+            raise LookupError(f"unknown item {attempt.item_id}") from None
+        if item.concept_id != attempt.concept_id:
+            raise ValueError(
+                f"attempt concept {attempt.concept_id} does not match item concept "
+                f"{item.concept_id}"
+            )
+
+        previous = self.session.execute(
+            select(m.AttemptRow.correct, m.AttemptRow.created_at)
+            .where(m.AttemptRow.user_id == attempt.user_id, m.AttemptRow.id != attempt.id)
+            .order_by(m.AttemptRow.created_at.desc())
+            .limit(1)
+        ).one_or_none()
+
+        if self.session.get(m.AttemptRow, attempt.id) is None:
+            self.session.add(
+                m.AttemptRow(
+                    id=attempt.id,
+                    user_id=attempt.user_id,
+                    item_id=attempt.item_id,
+                    recommendation_id=attempt.recommendation_id,
+                    explanation_id=attempt.explanation_id,
+                    response=attempt.response,
+                    correct=attempt.correct,
+                    latency_ms=attempt.latency_ms,
+                    hints_used=attempt.hints_used,
+                    confidence=attempt.confidence,
+                    created_at=attempt.created_at,
+                )
+            )
+
+        row = self._concept_row(attempt.user_id, attempt.concept_id)
+        before = row.p_mastery
+        row.p_mastery = bkt.update(
+            before,
+            attempt.correct,
+            slip=self.params.p_slip,
+            guess=bkt.guess_for(item, self.params),
+            p_learn=self.params.p_learn,
+        )
+        row.n_attempts += 1
+        row.streak = max(row.streak, 0) + 1 if attempt.correct else min(row.streak, 0) - 1
+
+        notes: list[str] = []
+        flags = list(row.misconception_ids)
+        if not attempt.correct and attempt.response in item.distractor_misconceptions:
+            misconception_id = item.distractor_misconceptions[attempt.response]
+            if misconception_id not in flags:
+                flags.append(misconception_id)
+                notes.append(f"misconception flagged: {misconception_id}")
+        elif attempt.correct and row.streak >= MISCONCEPTION_CLEAR_STREAK and flags:
+            notes.append(f"misconceptions cleared: {', '.join(flags)}")
+            flags = []
+        row.misconception_ids = flags
+        self.session.flush()
+
+        self._update_affect_after_attempt(attempt, row.streak, previous)
+        trait_changes: dict[TraitName, tuple[float, float]] = {}
+        if arm == "closed_loop" and self.behaviour_alpha > 0:
+            proxies: dict[TraitName, float | None] = {
+                "persistence": None
+                if previous is None
+                else updates.persistence_proxy(
+                    previous.correct, attempt.created_at - previous.created_at
+                ),
+                "self_efficacy": updates.self_efficacy_proxy(attempt.confidence, attempt.correct),
+            }
+            proxies = {t: v for t, v in proxies.items() if v is not None}
+            if proxies:
+
+                def apply_proxies(
+                    traits: LearnerTraits, posterior: BanditPosterior
+                ) -> tuple[LearnerTraits, BanditPosterior]:
+                    new = dict(traits.traits)
+                    for trait, proxy in proxies.items():
+                        new[trait] = updates.ewma_trait(new[trait], proxy, self.behaviour_alpha)
+                    return LearnerTraits(traits=new, version=traits.version), posterior
+
+                trait_changes = self._update_traits(attempt.user_id, apply_proxies)
+
+        delta = StateDelta(
+            user_id=attempt.user_id,
+            source="attempt",
+            source_id=source_id,
+            mastery_changes={attempt.concept_id: (before, row.p_mastery)},
+            trait_changes=trait_changes,
+            notes=notes,
+        )
+        return self._record(delta)
+
+    def record_test_attempt(self, attempt: AttemptRecord) -> None:
+        """Store a pre/post-test answer (EVALUATION_PLAN H4) without updating any learner state:
+        tests measure learning, they must not drive the model. Idempotent on attempt.id."""
+        if not is_test_item(attempt.item_id):
+            raise ValueError(f"{attempt.item_id} is not a pre/post-test item")
+        self._arm(attempt.user_id)  # rejects unknown or deleted users
+        if self.session.get(m.AttemptRow, attempt.id) is None:
+            self.session.add(
+                m.AttemptRow(
+                    id=attempt.id,
+                    user_id=attempt.user_id,
+                    item_id=attempt.item_id,
+                    response=attempt.response,
+                    correct=attempt.correct,
+                    latency_ms=attempt.latency_ms,
+                    created_at=attempt.created_at,
+                )
+            )
+            self.session.flush()
+
+    def _update_affect_after_attempt(
+        self, attempt: AttemptRecord, streak: int, previous: Row | None
+    ) -> None:
+        affect = self._affect_row(attempt.user_id)
+        new_session = (
+            affect.session_started_at is None
+            or previous is None
+            or attempt.created_at - previous.created_at > updates.SESSION_GAP
+        )
+        if new_session:
+            affect.session_started_at = attempt.created_at
+        session_results = self.session.scalars(
+            select(m.AttemptRow.correct)
+            .where(
+                m.AttemptRow.user_id == attempt.user_id,
+                m.AttemptRow.created_at >= affect.session_started_at,
+            )
+            .order_by(m.AttemptRow.created_at)
+        ).all()
+        recent = session_results[-5:]
+        minutes = (attempt.created_at - affect.session_started_at).total_seconds() / 60
+        affect.fatigue = updates.fatigue(
+            minutes,
+            recent_accuracy=sum(recent) / len(recent),
+            session_accuracy=sum(session_results) / len(session_results)
+            if len(session_results) > len(recent)
+            else sum(recent) / len(recent),
+        )
+        affect.frustration = updates.ewma(
+            affect.frustration,
+            updates.frustration_signal(attempt.correct, attempt.latency_ms, streak),
+            updates.FRUSTRATION_ALPHA,
+        )
+
+    def questionnaire_items(self) -> list[QuestionnaireItem]:
+        return [
+            QuestionnaireItem(
+                id=r.id,
+                trait=r.trait,
+                text=r.item_text,
+                reverse_scored=r.reverse_scored,
+                source=r.source,
+            )
+            for r in self.session.scalars(select(m.QuestionnaireItemRow))
+        ]
+
+    def init_from_questionnaire(self, user_id: UUID, answers: dict[str, int]) -> StateDelta:
+        """Store answers and set the trait prior (MODEL_SPEC §2.1) and bandit prior (§2.2).
+        Taken once per learner: a second submission returns the first result unchanged."""
+        source_id = str(user_id)
+        if (done := self._already_applied("questionnaire", source_id)) is not None:
+            return done
+
+        scores = score(self.questionnaire_items(), answers)
+        before = self.get_state(user_id).traits
+        for item_id, value in answers.items():
+            self.session.merge(
+                m.QuestionnaireResponseRow(user_id=user_id, item_id=item_id, value=value)
+            )
+
+        priors = dict(before.traits)
+        for trait, trait_score in scores.items():
+            priors[trait] = TraitEstimate(
+                mean=trait_score.mean, variance=self.questionnaire_variance
+            )
+        posterior = BanditPosterior.from_trait_priors(priors)
+        traits = LearnerTraits(traits={**priors, **posterior.reported_traits()})
+        self._save_traits(user_id, traits, posterior, expected=before.version)
+        if self.session.get(m.LearnerAffectRow, user_id) is None:
+            self.session.add(m.LearnerAffectRow(user_id=user_id))
+
+        delta = StateDelta(
+            user_id=user_id,
+            source="questionnaire",
+            source_id=source_id,
+            trait_changes={
+                t: (before.traits[t].mean, traits.traits[t].mean) for t in traits.traits
+            },
+            notes=[f"traits not scored (too few answers): {', '.join(missing)}"]
+            if (missing := sorted(set(TRAIT_NAMES) - set(scores)))
+            else [],
+        )
+        return self._record(delta)
+
+    def _arm(self, user_id: UUID) -> ExperimentArm:
+        """The learner's experiment arm; raises LookupError for unknown or deleted users."""
+        if user_id not in self._arms:
+            row = self.session.execute(
+                select(m.ExperimentAssignment.arm)
+                .select_from(m.User)
+                .outerjoin(m.ExperimentAssignment, m.ExperimentAssignment.user_id == m.User.id)
+                .where(m.User.id == user_id, m.User.deleted_at.is_(None))
+            ).one_or_none()
+            if row is None:
+                raise LookupError(f"unknown or deleted user {user_id}")
+            self._arms[user_id] = row.arm or DEFAULT_ARM
+        return self._arms[user_id]
+
+    def _affect_row(self, user_id: UUID) -> m.LearnerAffectRow:
+        row = self.session.get(m.LearnerAffectRow, user_id)
+        if row is None:
+            row = m.LearnerAffectRow(user_id=user_id, engagement=0.5, frustration=0.0, fatigue=0.0)
+            self.session.add(row)
+        return row
+
+    def _load_traits(self, user_id: UUID) -> tuple[LearnerTraits, BanditPosterior]:
+        row = self.session.get(m.LearnerTraitsRow, user_id)
+        if row is None:
+            traits = neutral_traits()
+            return traits, BanditPosterior.from_trait_priors(traits.traits)
+        traits = LearnerTraits(traits=row.traits, version=row.version)
+        posterior = (
+            BanditPosterior.from_json(row.bandit)
+            if row.bandit
+            else BanditPosterior.from_trait_priors(traits.traits)
+        )
+        return traits, posterior
+
+    def bandit_posterior(self, user_id: UUID) -> BanditPosterior:
+        return self._load_traits(user_id)[1]
+
+    def _save_traits(
+        self, user_id: UUID, traits: LearnerTraits, posterior: BanditPosterior, expected: int
+    ) -> None:
+        """Write traits as version expected + 1, failing if someone else wrote in between."""
+        payload = {t: e.model_dump() for t, e in traits.traits.items()}
+        if self.session.get(m.LearnerTraitsRow, user_id) is None:
+            self.session.add(
+                m.LearnerTraitsRow(
+                    user_id=user_id,
+                    traits=payload,
+                    bandit=posterior.to_json(),
+                    version=expected + 1,
+                )
+            )
+            self.session.flush()
+            return
+        result = self.session.execute(
+            update(m.LearnerTraitsRow)
+            .where(m.LearnerTraitsRow.user_id == user_id, m.LearnerTraitsRow.version == expected)
+            .values(traits=payload, bandit=posterior.to_json(), version=expected + 1)
+        )
+        if result.rowcount == 0:
+            raise StaleTraitsError(user_id)
+
+    def _update_traits(
+        self,
+        user_id: UUID,
+        change: Callable[[LearnerTraits, BanditPosterior], tuple[LearnerTraits, BanditPosterior]],
+    ) -> dict[TraitName, tuple[float, float]]:
+        """Read-modify-write of traits with an optimistic version check, retried once."""
+        for attempt in range(2):
+            traits, posterior = self._load_traits(user_id)
+            new_traits, new_posterior = change(traits, posterior)
+            try:
+                self._save_traits(user_id, new_traits, new_posterior, expected=traits.version)
+            except StaleTraitsError:
+                row = self.session.get(m.LearnerTraitsRow, user_id)
+                if attempt == 1 or row is None:
+                    raise
+                self.session.refresh(row)
+                continue
+            return {
+                t: (traits.traits[t].mean, new_traits.traits[t].mean)
+                for t in new_traits.traits
+                if new_traits.traits[t].mean != traits.traits[t].mean
+            }
+        raise AssertionError("unreachable")
+
+    def _followup_p_hat(self, summary: ExplanationFeedbackSummary) -> float | None:
+        """Predicted P(correct) on the follow-up micro-check, from mastery *before* that attempt."""
+        followup = self.session.scalar(
+            select(m.AttemptRow)
+            .where(m.AttemptRow.explanation_id == summary.explanation_id)
+            .order_by(m.AttemptRow.created_at)
+            .limit(1)
+        )
+        if followup is None:
+            return None
+        item = self.graph.get_item(followup.item_id)
+        applied = self._already_applied("attempt", str(followup.id))
+        if applied is None or item.concept_id not in applied.mastery_changes:
+            return None
+        mastery_before = applied.mastery_changes[item.concept_id][0]
+        return bkt.predict_correct(
+            mastery_before, self.params.p_slip, bkt.guess_for(item, self.params)
+        )
+
+    def apply_explanation_feedback(self, summary: ExplanationFeedbackSummary) -> StateDelta:
+        """Module C update rules: misconception suspicion and engagement in every arm; in the
+        closed loop also the bandit posterior and the style traits (MODEL_SPEC §2.2, §3, §4)."""
+        source_id = str(summary.explanation_id)
+        if (done := self._already_applied("explanation_feedback", source_id)) is not None:
+            return done
+        arm = self._arm(summary.user_id)
+        unknown = [c for c in summary.concept_ids if c not in self.graph.depth]
+        if unknown:
+            raise ValueError(f"unknown concepts in feedback: {unknown}")
+
+        notes: list[str] = []
+        for concept_id in summary.concept_ids:
+            row = self._concept_row(summary.user_id, concept_id)
+            before = row.misconception_suspicion
+            row.misconception_suspicion = updates.suspicion_after(before, summary)
+            if row.misconception_suspicion != before:
+                notes.append(
+                    f"misconception suspicion {concept_id}: "
+                    f"{before:.2f} -> {row.misconception_suspicion:.2f}"
+                )
+
+        affect = self._affect_row(summary.user_id)
+        affect.engagement = updates.ewma(
+            affect.engagement, 0.0 if summary.dismissed_quickly else 1.0, updates.ENGAGEMENT_ALPHA
+        )
+
+        y = updates.feedback_outcome(summary, self._followup_p_hat(summary))
+        trait_changes: dict[TraitName, tuple[float, float]] = {}
+        if y is None:
+            notes.append("no informative outcome (no follow-up answer or clarity rating)")
+        elif arm == "closed_loop":
+            style = (summary.style.example_first, summary.style.length, summary.style.depth)
+
+            def learn(
+                traits: LearnerTraits, posterior: BanditPosterior
+            ) -> tuple[LearnerTraits, BanditPosterior]:
+                updated = posterior.update(style, y)
+                return (
+                    LearnerTraits(
+                        traits={**traits.traits, **updated.reported_traits()},
+                        version=traits.version,
+                    ),
+                    updated,
+                )
+
+            trait_changes = self._update_traits(summary.user_id, learn)
+            notes.append(f"style outcome y = {y:+.3f}")
+
+        feedback_row = self.session.get(m.ExplanationFeedbackRow, summary.explanation_id)
+        if feedback_row is not None:
+            feedback_row.applied_at = datetime.now(UTC)
+
+        delta = StateDelta(
+            user_id=summary.user_id,
+            source="explanation_feedback",
+            source_id=source_id,
+            trait_changes=trait_changes,
+            notes=notes,
+        )
+        return self._record(delta)
+
+
+class StaleTraitsError(RuntimeError):
+    """The learner's traits changed between read and write (optimistic concurrency)."""
