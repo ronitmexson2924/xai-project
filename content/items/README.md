@@ -33,3 +33,18 @@ answer keys cannot drift from Python's real output.
 All items are `review_status: draft`. Only `approved` items are served, so the reviewer (Ronit, S3)
 must set each item to `approved` or `rejected` before the pilot. `pretest-NN` and `posttest-NN` are
 parallel: same concept, same difficulty, different surface details.
+
+## How to review (S3)
+
+From `backend/`:
+
+```bash
+python -m app.graph.review --stats                  # what is approved, and is the bank ready?
+python -m app.graph.review --cluster recursion      # walk through drafts: a / r / s / q
+python -m app.graph.seed ../content                 # load the decisions into the database
+```
+
+Each item is shown with its answer and the misconception behind every wrong option. Approve an item
+only if the key is right **and** each wrong option really is the mistake it is mapped to. The bank is
+ready for the pilot when `--stats` says so: at least 180 approved practice items, every concept with
+an approved practice item and micro-check, and both tests fully approved.
