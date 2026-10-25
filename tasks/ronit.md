@@ -252,10 +252,16 @@
     `state_updates` events and a confidence level from variance / n_observations.
   - `explain_change(delta) -> str` for E5 notices.
 - **Acceptance:**
-  - [ ] `p_best` matches the empirical argmax frequency within 0.05
-  - [ ] Confidence levels follow the thresholds in XAI_DESIGN
-  - [ ] Demo learners Asha/Ben/Chen produce the texts in XAI_DESIGN §6 (golden tests)
-- [ ] **R10 done**
+  - [x] `p_best` matches the empirical argmax frequency within 0.05
+  - [x] Confidence levels follow the thresholds in XAI_DESIGN
+  - [x] Demo learners Asha/Ben/Chen produce the texts in XAI_DESIGN §6 (golden tests)
+- [x] **R10 done**
+  - _`explain_style` (E3) is stored on the recommendation when the style is chosen;
+    `BeliefExplainer` (E4/E5) works from `state_updates`; `Explainability` (`app/planner/xai.py`)
+    implements the contract. See it with `python -m app.planner.xai_demo`. Reading its output
+    found two inconsistencies, both fixed: a concept was treated as "in progress" after
+    explanation feedback alone with no answers, and one counterfactual's outcome looked
+    unchanged._
 
 ## R11: XAI evaluation in the pre-registration
 - **Do:** add the faithfulness, comprehensibility, usefulness and behaviour measures
@@ -296,6 +302,18 @@ _(add items here when you need something from Mit's side)_
 - **Demo (M4/M6):** `python -m app.graph.demo_seed` creates three demo learners (emails
   `asha|ben|chen@demo.invalid`) with `password_hash = "!demo-account-no-login"`. If you want them
   to be able to log in for demos, give them a real hash in your auth code or a dev-only route.
+- **XAI (M9/M10):** first approve the `contract/xai` PR. Then wire the endpoints as follows:
+  - Build `Explainability(LearnerModel(session, graph))` from `app/planner/xai.py` per request.
+  - `GET /recommendations/{id}/why` → `xai.why(id)`. It returns the stored rationale; `style`
+    is filled once `planner.choose_style` has run for that recommendation, so always call
+    `next_step` then `choose_style` in the same request.
+  - `GET /learners/me/explain?subject=` → `xai.explain_belief(user, subject)` (a concept id or
+    trait name; `LookupError` → 404).
+  - After `apply_attempt` / `apply_explanation_feedback`, return
+    `xai.explain_change(delta).messages` with the response (E5).
+  - Log `why_opened` / `why_rated {"helpful": bool}` explanation events from the panel. The R8/R11
+    analysis reads them.
+  - `python -m app.planner.xai_demo` shows exactly what the texts look like.
 
 ## Notes / decisions log
 _(date: decision, and why)_

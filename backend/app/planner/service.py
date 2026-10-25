@@ -19,6 +19,7 @@ from app.contracts.graph import Item
 from app.contracts.learner import LearnerState
 from app.contracts.planning import Recommendation, RecommendationKind
 from app.contracts.reasons import ReasonCode, ReasonEvidence
+from app.contracts.xai import StyleRationale
 from app.db import models as m
 from app.graph.service import GraphSnapshot
 from app.learner_model import bkt
@@ -38,7 +39,7 @@ from app.planner.policy import (
     Trace,
 )
 from app.planner.rationale import build_rationale
-from app.planner.style import EPSILON_MIN, select_style
+from app.planner.style import EPSILON_MIN, explain_style, select_style
 
 
 class Planner:
@@ -60,6 +61,7 @@ class Planner:
         self._practice_concepts = graph.practice_concepts
         # user -> (latest recommendation id, its concept), for storing the style rationale
         self._last_recommendation: dict[uuid.UUID, tuple[uuid.UUID, str]] = {}
+        self.last_style_rationale: StyleRationale | None = None
         if not self._practice_concepts:
             raise LookupError("no approved practice items in the graph")
 
@@ -130,15 +132,25 @@ class Planner:
                 crc32(concept_id.encode()),
             ]
         )
-        return select_style(
+        posterior = self.learner_model.bandit_posterior(state.user_id)
+        style, source = select_style(
             arm=state.arm,
             traits=state.traits,
             affect=state.affect,
-            posterior=self.learner_model.bandit_posterior(state.user_id),
+            posterior=posterior,
             card_has_diagram=self.graph.get_concept(concept_id).card.diagram is not None,
             rng=rng,
             epsilon=self.epsilon,
         )
+        # XAI E3: explain the choice from the same posterior, and store it with the
+        # recommendation it belongs to (the one next_step just made for this concept)
+        self.last_style_rationale = explain_style(style, source, posterior, state.affect, rng)
+        last = self._last_recommendation.get(state.user_id)
+        if last is not None and last[1] == concept_id:
+            row = self.session.get(m.RecommendationRow, last[0])
+            row.style_rationale = self.last_style_rationale.model_dump(mode="json")
+            self.session.flush()
+        return style, source
 
     # --- rules (each returns a Trace, or None if it does not apply) ------------------------------
 
@@ -151,7 +163,8 @@ class Planner:
             state.total_attempts % len(DIAGNOSTIC_DEPTH_FRACTIONS)
         ]
         target = round(fraction * max_depth)
-        candidates = sorted(c for c in self._practice_concepts if c not in state.mastery)
+        answered = {c for c, cm in state.mastery.items() if cm.n_attempts > 0}
+        candidates = sorted(c for c in self._practice_concepts if c not in answered)
         if not candidates:
             return None
         best = min(abs(depth[c] - target) for c in candidates)
@@ -249,7 +262,10 @@ class Planner:
         ]
         if not frontier:
             return None
-        in_progress = [c for c in frontier if c in state.mastery]
+        # in progress = answered at least once (explanation feedback alone can create a row)
+        in_progress = [
+            c for c in frontier if c in state.mastery and state.mastery[c].n_attempts > 0
+        ]
         if in_progress:
             concept_id = min(in_progress, key=lambda c: (mastery[c], c))
             kind: RecommendationKind = "practice_item"

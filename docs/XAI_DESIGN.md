@@ -4,16 +4,25 @@ The project's claim is that the *adaptation itself* is explainable to the learne
 the content. This doc defines what the app must explain, how the explanations stay **faithful**
 (true to what the model actually did), and who builds what.
 
-## 1. Where we are
+## 1. Status
 
-| Already built (Ronit, R0–R7) | Missing |
-|---|---|
-| `ReasonEvidence` on every recommendation (rule, concept, value) | Learner-facing text for those reasons |
-| `StateDelta` audit log: every belief change with its cause | "Why we think this", built from that log |
-| Trait uncertainty (`variance`) and `n_observations` | Showing confidence ("not sure yet") |
-| `style_source` on every explanation | "Why this style" and "we're experimenting" |
-| — | **Counterfactuals**: what would change the decision |
-| — | Tests that explanations are faithful |
+| Part | Status | Where |
+|---|---|---|
+| Contract (`contracts/xai.py`, `ExplainabilityService`, fakes, `why_*` events) | ✅ Built; **needs both approvals** (branch `contract/xai`) | `backend/app/contracts/` |
+| E1 + E2: decision rationale and verified counterfactuals (R9) | ✅ Built and tested | `app/planner/rationale.py`, `app/planner/policy.py` |
+| E3: style rationale with `p_best` (R10) | ✅ Built and tested | `app/planner/style.py` (`explain_style`) |
+| E4 + E5: beliefs and change notices (R10) | ✅ Built and tested | `app/learner_model/explain.py` |
+| One service for the API (R10) | ✅ `Explainability(learner_model)` | `app/planner/xai.py` |
+| Evaluation measures (R11) | ✅ In the pre-registration (X1, X2) and `research/analyze.py` | `research/` |
+| API endpoints (M9) and UI panels (M10) | ⏳ Mit | `backend/app/api/`, `frontend/` |
+
+**See it now:** `cd backend && python -m app.planner.xai_demo` prints every explanation for the
+three demo learners (rolled back; the database is unchanged).
+
+How the rationale is stored: `Planner.next_step` builds the `Rationale` from its decision trace
+and saves it in `recommendations.rationale`. `Planner.choose_style` saves the `StyleRationale` on
+the same recommendation. `Explainability.why(recommendation_id)` returns both exactly as
+stored, never recomputed.
 
 ## 2. The five things the app explains
 

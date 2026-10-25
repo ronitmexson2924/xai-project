@@ -293,7 +293,12 @@ class _Builder:
                     target_value=target,
                     steps_needed=steps,
                     condition=condition[0].upper() + condition[1:],
-                    outcome=self.outcome_text(outcome),
+                    outcome=(
+                        f"{self.name(outcome.concept_id)} would become normal practice on your "
+                        "path instead of a fix-up"
+                        if outcome.concept_id == self.trace.concept_id
+                        else self.outcome_text(outcome)
+                    ),
                     outcome_concept_id=outcome.concept_id,
                 )
             )

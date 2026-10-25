@@ -141,7 +141,8 @@ def test_every_rule_gets_a_faithful_rationale(setup, scenario: str) -> None:  # 
     assert rationale.counterfactuals, "every rule except fallback offers what would change it"
 
     for cf in rationale.counterfactuals:
-        assert cf.outcome_concept_id != rec.target_concept_id or cf.kind == "review_done"
+        if cf.outcome_concept_id == rec.target_concept_id:  # same topic, different reason
+            assert "normal practice" in cf.outcome or cf.kind == "review_done"
         assert carry_out(setup, user_id, cf) == cf.outcome_concept_id, cf
 
 
