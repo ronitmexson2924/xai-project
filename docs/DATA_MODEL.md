@@ -9,7 +9,7 @@ PostgreSQL. `jsonb` payloads must match the Pydantic models in
 
 | Table | Columns | Notes |
 |---|---|---|
-| `users` | `id uuid pk`, `email text unique`, `password_hash text`, `display_name text`, `created_at timestamptz`, `consent_at timestamptz null`, `deleted_at timestamptz null` | Learning endpoints require consent. Deletion is soft, then purged. |
+| `users` | `id uuid pk`, `email text unique`, `password_hash text`, `display_name text`, `is_admin bool default false`, `created_at timestamptz`, `consent_at timestamptz null`, `deleted_at timestamptz null` | Learning endpoints require consent. Deletion is soft, then purged. `is_admin` gates `/admin/*`. |
 | `experiment_assignments` | `user_id uuid pk fk users`, `arm text check in ('generic','static_personalized','closed_loop')`, `assigned_at timestamptz` | Balanced randomisation at signup. |
 
 ## Concept graph & content (owner: Ronit, except `items` which is Mit)
@@ -26,9 +26,9 @@ PostgreSQL. `jsonb` payloads must match the Pydantic models in
 
 | Table | Columns | Notes |
 |---|---|---|
-| `learner_concept_state` | `user_id`, `concept_id`, `p_mastery real`, `n_attempts int`, `misconception_ids text[]`, `misconception_suspicion real default 0`, `updated_at`, pk `(user_id, concept_id)` | Created lazily. A missing row means the prior. |
+| `learner_concept_state` | `user_id`, `concept_id`, `p_mastery real`, `n_attempts int`, `streak int default 0` (>0 consecutive correct, <0 consecutive wrong), `misconception_ids text[]`, `misconception_suspicion real default 0`, `updated_at`, pk `(user_id, concept_id)` | Created lazily. A missing row means the prior. |
 | `learner_traits` | `user_id pk`, `traits jsonb` (`TraitName` → `{mean, variance, n_observations}`), `bandit jsonb` (posterior parameters), `version int`, `updated_at` | `version` gives optimistic concurrency. |
-| `learner_affect` | `user_id pk`, `engagement real`, `frustration real`, `fatigue real`, `updated_at` | Rolling estimates. |
+| `learner_affect` | `user_id pk`, `engagement real`, `frustration real`, `fatigue real`, `session_started_at timestamptz null`, `updated_at` | Rolling estimates; `session_started_at` drives fatigue. |
 | `questionnaire_responses` | `user_id`, `item_id`, `value smallint 1..5`, `created_at`, pk `(user_id,item_id)` | |
 | `state_updates` | `id bigserial pk`, `user_id`, `source text ('attempt','explanation_feedback','questionnaire')`, `source_id text`, `delta jsonb` (`StateDelta`), `created_at` | Audit log. Used for "why we think this" and for evaluation. A unique `(source, source_id)` makes updates idempotent. |
 

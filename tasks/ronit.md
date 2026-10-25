@@ -37,11 +37,11 @@
   4. `backend/tests/conftest.py`: a test-DB fixture that runs migrations once
      and wraps each test in a transaction that is rolled back.
 - **Acceptance:**
-  - [ ] `docker compose up -d db && alembic upgrade head` works from empty;
+  - [x] `docker compose up -d db && alembic upgrade head` works from empty;
         `alembic downgrade base` works too
-  - [ ] A test inserts and reads one row per table
-  - [ ] CI is green with Postgres
-- [ ] **R0 done**
+  - [x] A test inserts and reads one row per table
+  - [ ] CI is green with Postgres _(Postgres service added; confirm on the first PR run)_
+- [x] **R0 done**
 
 ## R1: Concept graph content + GraphService (weeks 1–4)
 - **Depends on:** R0 (the loader); content writing can start immediately
