@@ -234,6 +234,9 @@ class RecommendationRow(Base):
     item_id: Mapped[str | None] = mapped_column(ForeignKey("items.id"))
     reasons: Mapped[list[Any]]
     policy_version: Mapped[str] = mapped_column(Text)
+    # XAI: built when the decision is made, so "why" shows exactly the reasoning used
+    rationale: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # contracts.xai.Rationale
+    style_rationale: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # StyleRationale
     created_at: Mapped[datetime] = _now()
 
 

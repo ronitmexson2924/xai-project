@@ -1,13 +1,14 @@
 """PlannerService implementation (Module D, docs/MODEL_SPEC.md §5).
 
-next_step applies the rules in priority order and returns a Recommendation whose ReasonEvidence
-explains the decision; the recommendation is stored so explanations and attempts can reference it.
+`decide` applies the rules in priority order and returns a Trace (the rule that fired, evidence,
+threshold). `next_step` turns it into a Recommendation and stores it together with its learner-
+facing Rationale (docs/XAI_DESIGN.md), built from that same trace at decision time.
 """
 
 import random
 import uuid
 from collections.abc import Callable
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from zlib import crc32
 
 import numpy as np
@@ -22,23 +23,22 @@ from app.db import models as m
 from app.graph.service import GraphSnapshot
 from app.learner_model import bkt
 from app.learner_model.service import Activity, LearnerModel
+from app.planner.policy import (
+    DIAGNOSTIC_ATTEMPTS,
+    DIAGNOSTIC_DEPTH_FRACTIONS,
+    FRONTIER_PREREQ_MIN,
+    MASTERED,
+    POLICY_VERSION,
+    PREREQ_WEAK,
+    REVIEW_AFTER,
+    REVIEW_EVERY,
+    STRUGGLE_STREAK,
+    SUSPICION_THRESHOLD,
+    TARGET_P_CORRECT,
+    Trace,
+)
+from app.planner.rationale import build_rationale
 from app.planner.style import EPSILON_MIN, select_style
-
-POLICY_VERSION = "planner-v1"
-
-DIAGNOSTIC_ATTEMPTS = 8
-DIAGNOSTIC_DEPTH_FRACTIONS = (0.0, 0.25, 0.5, 0.75, 0.1, 0.35, 0.6, 0.85)
-SUSPICION_THRESHOLD = 0.5
-STRUGGLE_STREAK = -2  # two wrong in a row
-PREREQ_WEAK = 0.6
-FRONTIER_PREREQ_MIN = 0.85
-MASTERED = 0.95
-REVIEW_AFTER = timedelta(hours=48)
-REVIEW_EVERY = 6  # when a review is due, every 6th step is a review
-TARGET_P_CORRECT = 0.7
-
-# (kind, target concept, reasons) produced by one planner rule
-Decision = tuple[RecommendationKind, str, list[ReasonEvidence]]
 
 
 class Planner:
@@ -58,6 +58,8 @@ class Planner:
         self.now = now
         self.epsilon = epsilon
         self._practice_concepts = graph.practice_concepts
+        # user -> (latest recommendation id, its concept), for storing the style rationale
+        self._last_recommendation: dict[uuid.UUID, tuple[uuid.UUID, str]] = {}
         if not self._practice_concepts:
             raise LookupError("no approved practice items in the graph")
 
@@ -66,41 +68,58 @@ class Planner:
     def next_step(self, state: LearnerState) -> Recommendation:
         mastery = self.learner_model.effective_mastery(state)
         activity = self.learner_model.activity(state.user_id)
-        rng = random.Random(f"{self.seed}:{state.user_id}:{state.total_attempts}")
-
-        decision = (
-            self._diagnostic(state, rng)
-            or self._misconception(state, mastery)
-            or self._prerequisite_gap(mastery, activity)
-            or (self._review(mastery, activity) if self._review_turn(state) else None)
-            or self._frontier(state, mastery)
-            or self._review(mastery, activity)
-            or self._fallback(mastery)
-        )
-        kind, concept_id, reasons = decision
-        item = self._pick_item(concept_id, mastery[concept_id], activity.recent_items)
+        trace = self.decide(state, mastery, activity)
+        item = self._pick_item(trace.concept_id, mastery[trace.concept_id], activity.recent_items)
         recommendation = Recommendation(
             id=uuid.uuid4(),
             user_id=state.user_id,
-            kind=kind,
-            target_concept_id=concept_id,
+            kind=trace.kind,
+            target_concept_id=trace.concept_id,
             item_id=item.id,
-            reasons=reasons,
+            reasons=trace.reasons,
             policy_version=POLICY_VERSION,
         )
+        rationale = build_rationale(self, trace, state, activity, recommendation.id)
         self.session.add(
             m.RecommendationRow(
                 id=recommendation.id,
                 user_id=state.user_id,
-                kind=kind,
-                target_concept_id=concept_id,
+                kind=trace.kind,
+                target_concept_id=trace.concept_id,
                 item_id=item.id,
-                reasons=[r.model_dump(mode="json") for r in reasons],
+                reasons=[r.model_dump(mode="json") for r in trace.reasons],
                 policy_version=POLICY_VERSION,
+                rationale=rationale.model_dump(mode="json"),
             )
         )
         self.session.flush()
+        self._last_recommendation[state.user_id] = (recommendation.id, trace.concept_id)
         return recommendation
+
+    def decide(
+        self,
+        state: LearnerState,
+        mastery: dict[str, float],
+        activity: Activity,
+        skip: frozenset[str] = frozenset(),
+    ) -> Trace:
+        """The pure decision: no database writes, deterministic for a given state. Rules in
+        `skip` are left out (used to find what would have been recommended otherwise)."""
+        rng = random.Random(f"{self.seed}:{state.user_id}:{state.total_attempts}")
+        rules = {
+            "diagnostic": lambda: self._diagnostic(state, rng),
+            "misconception": lambda: self._misconception(state, mastery),
+            "prereq_gap": lambda: self._prerequisite_gap(mastery, activity),
+            "review_turn": lambda: (
+                self._review(mastery, activity, "review_turn") if self._review_turn(state) else None
+            ),
+            "frontier": lambda: self._frontier(state, mastery),
+            "review": lambda: self._review(mastery, activity, "review"),
+        }
+        for name, rule in rules.items():
+            if name not in skip and (trace := rule()) is not None:
+                return trace
+        return self._fallback(mastery)
 
     def choose_style(self, state: LearnerState, concept_id: str) -> tuple[StyleParams, StyleSource]:
         rng = np.random.default_rng(
@@ -121,9 +140,9 @@ class Planner:
             epsilon=self.epsilon,
         )
 
-    # --- rules (each returns (kind, concept_id, reasons) or None) --------------------------------
+    # --- rules (each returns a Trace, or None if it does not apply) ------------------------------
 
-    def _diagnostic(self, state: LearnerState, rng: random.Random) -> Decision | None:
+    def _diagnostic(self, state: LearnerState, rng: random.Random) -> Trace | None:
         if state.total_attempts >= DIAGNOSTIC_ATTEMPTS:
             return None
         depth = self.graph.depth
@@ -142,9 +161,16 @@ class Planner:
             concept_id=concept_id,
             detail=f"placement question {state.total_attempts + 1} of {DIAGNOSTIC_ATTEMPTS}",
         )
-        return "diagnostic_item", concept_id, [reason]
+        return Trace(
+            "diagnostic",
+            "diagnostic_item",
+            concept_id,
+            [reason],
+            threshold=DIAGNOSTIC_ATTEMPTS,
+            context={"done": state.total_attempts},
+        )
 
-    def _misconception(self, state: LearnerState, mastery: dict[str, float]) -> Decision | None:
+    def _misconception(self, state: LearnerState, mastery: dict[str, float]) -> Trace | None:
         flagged = [
             c
             for c in state.mastery.values()
@@ -173,9 +199,19 @@ class Planner:
                     detail="recent explanations did not seem to land",
                 )
             ]
-        return "remediate", target.concept_id, reasons
+        return Trace(
+            "misconception",
+            "remediate",
+            target.concept_id,
+            reasons,
+            threshold=None if target.misconception_ids else SUSPICION_THRESHOLD,
+            context={
+                "misconception_ids": list(target.misconception_ids),
+                "suspicion": target.misconception_suspicion,
+            },
+        )
 
-    def _prerequisite_gap(self, mastery: dict[str, float], activity: Activity) -> Decision | None:
+    def _prerequisite_gap(self, mastery: dict[str, float], activity: Activity) -> Trace | None:
         struggling = [c for c, s in activity.streaks.items() if s <= STRUGGLE_STREAK]
         for concept_id in sorted(
             struggling, key=lambda c: activity.last_practiced[c], reverse=True
@@ -193,10 +229,17 @@ class Planner:
                     value=mastery[prereq],
                     detail=f"needed for {self.graph.get_concept(concept_id).name}",
                 )
-                return "remediate", prereq, [reason]
+                return Trace(
+                    "prereq_gap",
+                    "remediate",
+                    prereq,
+                    [reason],
+                    threshold=PREREQ_WEAK,
+                    context={"struggling": concept_id},
+                )
         return None
 
-    def _frontier(self, state: LearnerState, mastery: dict[str, float]) -> Decision | None:
+    def _frontier(self, state: LearnerState, mastery: dict[str, float]) -> Trace | None:
         frontier = [
             c
             for c in self.graph.topological_order
@@ -215,12 +258,12 @@ class Planner:
         reason = ReasonEvidence(
             code=ReasonCode.READY_FOR_NEXT, concept_id=concept_id, value=mastery[concept_id]
         )
-        return kind, concept_id, [reason]
+        return Trace("frontier", kind, concept_id, [reason], threshold=MASTERED)
 
     def _review_turn(self, state: LearnerState) -> bool:
         return state.total_attempts % REVIEW_EVERY == REVIEW_EVERY - 1
 
-    def _review(self, mastery: dict[str, float], activity: Activity) -> Decision | None:
+    def _review(self, mastery: dict[str, float], activity: Activity, rule: str) -> Trace | None:
         cutoff = self.now() - REVIEW_AFTER
         due = [
             c
@@ -236,14 +279,21 @@ class Planner:
             value=mastery[concept_id],
             detail=f"last practised {activity.last_practiced[concept_id]:%Y-%m-%d}",
         )
-        return "review", concept_id, [reason]
+        return Trace(
+            rule,
+            "review",
+            concept_id,
+            [reason],
+            threshold=MASTERED,
+            context={"last_practiced": activity.last_practiced[concept_id].isoformat()},
+        )
 
-    def _fallback(self, mastery: dict[str, float]) -> Decision:
+    def _fallback(self, mastery: dict[str, float]) -> Trace:
         concept_id = min(self._practice_concepts, key=lambda c: (mastery[c], c))
         reason = ReasonEvidence(
             code=ReasonCode.REVIEW_DUE, concept_id=concept_id, value=mastery[concept_id]
         )
-        return "review", concept_id, [reason]
+        return Trace("fallback", "review", concept_id, [reason])
 
     # --- item choice ------------------------------------------------------------------------------
 

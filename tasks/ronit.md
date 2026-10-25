@@ -1,7 +1,7 @@
 # Ronit: Learner Intelligence Lane
 
 > **For the coding agent:** you are working for **Ronit**. Read `AGENTS.md`
-> first. Work only on the `ronit` branch (or `ronit/<task>` sub-branches).
+> first. Work only on the `ronit` branch (or `ronit-<task>` sub-branches).
 > Pick the **first unchecked task whose dependencies are done**, plan it,
 > implement it, test it, tick its box in this file, and prepare a PR to
 > `dev`. Do not edit Mit's directories (see `docs/ARCHITECTURE.md`
@@ -232,11 +232,16 @@
   3. Counterfactuals: simulate BKT forward ("n more correct answers") to the threshold that
      flips the rule (0.6 prereq, 0.85 frontier, 0.95 mastered, 2-in-a-row for misconceptions).
 - **Acceptance:**
-  - [ ] Every rule (diagnostic, misconception, prereq gap, frontier, review) has a rationale test
-  - [ ] **Faithfulness test:** apply each counterfactual to the state, re-run the planner, and
+  - [x] Every rule (diagnostic, misconception, prereq gap, frontier, review) has a rationale test
+  - [x] **Faithfulness test:** apply each counterfactual to the state, re-run the planner, and
         the decision changes as stated (100%)
-  - [ ] No psychological labels in any generated text (test against a banned-word list)
-- [ ] **R9 done**
+  - [x] No psychological labels in any generated text (test against a banned-word list)
+- [x] **R9 done**
+  - _The planner's `decide()` is pure and returns a `Trace`. The `Rationale` is built from it at
+    decision time and stored in `recommendations.rationale` (migration 0002). Counterfactuals
+    are kept only if re-running `decide()` on the changed state changes the decision. The test
+    carries each one out through the real learner model and checks the planner then
+    recommends exactly the promised concept._
 
 ## R10: Style rationale and open-learner-model explanations (XAI E3, E4, E5)
 - **Depends on:** R9 contract PR
