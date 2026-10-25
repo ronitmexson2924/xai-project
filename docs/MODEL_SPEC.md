@@ -55,15 +55,24 @@ Style feature vector `x(s)` (with a leading 1 for the intercept):
 | `x_load` | −1 short, 0 medium, +1 long |
 | `x_depth` | +1 `why`, −1 `how` |
 
-Outcome `y` for one explanation, built from `ExplanationFeedbackSummary`.
-Weights are renormalised over the components that are present; if none are
-present, no update happens.
+Outcome `y` for one explanation, built from `ExplanationFeedbackSummary`
+(code: `backend/app/learner_model/updates.py`):
 
 ```
-y = 0.6·(followup_correct − p̂_correct)      # mastery-adjusted, so weak concepts don't punish every style
-  + 0.3·(clarity_rating − 3)/2
-  + 0.1·(−1 if dismissed_quickly else 0)
+y = [0.6·(followup_correct − p̂_correct) + 0.3·(clarity_rating − 3)/2] / (weights present)
+    − 0.1 if dismissed_quickly
 ```
+
+- `p̂_correct` is the BKT prediction for the micro-check, using mastery from
+  *before* that attempt (read from the attempt's `state_updates` delta). This
+  mastery adjustment keeps weak concepts from making every style look bad.
+- If neither a follow-up answer nor a clarity rating exists, there is no
+  bandit update. A quick dismissal alone is too weak a signal.
+
+> *Changed in R5:* v0 renormalised over all three parts, including the
+> dismissal term. A bare dismissal then became `y = −1`, a strong signal from
+> a weak cue. The dismissal is now a fixed penalty on an otherwise
+> informative outcome.
 
 Model (θ measured in **trait units**, so a trait τ ∈ [0,1] corresponds to
 `θ_k = κ(2τ_k − 1)`):
@@ -98,7 +107,8 @@ observation count `n` are stored in `learner_traits.bandit`. Code:
 2. Otherwise, sample `θ̃ ~ N(μ, Λ⁻¹)` and pick the style that maximises
    `θ̃·x(s) − c·x_load²`. Set `style_source="thompson"`.
 3. Affect constraints are applied *before* choosing, by shrinking the
-   candidate set: `fatigue > 0.7` allows only `short`.
+   candidate set: `fatigue > 0.7` allows only `short`. This and rule 4 apply
+   to both personalised arms (`static_personalized` and `closed_loop`).
 4. `tone = "encouraging"` if `self_efficacy.mean < 0.4` or
    `frustration > 0.6`. `include_diagram = concept card has a diagram and
    x_abs = −1`.
@@ -117,10 +127,16 @@ tone=neutral, include_diagram=card has diagram`, with
 
 ### 2.3 Behavioural traits: EWMA
 
-- `persistence`: proxy ∈ {0,1} per wrong answer, equal to 1 if the learner
-  retries or continues instead of quitting the session within 60 s.
-- `self_efficacy`: proxy = mean of normalised confidence ratings, minus the
-  miscalibration `|confidence − correctness|`.
+Only in the `closed_loop` arm; the other arms keep their questionnaire
+values.
+
+- `persistence`: after a wrong answer, the next attempt gives proxy 1 if it
+  comes within the same session (gap ≤ 30 min) and 0 if the session ended
+  there. Sessions are detected by a gap, so "quit within 60 s" (v0) is
+  approximated by "the next attempt is in a new session".
+- `self_efficacy`: per attempt with a confidence rating,
+  `proxy = clip(c − |c − correct|, 0, 1)`, where `c = (confidence − 1)/4`.
+  Confident and right gives 1; confident and wrong gives 0.
 - Update with `α = 0.05` *(tune)*:
   `mean ← (1−α)·mean + α·proxy`, `variance ← max(0.005, variance·(1−α))`.
 
@@ -138,9 +154,12 @@ tone=neutral, include_diagram=card has diagram`, with
 
 | Signal | Update |
 |---|---|
-| `engagement` | EWMA(α=0.2) of `1 − dismissed_quickly`, plus micro-check completion |
+| `engagement` | EWMA(α=0.2) of `1 − dismissed_quickly`, per explanation |
 | `frustration` | EWMA(α=0.3) of "wrong and (latency < 3 s or 2+ consecutive wrong)" |
 | `fatigue` | `min(1, minutes_in_session / 40)`, + 0.2 if accuracy over the last 5 is 0.3 or more below the session mean |
+
+A new session starts when the gap since the previous attempt is more than
+30 minutes. Affect updates in every arm.
 
 ## 5. Planner rules (R4), in priority order
 

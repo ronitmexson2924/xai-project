@@ -8,7 +8,9 @@ import random
 import uuid
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
+from zlib import crc32
 
+import numpy as np
 from sqlalchemy.orm import Session
 
 from app.contracts.explanation import StyleParams, StyleSource
@@ -20,6 +22,7 @@ from app.db import models as m
 from app.graph.service import GraphSnapshot
 from app.learner_model import bkt
 from app.learner_model.service import Activity, LearnerModel
+from app.planner.style import select_style
 
 POLICY_VERSION = "planner-v1"
 
@@ -100,7 +103,22 @@ class Planner:
         return recommendation
 
     def choose_style(self, state: LearnerState, concept_id: str) -> tuple[StyleParams, StyleSource]:
-        raise NotImplementedError("task R5")
+        rng = np.random.default_rng(
+            [
+                self.seed,
+                state.user_id.int & 0xFFFFFFFF,
+                state.total_attempts,
+                crc32(concept_id.encode()),
+            ]
+        )
+        return select_style(
+            arm=state.arm,
+            traits=state.traits,
+            affect=state.affect,
+            posterior=self.learner_model.bandit_posterior(state.user_id),
+            card_has_diagram=self.graph.get_concept(concept_id).card.diagram is not None,
+            rng=rng,
+        )
 
     # --- rules (each returns (kind, concept_id, reasons) or None) --------------------------------
 
