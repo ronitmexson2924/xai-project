@@ -39,9 +39,36 @@ All project docs, agent instructions and code live on `dev`. Start there:
 
 ```bash
 cp .env.example .env
-docker compose up -d db
+docker compose up -d db                      # Postgres on 5432
+
 cd backend && python -m venv .venv && . .venv/bin/activate
 pip install -e ".[dev]"
-pytest -q                         # includes the closed loop run through in-memory fakes
-uvicorn app.main:app --reload     # http://localhost:8000/health
+alembic upgrade head                         # schema
+python -m app.graph.seed ../content          # concepts, misconceptions, items, questionnaire
+python -m app.graph.demo_seed --password 'Demo-pass-1'   # optional: asha|ben|chen@demo.example.com
+python -m app.auth.onboard admin --email you@example.com # an admin for /admin (asks a password)
+uvicorn app.main:app --reload                # http://localhost:8000/health/ready
+
+cd ../frontend && npm ci && npm run dev      # http://localhost:3000
 ```
+
+## Checks
+
+```bash
+cd backend && ruff check . && ruff format --check . && pytest -q   # unit, API and security tests
+cd frontend && npm run lint && npm run build
+cd frontend && PYTHON=../backend/.venv/bin/python npx playwright test   # browser E2E on a fresh pcg_e2e DB
+```
+
+`backend/tests/test_security.py` and `frontend/tests/abuse.spec.ts` attack the app the way a
+hostile user would (forged tokens, other learners' ids, replays, injection, oversized input, ...).
+
+## Deploy
+
+- **API + Postgres:** `render.yaml` (Render blueprint). Runs as `ENVIRONMENT=production`, which
+  refuses to start with a weak `JWT_SECRET` or `CORS_ORIGINS=*`; migrations and content seeding
+  run on start. Set `CORS_ORIGINS` to the frontend URL and the Gemini variables in the dashboard.
+- **Frontend:** Vercel (`frontend/vercel.json`) with `NEXT_PUBLIC_API_URL` set to the API URL.
+- **Pilot accounts:** `python -m app.auth.onboard cohort --count 45 --output-csv pilot.roster.csv`
+  (the roster holds passwords: `*.roster.csv` is git-ignored; delete it after hand-out).
+- **Withdrawals:** run `python -m app.auth.purge` on a schedule to delete withdrawn accounts.

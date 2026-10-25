@@ -1,0 +1,124 @@
+# Remap of the IDs in Mit's item bank draft (origin/mit, M5) onto the real concept graph
+# (content/concepts.yaml) and misconception catalogue (content/misconceptions.yaml).
+#
+# Why: the M5 items were generated from app/items/curriculum.py, a parallel curriculum with its own
+# IDs. Against the real graph, 172 concept references and 380 misconception references are unknown,
+# so seeding fails and almost every DB test errors once mit is merged into dev.
+#
+# Every target ID below exists on dev (the 22 misconceptions that had no counterpart were added to
+# content/misconceptions.yaml). Several Mit concepts fold into one real concept; that is intended.
+# Applying this file fixes the IDs only. It does not fix item quality: see the issue that links here.
+
+concepts:
+  # basics
+  loops: loops
+  nested-loops: loop-complexity-analysis
+  time-complexity-intro: big-o-notation
+  space-complexity-intro: space-complexity
+  conditional-invariants: conditionals
+  variables-and-scope: references            # its items are about rebinding vs mutating
+  # arrays & strings
+  array-indexing: arrays-indexing
+  two-pointers-technique: two-pointers
+  sliding-window: sliding-window
+  prefix-sums: prefix-sums
+  string-immutability: strings-as-sequences
+  in-place-array-modification: two-pointers  # read/write pointers
+  # linked structures
+  singly-linked-list-node: singly-linked-list
+  linked-list-traversal: singly-linked-list
+  linked-list-insertion: linked-list-insert-delete
+  linked-list-deletion: linked-list-insert-delete
+  fast-slow-pointers: fast-slow-pointers
+  doubly-linked-list: doubly-linked-list
+  # recursion
+  recursion-base-case: recursion-base-case
+  recursive-call-stack: call-stack
+  divide-and-conquer: divide-and-conquer
+  tree-recursion: recursion-tracing
+  backtracking-basics: backtracking
+  tail-recursion: recursion-vs-iteration
+  # sorting & searching
+  linear-search: linear-search
+  binary-search-bounds: binary-search-boundaries
+  binary-search-midpoint: binary-search
+  bubble-sort-invariant: elementary-sorts
+  merge-sort-merge-step: merge-sort
+  quick-sort-partition: quick-sort
+  # trees
+  binary-tree-traversal-preorder: tree-dfs-traversals
+  binary-tree-traversal-inorder: tree-dfs-traversals
+  binary-tree-traversal-postorder: tree-dfs-traversals
+  bst-search-property: binary-search-tree
+  bst-insertion: bst-insert-delete
+  tree-height-depth: tree-height
+  # graphs
+  graph-adjacency-list: graph-representation
+  breadth-first-search-queue: graph-bfs
+  depth-first-search-visited: graph-dfs
+  topological-sort: topological-sort
+  dijkstra-shortest-path: dijkstra
+  cycle-detection-directed: graph-dfs
+  # dynamic programming
+  overlapping-subproblems: overlapping-subproblems
+  optimal-substructure: dp-state-design
+  memoization-top-down: memoization
+  tabulation-bottom-up: tabulation
+  dp-state-transition-1d: dp-state-design
+  dp-state-transition-2d: lcs                # its misconception is the LCS mismatch rule
+
+misconceptions:
+  loops-off-by-one: loops-off-by-one
+  loops-never-terminate: loops-while-never-ends
+  nested-loops-add-not-mult: loopcx-nested-adds
+  time-comp-drop-high-order: bigo-keeps-constants
+  time-comp-line-count-equals-time: bigo-counts-lines
+  space-comp-include-input-as-aux: space-counts-input
+  cond-chain-multi-execute: cond-all-branches-checked
+  scope-rebinding-modifies-caller: ref-param-rebind-changes-caller
+  array-1-based-indexing: arr-index-starts-at-one
+  array-out-of-bounds: arr-out-of-range-default
+  two-pointers-requires-sorted: tp-works-unsorted
+  sliding-window-discontinuous: sw-window-skips-elements
+  prefix-sums-off-by-one: ps-range-off-by-one
+  string-concat-is-constant-time: str-concat-constant
+  in-place-overwrites-uninspected: tp-write-overtakes-read
+  linked-list-random-access: sll-random-access
+  linked-list-deref-null: sll-deref-none
+  linked-list-orphan-chain: lli-wrong-update-order
+  linked-list-delete-without-prev: lli-unlink-without-prev
+  floyd-skip-null-check: fs-check-only-next
+  doubly-linked-forget-prev: dll-one-direction-only
+  recursion-no-base-case: recursion-no-base-case
+  recursion-base-case-unreachable: rc-no-progress   # "moves the wrong way, e.g. n + 1"
+  recursion-shared-local-vars: cs-shared-locals
+  divide-conquer-overlapping-subproblems: dc-ignores-repeated-work
+  tree-recursion-linear-time: trace-depth-is-cost
+  backtracking-forget-undo: bt-missing-unchoose
+  tail-call-pending-mult: rvi-pending-work-is-tail
+  linear-search-requires-sorted: ls-needs-sorted
+  binary-search-infinite-loop: bsb-mixed-convention
+  binary-search-on-unsorted: bs-unsorted-ok
+  bsearch-float-division: bs-float-midpoint
+  bubble-sort-is-linear: es-bubble-linear
+  merge-sort-in-place-naive: ms-in-place-free
+  quicksort-always-nlogn: qs-always-nlogn
+  preorder-processes-leaves-first: trav-preorder-postorder-swap
+  inorder-always-sorted-arbitrary-tree: trav-inorder-always-sorted
+  postorder-root-first: trav-preorder-postorder-swap
+  bst-check-immediate-only: bst-local-check
+  bst-insert-restructures-root: bstd-insert-rebalances
+  tree-height-depth-confused: height-is-depth
+  undirected-one-way-edge: gr-undirected-one-way
+  bfs-mark-visited-on-pop: bfs-mark-on-dequeue
+  bfs-shortest-path-weighted: bfs-weighted-shortest
+  dfs-no-visited-set-cycles: dfs-no-visited
+  topological-sort-cyclic: topo-cycles-ok
+  dijkstra-handles-negative-weights: dij-negative-weights
+  directed-cycle-cross-edge-confusion: dfs-finished-node-cycle
+  dp-apply-to-disjoint-subproblems: ovl-dc-is-dp
+  all-problems-have-optimal-substructure: dps-assumes-optimal-substructure
+  memoization-forget-store: memo-never-stores
+  tabulation-wrong-order: tab-wrong-order
+  dp-transition-incomplete-branches: dps-missing-transition
+  2d-dp-diagonal-vs-orthogonal: lcs-diagonal-on-mismatch

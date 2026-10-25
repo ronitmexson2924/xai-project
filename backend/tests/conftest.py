@@ -86,8 +86,10 @@ def _test_items() -> list[ItemSpec]:
 
 @pytest.fixture(scope="session")
 def bundle() -> ContentBundle:
+    """The real concept graph with the fixture items only, so tests don't depend on the item bank
+    (content/items/, Mit). test_content.py validates the real bank."""
     content = load_content(CONTENT_DIR)
-    content.items = [*content.items, *_test_items()]
+    content.items = _test_items()
     return content
 
 
@@ -109,3 +111,78 @@ def make_user(db: Session, arm: str = "closed_loop") -> uuid.UUID:
     db.add(m.ExperimentAssignment(user_id=user_id, arm=arm))
     db.flush()
     return user_id
+
+
+# --- API fixtures: the real app on the per-test database session ----------------------------------
+
+
+def _api_items() -> list[ItemSpec]:
+    """Fixture items plus a second practice concept and parallel pre/post tests."""
+    return [
+        *_test_items(),
+        ItemSpec(
+            id="t-vars-mcq",
+            concept_id="variables-and-types",
+            kind="mcq",
+            stem="x = 1; y = x; x = 2. What is y?",
+            options=["1", "2", "None"],
+            answer="1",
+            distractor_misconceptions={"2": "vars-assignment-links-names"},
+            review_status="approved",
+        ),
+        ItemSpec(
+            id="t-draft",
+            concept_id="loops",
+            kind="mcq",
+            stem="An unreviewed question",
+            options=["a", "b"],
+            answer="a",
+            review_status="draft",
+        ),
+        *(
+            ItemSpec(
+                id=f"{phase}-{n}",
+                concept_id="loops",
+                kind="mcq",
+                stem=f"{phase} question {n}",
+                options=["right", "wrong"],
+                answer="right",
+                review_status="approved",
+            )
+            for phase in ("pretest", "posttest")
+            for n in (1, 2)
+        ),
+    ]
+
+
+@pytest.fixture
+def client(db: Session, bundle: ContentBundle, monkeypatch: pytest.MonkeyPatch):
+    from fastapi.testclient import TestClient
+
+    from app.api.deps import reload_graph
+    from app.api.middleware import reset_rate_limiter
+    from app.auth.limits import login_throttle
+    from app.config import settings
+    from app.db.session import get_db
+    from app.main import app
+
+    seed(db, bundle.model_copy(update={"items": _api_items()}))
+    db.commit()
+    monkeypatch.setattr(settings, "rate_limit_enabled", False)
+    monkeypatch.setattr(settings, "jwt_secret", "test-secret-" + "x" * 32)
+    monkeypatch.setattr(settings, "analysis_salt", "test-salt-0123456789")
+    reload_graph()
+    reset_rate_limiter()
+    login_throttle.reset()
+
+    def override_db() -> Iterator[Session]:
+        try:
+            yield db
+        finally:
+            db.rollback()
+
+    app.dependency_overrides[get_db] = override_db
+    with TestClient(app) as test_client:
+        yield test_client
+    app.dependency_overrides.clear()
+    reload_graph()

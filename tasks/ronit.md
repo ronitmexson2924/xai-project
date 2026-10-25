@@ -276,6 +276,19 @@
 
 ---
 
+## I1: Integration (agreed with Ronit, done by his agent on `ronit-integration`)
+- **Do:** merge `mit` and `ronit`, run the API on Postgres and the real services, build M9/M10,
+  and test the app the way a hostile user would.
+- [x] API on Postgres + real LearnerModel/Planner/Explainability (fakes only in contract tests)
+- [x] M9 endpoints and M10 panels (see tasks/mit.md, Mit to review)
+- [x] `tests/test_security.py` (API attacks) and Playwright `tests/abuse.spec.ts` +
+  `journey.spec.ts` (browser), all passing; E2E job added to CI
+- [x] Fabricated figures removed: audit ratings, admin metric placeholders, UI uncertainty and
+  trait claims (see the notice in `research/reports/system_implementation.md`)
+- [ ] **Still human work before the pilot:** R1a/R1b content review, a real item bank (issue
+  #3), the explanation audit by two raters, ethics approval (S4) and the pre-registration
+  sign-off (S2).
+
 ## Asks for Mit
 _(add items here when you need something from Mit's side)_
 - **Questionnaire API (M1):** `GET /onboarding/questionnaire` should return
@@ -305,7 +318,7 @@ _(add items here when you need something from Mit's side)_
   `ExplanationFeedbackSummary` JSON) before calling `apply_explanation_feedback`. The R8 analysis
   reads that table.
 - **Demo (M4/M6):** `python -m app.graph.demo_seed` creates three demo learners (emails
-  `asha|ben|chen@demo.invalid`) with `password_hash = "!demo-account-no-login"`. If you want them
+  `asha|ben|chen@demo.example.com`) with `password_hash = "!demo-account-no-login"`. If you want them
   to be able to log in for demos, give them a real hash in your auth code or a dev-only route.
 - **XAI (M9/M10):** first approve the `contract/xai` PR. Then wire the endpoints as follows:
   - Build `Explainability(LearnerModel(session, graph))` from `app/planner/xai.py` per request.
