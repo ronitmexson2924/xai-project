@@ -7,47 +7,39 @@ import jwt
 from app.config import settings
 
 ALGORITHM = "HS256"
-DEFAULT_EXPIRE_DAYS = 7
+# compared against when the email is unknown, so a failed login takes as long either way
+_DUMMY_HASH = bcrypt.hashpw(b"not-a-real-password", bcrypt.gensalt()).decode()
 
 
 def hash_password(password: str) -> str:
-    pwd_bytes = password.encode("utf-8")
-    salt = bcrypt.gensalt()
-    return bcrypt.hashpw(pwd_bytes, salt).decode("utf-8")
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
-def verify_password(password: str, hashed_password: str) -> bool:
+def verify_password(password: str, hashed_password: str | None) -> bool:
     try:
-        return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
-    except Exception:
+        return bcrypt.checkpw(password.encode("utf-8"), (hashed_password or _DUMMY_HASH).encode())
+    except ValueError:  # malformed hash, e.g. the placeholder of a demo or deleted account
+        bcrypt.checkpw(password.encode("utf-8"), _DUMMY_HASH.encode())
         return False
-
-
-def _get_jwt_secret() -> str:
-    secret = settings.jwt_secret
-    if len(secret) < 32:
-        return secret.ljust(32, "-")
-    return secret
 
 
 def create_access_token(user_id: UUID, expires_delta: timedelta | None = None) -> str:
     now = datetime.now(UTC)
-    delta = expires_delta if expires_delta is not None else timedelta(days=DEFAULT_EXPIRE_DAYS)
-    expire = now + delta
-    payload = {
-        "sub": str(user_id),
-        "iat": int(now.timestamp()),
-        "exp": int(expire.timestamp()),
-    }
-    return jwt.encode(payload, _get_jwt_secret(), algorithm=ALGORITHM)
+    expire = now + (expires_delta or timedelta(hours=settings.jwt_expire_hours))
+    payload = {"sub": str(user_id), "iat": int(now.timestamp()), "exp": int(expire.timestamp())}
+    return jwt.encode(payload, settings.jwt_secret, algorithm=ALGORITHM)
 
 
-def decode_access_token(token: str) -> UUID | None:
+def decode_access_token(token: str) -> tuple[UUID, datetime] | None:
+    """(user id, issued at) of a valid token, else None. Only HS256 is accepted, so a token
+    signed with "none" or another algorithm is rejected."""
     try:
-        payload = jwt.decode(token, _get_jwt_secret(), algorithms=[ALGORITHM])
-        sub = payload.get("sub")
-        if not sub:
-            return None
-        return UUID(sub)
-    except Exception:
+        payload = jwt.decode(
+            token,
+            settings.jwt_secret,
+            algorithms=[ALGORITHM],
+            options={"require": ["sub", "exp", "iat"]},
+        )
+        return UUID(payload["sub"]), datetime.fromtimestamp(payload["iat"], UTC)
+    except (jwt.PyJWTError, ValueError, TypeError):
         return None

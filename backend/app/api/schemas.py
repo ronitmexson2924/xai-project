@@ -1,37 +1,33 @@
 """API-specific request and response schemas.
 
-Owner: Mit.
-Builds upon and references domain models from app.contracts.
+Owner: Mit. They extend the shared models in app.contracts without changing them.
 """
 
 from datetime import datetime
-from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 from app.contracts.explanation import ExplanationEventIn
 from app.contracts.graph import Concept, ConceptEdge
-from app.contracts.learner import StateDelta
+from app.contracts.learner import AttemptResult, StateDelta
+from app.contracts.xai import ChangeNotice
 
 
-class QuestionnaireItem(BaseModel):
+class QuestionnaireItemOut(BaseModel):
+    """What a learner sees of an item: never its trait, scoring direction or source."""
+
     id: str
-    trait: str
     text: str
-    reverse_scored: bool = False
-    source: str = ""
 
 
 class QuestionnaireAnswersIn(BaseModel):
     answers: dict[str, int] = Field(
-        ...,
-        description="Map of questionnaire item ID to likert rating (1 to 5)",
+        ..., max_length=100, description="Questionnaire item id -> Likert rating (1 to 5)"
     )
 
 
 class StateUpdateView(BaseModel):
     id: int
-    user_id: UUID
     source: str
     source_id: str
     delta: StateDelta
@@ -44,10 +40,7 @@ class GraphResponse(BaseModel):
 
 
 class EventBatchIn(BaseModel):
-    events: list[ExplanationEventIn] = Field(
-        ...,
-        description="Batched explanation interaction events",
-    )
+    events: list[ExplanationEventIn] = Field(..., max_length=200)
 
 
 class EventBatchResponse(BaseModel):
@@ -55,17 +48,21 @@ class EventBatchResponse(BaseModel):
     duplicates: int
 
 
+class AttemptResultOut(AttemptResult):
+    """AttemptResult plus what the answer changed, in plain language (XAI E5)."""
+
+    change: ChangeNotice | None = None
+    feedback_change: ChangeNotice | None = None  # set when a micro-check closed an explanation
+
+
 class AdminMetricsResponse(BaseModel):
     total_users: int
+    consented_users: int
     arm_distribution: dict[str, int]
     total_attempts: int
     total_explanations: int
-    p50_latency_ms: float
-    p95_latency_ms: float
-    source_mix: dict[str, int] = Field(
-        default_factory=lambda: {"template": 0, "precomputed": 0, "llm": 0}
-    )
-    clarity_distribution: dict[int, int] = Field(
-        default_factory=lambda: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
-    )
-    avg_dwell_ms: float = 0.0
+    p50_latency_ms: float | None
+    p95_latency_ms: float | None
+    source_mix: dict[str, int]
+    clarity_distribution: dict[int, int]
+    avg_dwell_ms: float | None

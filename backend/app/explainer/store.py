@@ -63,3 +63,67 @@ class VariantStore:
 
 
 variant_store = VariantStore()
+
+
+class DbVariantStore:
+    """The same interface over the `explanation_variants` table (used by the API and by
+    `python -m app.explainer.precompute`)."""
+
+    def __init__(self, session) -> None:  # noqa: ANN001 (sqlalchemy Session)
+        self.session = session
+
+    @staticmethod
+    def _record(row) -> ExplanationVariantRecord:  # noqa: ANN001
+        return ExplanationVariantRecord(
+            id=row.id,
+            concept_id=row.concept_id,
+            style_key=row.style_key,
+            body_markdown=row.body_markdown,
+            prompt_version=row.prompt_version,
+            model=row.model or "",
+            validation=row.validation,
+            review_status=row.review_status,
+            created_at=row.created_at,
+        )
+
+    def get_variant(
+        self, concept_id: str, style_key: str, prompt_version: str = "v1"
+    ) -> ExplanationVariantRecord | None:
+        from sqlalchemy import select
+
+        from app.db import models as m
+
+        row = self.session.scalar(
+            select(m.ExplanationVariantRow).where(
+                m.ExplanationVariantRow.concept_id == concept_id,
+                m.ExplanationVariantRow.style_key == style_key,
+                m.ExplanationVariantRow.prompt_version == prompt_version,
+                m.ExplanationVariantRow.review_status.in_(("auto_ok", "approved")),
+            )
+        )
+        return self._record(row) if row is not None else None
+
+    def put_variant(self, record: ExplanationVariantRecord) -> None:
+        from sqlalchemy.dialects.postgresql import insert
+
+        from app.db import models as m
+
+        values = record.model_dump(exclude={"created_at"})
+        self.session.execute(
+            insert(m.ExplanationVariantRow)
+            .values(**values)
+            .on_conflict_do_update(
+                index_elements=["concept_id", "style_key", "prompt_version"],
+                set_={
+                    k: values[k] for k in ("body_markdown", "model", "validation", "review_status")
+                },
+            )
+        )
+        self.session.flush()
+
+    def count(self) -> int:
+        from sqlalchemy import func, select
+
+        from app.db import models as m
+
+        return self.session.scalar(select(func.count()).select_from(m.ExplanationVariantRow)) or 0

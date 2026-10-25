@@ -1,107 +1,127 @@
-"""Administrative metrics and research export routes.
+"""Admin: operational metrics and pseudonymised research exports. Admins only
+(users.is_admin, granted with `python -m app.auth.admin_cli grant <email>`).
 
 Owner: Mit.
 """
 
 import csv
+import hashlib
+import hmac
 import io
-from typing import Annotated
+from datetime import datetime
+from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Query, Response
+from sqlalchemy import func, select
 
-from app.api.attempts import get_attempts_log
-from app.api.deps import FeedbackAnalyzerDep, LearnerModelDep
+from app.api.deps import DbSession
+from app.api.errors import api_error
 from app.api.schemas import AdminMetricsResponse
-from app.auth import UserResponse, auth_store, get_current_user
+from app.auth import AdminUser
+from app.config import settings
+from app.db import models as m
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
+ExportTable = Literal["users", "attempts", "explanations", "feedback"]
 
-@router.get(
-    "/metrics",
-    response_model=AdminMetricsResponse,
-    summary="Get operational metrics across study arms and latency budgets",
-)
-def get_metrics(
-    _: Annotated[UserResponse, Depends(get_current_user)],
-    learner_model: LearnerModelDep,
-    analyzer: FeedbackAnalyzerDep,
-) -> AdminMetricsResponse:
-    arm_counts = dict(auth_store._arm_counts)
-    total_users = sum(arm_counts.values())
 
-    attempts_log = get_attempts_log()
-    total_attempts = len(attempts_log)
-    if total_attempts == 0 and hasattr(learner_model, "_states"):
-        total_attempts = sum(s.total_attempts for s in learner_model._states.values())
+def _percentile(values: list[int], q: float) -> float | None:
+    if not values:
+        return None
+    values = sorted(values)
+    k = (len(values) - 1) * q
+    lo, hi = int(k), min(int(k) + 1, len(values) - 1)
+    return float(values[lo] + (values[hi] - values[lo]) * (k - lo))
 
-    total_explanations = 0
-    source_counts = {"template": 14, "precomputed": 28, "llm": 8}
-    clarity_counts = {1: 1, 2: 3, 3: 12, 4: 24, 5: 35}
 
-    if hasattr(analyzer, "_explanations"):
-        total_explanations = len(analyzer._explanations)
-        for exp in analyzer._explanations.values():
-            src = exp.source if exp.source in source_counts else "template"
-            source_counts[src] = source_counts.get(src, 0) + 1
-
-    if hasattr(analyzer, "_summaries"):
-        for summ in analyzer._summaries.values():
-            if summ.clarity_rating is not None:
-                r = max(1, min(5, summ.clarity_rating))
-                clarity_counts[r] = clarity_counts.get(r, 0) + 1
-
+@router.get("/metrics", response_model=AdminMetricsResponse, summary="Operational metrics")
+def get_metrics(_: AdminUser, session: DbSession) -> AdminMetricsResponse:
+    active = m.User.deleted_at.is_(None)
+    arms = dict(
+        session.execute(
+            select(m.ExperimentAssignment.arm, func.count())
+            .join(m.User, m.User.id == m.ExperimentAssignment.user_id)
+            .where(active)
+            .group_by(m.ExperimentAssignment.arm)
+        ).all()
+    )
+    latencies = list(session.scalars(select(m.ExplanationRow.latency_ms)))
+    sources = dict(
+        session.execute(
+            select(m.ExplanationRow.source, func.count()).group_by(m.ExplanationRow.source)
+        ).all()
+    )
+    clarity = dict.fromkeys(range(1, 6), 0)
+    dwell = []
+    for summary in session.scalars(select(m.ExplanationFeedbackRow.summary)):
+        if (rating := summary.get("clarity_rating")) in clarity:
+            clarity[rating] += 1
+        if summary.get("effective_dwell_ms") is not None:
+            dwell.append(summary["effective_dwell_ms"])
     return AdminMetricsResponse(
-        total_users=total_users,
-        arm_distribution=arm_counts,
-        total_attempts=total_attempts,
-        total_explanations=total_explanations or 50,
-        p50_latency_ms=28.5,
-        p95_latency_ms=45.0,
-        source_mix=source_counts,
-        clarity_distribution=clarity_counts,
-        avg_dwell_ms=16420.0,
+        total_users=session.scalar(select(func.count()).select_from(m.User).where(active)) or 0,
+        consented_users=session.scalar(
+            select(func.count()).select_from(m.User).where(active, m.User.consent_at.is_not(None))
+        )
+        or 0,
+        arm_distribution={
+            arm: arms.get(arm, 0) for arm in ("generic", "static_personalized", "closed_loop")
+        },
+        total_attempts=session.scalar(select(func.count()).select_from(m.AttemptRow)) or 0,
+        total_explanations=len(latencies),
+        p50_latency_ms=_percentile(latencies, 0.5),
+        p95_latency_ms=_percentile(latencies, 0.95),
+        source_mix={s: sources.get(s, 0) for s in ("precomputed", "llm", "template")},
+        clarity_distribution=clarity,
+        avg_dwell_ms=sum(dwell) / len(dwell) if dwell else None,
     )
 
 
-@router.get(
-    "/export.csv",
-    summary="Export research data tables as pseudonymized CSV",
-)
-def export_csv(
-    _: Annotated[UserResponse, Depends(get_current_user)],
-    table: str = Query("users", description="Table to export (users, attempts, assignments)"),
-) -> Response:
-    output = io.StringIO()
-    writer = csv.writer(output)
+def pseudonym(user_id) -> str:  # noqa: ANN001
+    return hmac.new(
+        settings.export_salt.encode(), str(user_id).encode(), hashlib.sha256
+    ).hexdigest()[:16]
 
+
+def _cell(value: object) -> object:
+    """Neutralise spreadsheet formulas (CSV injection): text starting with = + - @ is quoted."""
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, str) and value[:1] in ("=", "+", "-", "@", "\t", "\r"):
+        return "'" + value
+    return value
+
+
+@router.get("/export.csv", summary="Pseudonymised CSV export of one table")
+def export_csv(
+    _: AdminUser,
+    session: DbSession,
+    table: Annotated[ExportTable, Query()] = "users",
+) -> Response:
+    if len(settings.export_salt) < 16:
+        raise api_error(
+            503, "EXPORT_DISABLED", "Set EXPORT_SALT (16+ characters) to enable exports"
+        )
+    deleted = set(session.scalars(select(m.User.id).where(m.User.deleted_at.is_not(None))))
+    out = io.StringIO()
+    writer = csv.writer(out)
     if table == "users":
-        writer.writerow(["pseudonym_id", "created_at", "consent_recorded", "arm"])
-        for user_id, user in auth_store._users_by_id.items():
-            if user.deleted_at is None:
-                assignment = auth_store.get_assignment(user_id)
-                arm = assignment.arm if assignment else "unknown"
-                pseudo_id = f"p_{str(user_id)[:8]}"
+        writer.writerow(["learner", "arm", "created_at", "consented"])
+        for user, arm in session.execute(
+            select(m.User, m.ExperimentAssignment.arm).join(
+                m.ExperimentAssignment, m.ExperimentAssignment.user_id == m.User.id
+            )
+        ):
+            if user.id not in deleted:
                 writer.writerow(
-                    [
-                        pseudo_id,
-                        user.created_at.isoformat(),
-                        user.consent_at is not None,
-                        arm,
-                    ]
+                    [pseudonym(user.id), arm, _cell(user.created_at), user.consent_at is not None]
                 )
-    elif table == "assignments":
-        writer.writerow(["pseudonym_id", "arm", "assigned_at"])
-        for user_id, assignment in auth_store._assignments_by_user_id.items():
-            pseudo_id = f"p_{str(user_id)[:8]}"
-            writer.writerow([pseudo_id, assignment.arm, assignment.assigned_at.isoformat()])
     elif table == "attempts":
         writer.writerow(
             [
-                "attempt_id",
-                "pseudonym_id",
+                "learner",
                 "item_id",
-                "concept_id",
                 "correct",
                 "latency_ms",
                 "hints_used",
@@ -109,28 +129,76 @@ def export_csv(
                 "created_at",
             ]
         )
-        for att in get_attempts_log():
-            pseudo_id = f"p_{str(att.user_id)[:8]}"
-            writer.writerow(
-                [
-                    str(att.id),
-                    pseudo_id,
-                    att.item_id,
-                    att.concept_id,
-                    att.correct,
-                    att.latency_ms,
-                    att.hints_used,
-                    att.confidence if att.confidence is not None else "",
-                    att.created_at.isoformat(),
-                ]
-            )
+        for a in session.scalars(select(m.AttemptRow).order_by(m.AttemptRow.created_at)):
+            if a.user_id not in deleted:
+                writer.writerow(
+                    [
+                        pseudonym(a.user_id),
+                        _cell(a.item_id),
+                        a.correct,
+                        a.latency_ms,
+                        a.hints_used,
+                        a.confidence,
+                        _cell(a.created_at),
+                    ]
+                )
+    elif table == "explanations":
+        writer.writerow(
+            [
+                "learner",
+                "explanation_id",
+                "concept_id",
+                "source",
+                "style_source",
+                "latency_ms",
+                "created_at",
+            ]
+        )
+        for e in session.scalars(select(m.ExplanationRow).order_by(m.ExplanationRow.created_at)):
+            if e.user_id not in deleted:
+                writer.writerow(
+                    [
+                        pseudonym(e.user_id),
+                        e.id,
+                        _cell(e.concept_ids[0]),
+                        e.source,
+                        e.style_source,
+                        e.latency_ms,
+                        _cell(e.created_at),
+                    ]
+                )
     else:
-        writer.writerow(["pseudonym_id", "status"])
-        writer.writerow(["none", "empty"])
-
-    csv_data = output.getvalue()
+        writer.writerow(
+            [
+                "learner",
+                "explanation_id",
+                "dwell_ms",
+                "clarity",
+                "followup_correct",
+                "dismissed_quickly",
+                "applied_at",
+            ]
+        )
+        for f, user_id in session.execute(
+            select(m.ExplanationFeedbackRow, m.ExplanationRow.user_id).join(
+                m.ExplanationRow, m.ExplanationRow.id == m.ExplanationFeedbackRow.explanation_id
+            )
+        ):
+            if user_id not in deleted:
+                s = f.summary
+                writer.writerow(
+                    [
+                        pseudonym(user_id),
+                        f.explanation_id,
+                        s.get("effective_dwell_ms"),
+                        s.get("clarity_rating"),
+                        s.get("followup_correct"),
+                        s.get("dismissed_quickly"),
+                        _cell(f.applied_at),
+                    ]
+                )
     return Response(
-        content=csv_data,
+        content=out.getvalue(),
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{table}_export.csv"'},
     )

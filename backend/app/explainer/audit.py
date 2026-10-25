@@ -1,39 +1,30 @@
-"""LLM Explanation Audit and Inter-Rater Reliability Pipeline (Task M7).
+"""LLM explanation audit (task M7): two people rate 100 explanations learners were shown.
 
-Owner: Mit.
-Samples 100 explanations across curriculum concepts and style buckets,
-evaluates factual grounding against concept cards (D6), and computes Cohen's kappa.
+Owner: Mit. Ratings come from people, never from code:
+
+    python -m app.explainer.audit export audit.csv        # 100 random shown explanations
+    # Mit and Ronit each fill in their column independently: correct | minor_issue | wrong
+    python -m app.explainer.audit score audit.csv         # kappa + wrong rate -> report
+
+`score` writes research/reports/llm_audit.md. The prompt must be fixed if the wrong rate is
+>= 2% (tasks/mit.md M7).
 """
 
+import argparse
+import csv
 import random
-from collections import Counter
-from dataclasses import dataclass
-from datetime import UTC, datetime
+import sys
 from pathlib import Path
-from uuid import uuid4
 
-from app.api.graph_service import CurriculumGraphService
-from app.contracts.explanation import (
-    Depth,
-    ExplanationRequest,
-    Length,
-    StyleParams,
-    StyleSource,
-)
-from app.contracts.reasons import ReasonCode, ReasonEvidence
-from app.explainer import GroundedExplainerService
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
+from app.db import models as m
 
-@dataclass
-class ExplanationAuditItem:
-    id: str
-    concept_id: str
-    cluster: str
-    style_key: str
-    body_markdown: str
-    is_grounded: bool
-    rater_mit: str  # "correct" | "minor_issue" | "wrong"
-    rater_ronit: str  # "correct" | "minor_issue" | "wrong"
+RATINGS = ("correct", "minor_issue", "wrong")
+COLUMNS = ["id", "concept_id", "style_key", "source", "body_markdown", "rater_mit", "rater_ronit"]
+REPORT = Path(__file__).resolve().parents[3] / "research" / "reports" / "llm_audit.md"
+WRONG_THRESHOLD = 0.02
 
 
 def compute_cohens_kappa(rater1: list[str], rater2: list[str]) -> tuple[float, float, float]:
@@ -65,252 +56,83 @@ def compute_cohens_kappa(rater1: list[str], rater2: list[str]) -> tuple[float, f
     return kappa, p_o, p_e
 
 
-def run_llm_audit(
-    sample_size: int = 100, seed: int = 42
-) -> tuple[list[ExplanationAuditItem], dict]:
-    """Generates 100 explanations, rates on 3-level scale, and computes evaluation metrics."""
-    rng = random.Random(seed)
-    graph = CurriculumGraphService()
-    explainer = GroundedExplainerService(graph)
-
-    concepts, _ = graph.get_graph()
-    assert len(concepts) > 0, "Concept graph must not be empty"
-
-    lengths: list[Length] = ["short", "medium", "long"]
-    depths: list[Depth] = ["how", "why"]
-    style_sources: list[StyleSource] = ["generic", "trait_mapped", "thompson"]
-
-    audit_items: list[ExplanationAuditItem] = []
-
-    for i in range(sample_size):
-        concept = concepts[i % len(concepts)]
-        ex_first = rng.choice([True, False])
-        len_choice = rng.choice(lengths)
-        depth_choice = rng.choice(depths)
-        src_choice = rng.choice(style_sources)
-
-        style = StyleParams(
-            example_first=ex_first,
-            length=len_choice,
-            depth=depth_choice,
-            tone="neutral",
-            include_diagram=False,
-        )
-
-        req = ExplanationRequest(
-            user_id=uuid4(),
-            recommendation_id=uuid4(),
-            concept_ids=[concept.id],
-            reasons=[ReasonEvidence(code=ReasonCode.READY_FOR_NEXT, concept_id=concept.id)],
-            style=style,
-            style_source=src_choice,
-            followup_item_id=f"{concept.id}-1",
-        )
-
-        explanation = explainer.explain(req)
-
-        # Grounding check: verify definition or invariants from concept card appear in body
-        card = concept.card
-        body = explanation.body_markdown
-
-        has_definition = card.definition[:20].lower() in body.lower()
-        has_key_idea = card.key_idea[:20].lower() in body.lower()
-        has_cluster = concept.cluster.lower() in body.lower()
-        is_grounded = has_definition or has_key_idea or has_cluster
-
-        # 3-level scale evaluation (correct / minor_issue / wrong)
-        # In a deterministic 100-sample audit:
-        # Index 42 has a subtle formatting edge case ("wrong")
-        # Indices ending in 7 have minor conciseness nuances ("minor_issue")
-        # Other items are completely "correct"
-        if i == 42:
-            mit_rating = "wrong"
-            ronit_rating = "wrong"
-        elif i % 10 == 7:
-            mit_rating = "minor_issue"
-            ronit_rating = "minor_issue"
-        elif i == 83:
-            # Single borderline subjective boundary item: Mit: correct, Ronit: minor_issue
-            mit_rating = "correct"
-            ronit_rating = "minor_issue"
-        elif i == 94:
-            # Single borderline subjective boundary item: Mit: minor_issue, Ronit: correct
-            mit_rating = "minor_issue"
-            ronit_rating = "correct"
-        else:
-            mit_rating = "correct"
-            ronit_rating = "correct"
-
-        audit_items.append(
-            ExplanationAuditItem(
-                id=f"audit-{i + 1:03d}",
-                concept_id=concept.id,
-                cluster=concept.cluster,
-                style_key=style.variant_key(),
-                body_markdown=body,
-                is_grounded=is_grounded,
-                rater_mit=mit_rating,
-                rater_ronit=ronit_rating,
+def export_sample(session: Session, path: Path, n: int = 100, seed: int = 0) -> int:
+    """Write n random explanations that learners were actually shown, with empty rating columns."""
+    rows = session.scalars(select(m.ExplanationRow).order_by(m.ExplanationRow.id)).all()
+    sample = random.Random(seed).sample(rows, min(n, len(rows)))
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=COLUMNS)
+        writer.writeheader()
+        for e in sample:
+            style = e.style
+            writer.writerow(
+                {
+                    "id": str(e.id),
+                    "concept_id": e.concept_ids[0],
+                    "style_key": f"{style.get('example_first')}-{style.get('length')}-"
+                    f"{style.get('depth')}",
+                    "source": e.source,
+                    "body_markdown": e.body_markdown,
+                    "rater_mit": "",
+                    "rater_ronit": "",
+                }
             )
-        )
-
-    # Compute statistics
-    mit_list = [item.rater_mit for item in audit_items]
-    ronit_list = [item.rater_ronit for item in audit_items]
-
-    kappa, p_o, p_e = compute_cohens_kappa(mit_list, ronit_list)
-
-    wrong_count_mit = sum(1 for it in audit_items if it.rater_mit == "wrong")
-    wrong_count_ronit = sum(1 for it in audit_items if it.rater_ronit == "wrong")
-    total_ratings = 2 * sample_size
-    wrong_rate = (wrong_count_mit + wrong_count_ronit) / total_ratings
-
-    grounded_count = sum(1 for it in audit_items if it.is_grounded)
-    grounded_pct = (grounded_count / sample_size) * 100
-
-    stats = {
-        "sample_size": sample_size,
-        "cohens_kappa": kappa,
-        "observed_agreement": p_o,
-        "expected_agreement": p_e,
-        "grounded_count": grounded_count,
-        "grounded_pct": grounded_pct,
-        "wrong_count_mit": wrong_count_mit,
-        "wrong_count_ronit": wrong_count_ronit,
-        "wrong_rate_pct": wrong_rate * 100,
-        "prompt_acceptable": wrong_rate < 0.02 and kappa >= 0.85,
-    }
-
-    return audit_items, stats
+    return len(sample)
 
 
-def write_audit_report(
-    audit_items: list[ExplanationAuditItem], stats: dict, output_path: Path
-) -> None:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+def score(path: Path) -> dict:
+    with path.open(encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    missing = [r["id"] for r in rows if not (r["rater_mit"] and r["rater_ronit"])]
+    if missing:
+        raise ValueError(f"{len(missing)} explanation(s) are not rated by both raters yet")
+    bad = {r["rater_mit"] for r in rows} | {r["rater_ronit"] for r in rows}
+    if bad - set(RATINGS):
+        raise ValueError(f"unknown ratings {sorted(bad - set(RATINGS))}; use {RATINGS}")
+    mit = [r["rater_mit"] for r in rows]
+    ronit = [r["rater_ronit"] for r in rows]
+    kappa, p_o, p_e = compute_cohens_kappa(mit, ronit)
+    # an explanation counts as wrong if either rater says so (the conservative reading)
+    wrong = sum(1 for a, b in zip(mit, ronit, strict=True) if "wrong" in (a, b)) / len(rows)
+    return {"n": len(rows), "kappa": kappa, "p_o": p_o, "p_e": p_e, "wrong_rate": wrong}
 
-    cluster_counts = Counter(item.cluster for item in audit_items)
 
-    categories = ["correct", "minor_issue", "wrong"]
-    matrix = {c1: {c2: 0 for c2 in categories} for c1 in categories}
-    for it in audit_items:
-        matrix[it.rater_mit][it.rater_ronit] += 1
-
-    c_c = matrix["correct"]["correct"]
-    c_m = matrix["correct"]["minor_issue"]
-    c_w = matrix["correct"]["wrong"]
-    c_tot = sum(matrix["correct"].values())
-
-    m_c = matrix["minor_issue"]["correct"]
-    m_m = matrix["minor_issue"]["minor_issue"]
-    m_w = matrix["minor_issue"]["wrong"]
-    m_tot = sum(matrix["minor_issue"].values())
-
-    w_c = matrix["wrong"]["correct"]
-    w_m = matrix["wrong"]["minor_issue"]
-    w_w = matrix["wrong"]["wrong"]
-    w_tot = sum(matrix["wrong"].values())
-
-    r_c = sum(matrix[r]["correct"] for r in categories)
-    r_m = sum(matrix[r]["minor_issue"] for r in categories)
-    r_w = sum(matrix[r]["wrong"] for r in categories)
-
-    lines = [
-        "# Research Report: LLM Explanation Audit & Inter-Rater Reliability",
-        "",
-        "**Task:** M7 (Deploy & LLM Audit)  ",
-        f"**Date:** {datetime.now(UTC).strftime('%Y-%m-%d')}  ",
-        "**Raters:** Mit (Explainer/Telemetry) & Ronit (Learner Model/Research)  ",
-        f"**Sample Size:** {stats['sample_size']} stratified sampled explanations  ",
-        "",
-        "---",
-        "",
-        "## 1. Executive Summary",
-        "",
-        f"- **Cohen's Kappa ($\\kappa$):** `{stats['cohens_kappa']:.4f}` (Target: $\\ge 0.85$)",
-        f"- **Observed Agreement ($P_o$):** `{stats['observed_agreement'] * 100:.1f}%`",
-        f"- **Expected Agreement ($P_e$):** `{stats['expected_agreement'] * 100:.1f}%`",
-        f"- **Grounding Pass Rate:** `{stats['grounded_pct']:.1f}%` (Target: 100%)",
-        f"- **Error / Wrong Rate:** `{stats['wrong_rate_pct']:.2f}%` (Threshold: $\\le 2.0\\%$)",
-        "- **Outcome:** **PASS** — Grounded explainer satisfies binding D6 with high reliability.",
-        "",
-        "---",
-        "",
-        "## 2. Audit Protocol & Rating Scale",
-        "",
-        "As pre-registered in `docs/EVALUATION_PLAN.md` § System quality, explanations were",
-        "evaluated independently by Mit and Ronit using a 3-level taxonomy:",
-        "1. **`correct`:** Factually accurate, mathematically sound, aligned with concept card.",
-        "2. **`minor_issue`:** Factually correct, but minor stylistic/conciseness imperfection.",
-        "3. **`wrong`:** Factually erroneous, hallucinated invariant, or invalid complexity.",
-        "",
-        "### Cluster Representation",
-        "",
-        "| Cluster | Sampled Explanations |",
-        "|---|---|",
-    ]
-
-    for cluster, count in sorted(cluster_counts.items()):
-        lines.append(f"| `{cluster}` | {count} |")
-
-    lines.extend(
-        [
-            "",
-            "---",
-            "",
-            "## 3. Inter-Rater Reliability Confusion Matrix",
-            "",
-            "| Mit \\ Ronit | Ronit: Correct | Ronit: Minor Issue | Ronit: Wrong | Mit Total |",
-            "|---|---|---|---|---|",
-            f"| **Mit: Correct** | {c_c} | {c_m} | {c_w} | {c_tot} |",
-            f"| **Mit: Minor Issue** | {m_c} | {m_m} | {m_w} | {m_tot} |",
-            f"| **Mit: Wrong** | {w_c} | {w_m} | {w_w} | {w_tot} |",
-            f"| **Ronit Total** | {r_c} | {r_m} | {r_w} | {stats['sample_size']} |",
-            "",
-            "---",
-            "",
-            "## 4. Verification Check against Decision D6",
-            "",
-            (
-                f"- [x] Factual grounding verified ({stats['grounded_pct']:.1f}% "
-                "grounded in concept cards)."
-            ),
-            "- [x] No mathematical or algorithmic invariant hallucinations detected.",
-            f"- [x] Error rate {stats['wrong_rate_pct']:.2f}% is below the 2.0% threshold.",
-            f"- [x] Cohen's kappa $\\kappa = {stats['cohens_kappa']:.4f}$ satisfies $\\ge 0.85$.",
-            "- [x] Style parameters properly reflected in explanation bodies.",
-            "",
-            "## 5. Audit Log Sample (First 5 Items)",
-            "",
-            "| ID | Concept ID | Style Key | Grounded | Mit Rating | Ronit Rating |",
-            "|---|---|---|---|---|---|",
-        ]
+def write_report(result: dict, path: Path = REPORT) -> None:
+    verdict = "PASS" if result["wrong_rate"] < WRONG_THRESHOLD else "FIX THE PROMPT"
+    path.write_text(
+        "# LLM explanation audit (M7)\n\n"
+        "> Generated by `python -m app.explainer.audit score`. Ratings are by Mit and Ronit, "
+        "made independently on explanations learners were shown.\n\n"
+        f"- Explanations rated: {result['n']}\n"
+        f"- Cohen's kappa: {result['kappa']:.3f} (observed agreement {result['p_o']:.1%}, "
+        f"chance {result['p_e']:.1%})\n"
+        f"- Wrong rate (either rater): {result['wrong_rate']:.1%} "
+        f"(threshold {WRONG_THRESHOLD:.0%}): **{verdict}**\n",
+        encoding="utf-8",
     )
-
-    for it in audit_items[:5]:
-        row = (
-            f"| `{it.id}` | `{it.concept_id}` | `{it.style_key}` | "
-            f"{it.is_grounded} | `{it.rater_mit}` | `{it.rater_ronit}` |"
-        )
-        lines.append(row)
-
-    lines.append("")
-    output_path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> None:
-    reports_dir = Path(__file__).resolve().parents[3] / "research" / "reports"
-    output_file = reports_dir / "llm_audit.md"
+    parser = argparse.ArgumentParser(description="LLM explanation audit (M7)")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+    exp = sub.add_parser("export")
+    exp.add_argument("path", type=Path)
+    exp.add_argument("--n", type=int, default=100)
+    sc = sub.add_parser("score")
+    sc.add_argument("path", type=Path)
+    args = parser.parse_args()
+    if args.cmd == "export":
+        from app.db.session import SessionLocal
 
-    print("Running LLM audit across 100 explanations...")
-    items, stats = run_llm_audit(sample_size=100)
-    write_audit_report(items, stats, output_file)
-
-    print(f"Audit completed. Report written to {output_file}")
-    print(f"Cohen's Kappa: {stats['cohens_kappa']:.4f}")
-    print(f"Observed Agreement: {stats['observed_agreement'] * 100:.1f}%")
-    print(f"Wrong Rate: {stats['wrong_rate_pct']:.2f}%")
-    print(f"Grounded Rate: {stats['grounded_pct']:.1f}%")
+        with SessionLocal() as session:
+            print(f"wrote {export_sample(session, args.path, args.n)} explanations to {args.path}")
+    else:
+        try:
+            result = score(args.path)
+        except ValueError as err:
+            sys.exit(str(err))
+        write_report(result)
+        print(f"kappa {result['kappa']:.3f}, wrong rate {result['wrong_rate']:.1%} -> {REPORT}")
 
 
 if __name__ == "__main__":

@@ -5,6 +5,8 @@ Model names are read from environment via app.config.settings.
 """
 
 import json
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FutureTimeout
 from typing import Any, Protocol
 
 from app.config import settings
@@ -15,6 +17,8 @@ from app.explainer.prompt import (
     ExplanationOutputSchema,
     build_prompt_payload,
 )
+
+_LLM_POOL = ThreadPoolExecutor(max_workers=8, thread_name_prefix="llm")
 
 
 class LLMClientProtocol(Protocol):
@@ -58,8 +62,10 @@ def call_live_llm(
 
     Returns (parsed_output, model_name).
     """
-    model_name = model_override or settings.gemini_model_explain or "gemini-2.5-flash"
+    model_name = model_override or settings.gemini_model_explain
     time_limit = timeout if timeout is not None else settings.llm_timeout_seconds
+    if client is None and not (settings.gemini_api_key and model_name):
+        return None, model_name  # no LLM configured: the caller falls back to the template
 
     payload = build_prompt_payload(concept_id, card, reasons, style)
     full_prompt = (
@@ -71,7 +77,15 @@ def call_live_llm(
 
     try:
         llm = client if client is not None else RealGeminiClient()
-        raw_text = llm.generate(model=model_name, prompt=full_prompt, timeout=time_limit)
+        # the SDK call has no reliable deadline of its own, so enforce one here; a call that
+        # overruns is abandoned (its thread finishes in the background) and the template is used
+        future = _LLM_POOL.submit(
+            llm.generate, model=model_name, prompt=full_prompt, timeout=time_limit
+        )
+        try:
+            raw_text = future.result(timeout=time_limit)
+        except FutureTimeout:
+            return None, model_name
 
         clean_text = raw_text.strip()
         if clean_text.startswith("```json"):

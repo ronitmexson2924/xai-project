@@ -1,156 +1,159 @@
-"""Module C telemetry capture and analyzer implementation.
+"""Module C telemetry capture and analyzer (FeedbackAnalyzer, contracts/services.py).
 
-Owner: Mit.
-Implements FeedbackAnalyzer Protocol from app.contracts.services.
+Owner: Mit. Events are stored in `explanation_events` (deduplicated on idempotency_key) and
+condensed into an ExplanationFeedbackSummary. Client timestamps are only trusted relative to each
+other and are bounded by server time, so a client cannot claim more reading time than it had.
 """
 
-import threading
-from collections import defaultdict
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
+from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.orm import Session
+
 from app.contracts.explanation import (
-    Explanation,
     ExplanationEventIn,
     ExplanationFeedbackSummary,
     StyleParams,
 )
-from app.contracts.services import FeedbackAnalyzer
+from app.db import models as m
+
+QUICK_DISMISS_MS = 3000
+MAX_INTERVAL_MS = 10 * 60 * 1000  # one visible stretch counts for at most 10 minutes
+PASSIVE_TYPES = {"shown", "visible", "hidden", "dismissed", "why_opened", "why_rated"}
 
 
-class TelemetryFeedbackAnalyzer(FeedbackAnalyzer):
-    """Production in-memory / database-ready implementation of FeedbackAnalyzer.
+def summarize_events(
+    explanation: m.ExplanationRow,
+    events: list[ExplanationEventIn],
+    followup_correct: bool | None,
+    now: datetime | None = None,
+) -> ExplanationFeedbackSummary:
+    """Effective dwell counts visible time only (shown/visible -> hidden/dismissed), each stretch
+    capped, and the total capped by the server time since the explanation was created."""
+    now = now or datetime.now(UTC)
+    events = sorted(events, key=lambda e: e.client_ts)
+    dwell_ms = 0
+    visible_since: datetime | None = None
+    clarity: int | None = None
+    expanded = False
+    replays = 0
+    seen: set[str] = set()
 
-    Deduplicates events by idempotency_key, calculates effective dwell time
-    strictly over visible intervals, extracts clarity ratings, and summarizes
-    interaction.
-    """
+    def close(at: datetime) -> int:
+        assert visible_since is not None
+        return max(0, min(MAX_INTERVAL_MS, int((at - visible_since).total_seconds() * 1000)))
 
-    def __init__(self) -> None:
-        self._lock = threading.Lock()
-        self._explanations: dict[UUID, Explanation] = {}
-        self._events: dict[UUID, list[ExplanationEventIn]] = defaultdict(list)
-        self._seen_keys: set[UUID] = set()
+    for event in events:
+        seen.add(event.type)
+        if event.type in ("shown", "visible"):
+            if visible_since is None:
+                visible_since = event.client_ts
+        elif event.type in ("hidden", "dismissed"):
+            if visible_since is not None:
+                dwell_ms += close(event.client_ts)
+                visible_since = None
+        elif event.type == "expanded":
+            expanded = True
+        elif event.type == "replayed":
+            replays += 1
+        elif event.type == "clarity_rated":
+            rating = event.payload.get("rating")
+            if isinstance(rating, int) and not isinstance(rating, bool) and 1 <= rating <= 5:
+                clarity = rating
+    if visible_since is not None and len(events) > 1:
+        dwell_ms += close(events[-1].client_ts)
 
-    def clear(self) -> None:
-        with self._lock:
-            self._explanations.clear()
-            self._events.clear()
-            self._seen_keys.clear()
+    created = explanation.created_at
+    if created is not None:
+        dwell_ms = min(dwell_ms, max(0, int((now - created).total_seconds() * 1000)))
+    interacted = bool(seen - PASSIVE_TYPES)
+    return ExplanationFeedbackSummary(
+        explanation_id=explanation.id,
+        user_id=explanation.user_id,
+        concept_ids=list(explanation.concept_ids),
+        style=StyleParams.model_validate(explanation.style),
+        style_source=explanation.style_source,
+        effective_dwell_ms=dwell_ms,
+        expanded=expanded,
+        replays=min(replays, 50),
+        clarity_rating=clarity,
+        followup_correct=followup_correct,
+        dismissed_quickly=dwell_ms < QUICK_DISMISS_MS and not interacted,
+    )
 
-    def register(self, explanation: Explanation) -> None:
-        """Store explanation metadata for summarization."""
-        with self._lock:
-            self._explanations[explanation.id] = explanation
+
+class TelemetryFeedbackAnalyzer:
+    def __init__(self, session: Session) -> None:
+        self.session = session
 
     def record_events(
         self, explanation_id: UUID, user_id: UUID, events: list[ExplanationEventIn]
     ) -> tuple[int, int]:
-        """Record batched interaction events with deduplication.
+        """Store new events; returns (accepted, duplicates). Ownership is checked by the caller."""
+        if not events:
+            return 0, 0
+        now = datetime.now(UTC)
+        rows = [
+            {
+                "idempotency_key": e.idempotency_key,
+                "explanation_id": explanation_id,
+                "user_id": user_id,
+                "type": e.type,
+                "payload": e.payload,
+                # a client clock far off (or forged) is pulled back to the server's
+                "client_ts": e.client_ts if abs(e.client_ts - now) < timedelta(days=1) else now,
+            }
+            for e in {e.idempotency_key: e for e in events}.values()
+        ]
+        inserted = self.session.execute(
+            insert(m.ExplanationEventRow)
+            .values(rows)
+            .on_conflict_do_nothing(index_elements=["idempotency_key"])
+            .returning(m.ExplanationEventRow.id)
+        ).all()
+        return len(inserted), len(events) - len(inserted)
 
-        Returns (accepted, duplicates).
-        """
-        accepted = 0
-        duplicates = 0
-
-        with self._lock:
-            for event in events:
-                if event.idempotency_key in self._seen_keys:
-                    duplicates += 1
-                    continue
-
-                self._seen_keys.add(event.idempotency_key)
-                self._events[explanation_id].append(event)
-                accepted += 1
-
-        return accepted, duplicates
+    def events(self, explanation_id: UUID) -> list[ExplanationEventIn]:
+        return [
+            ExplanationEventIn(
+                idempotency_key=r.idempotency_key,
+                type=r.type,
+                client_ts=r.client_ts,
+                payload=r.payload,
+            )
+            for r in self.session.scalars(
+                select(m.ExplanationEventRow).where(
+                    m.ExplanationEventRow.explanation_id == explanation_id
+                )
+            )
+        ]
 
     def summarize(self, explanation_id: UUID) -> ExplanationFeedbackSummary:
-        """Condense event stream into ExplanationFeedbackSummary.
-
-        Calculates effective dwell time strictly over visible periods:
-        shown/visible -> hidden/dismissed intervals.
-        """
-        with self._lock:
-            if explanation_id not in self._explanations:
-                # If explanation metadata was not registered, look up defaults
-                exp = Explanation(
-                    id=explanation_id,
-                    recommendation_id=explanation_id,
-                    user_id=explanation_id,
-                    concept_ids=["unknown"],
-                    style=StyleParams(example_first=True, length="medium", depth="how"),
-                    style_source="generic",
-                    body_markdown="",
-                    source="template",
-                    prompt_version="m2-fallback",
-                )
-            else:
-                exp = self._explanations[explanation_id]
-
-            raw_events = list(self._events.get(explanation_id, []))
-
-        # Sort chronologically by client timestamp to handle out-of-order delivery
-        events = sorted(raw_events, key=lambda e: e.client_ts)
-
-        dwell_ms = 0
-        visible_since: datetime | None = None
-        clarity_rating: int | None = None
-        followup_correct: bool | None = None
-        expanded = False
-        replays = 0
-        seen_types: set[str] = set()
-
-        for event in events:
-            seen_types.add(event.type)
-
-            if event.type in ("shown", "visible"):
-                if visible_since is None:
-                    visible_since = event.client_ts
-            elif event.type in ("hidden", "dismissed"):
-                if visible_since is not None:
-                    delta_ms = int((event.client_ts - visible_since).total_seconds() * 1000)
-                    if delta_ms > 0:
-                        dwell_ms += delta_ms
-                    visible_since = None
-            elif event.type == "expanded":
-                expanded = True
-            elif event.type == "replayed":
-                replays += 1
-            elif event.type == "clarity_rated":
-                if "rating" in event.payload:
-                    try:
-                        clarity_rating = int(event.payload["rating"])
-                    except (ValueError, TypeError):
-                        pass
-            elif event.type == "followup_answered":
-                if "correct" in event.payload:
-                    followup_correct = bool(event.payload["correct"])
-
-        # If still visible at the end of known events, close interval at the last event timestamp
-        if visible_since is not None and len(events) > 1:
-            delta_ms = int((events[-1].client_ts - visible_since).total_seconds() * 1000)
-            if delta_ms > 0:
-                dwell_ms += delta_ms
-
-        passive_only_types = {"shown", "visible", "hidden", "dismissed"}
-        has_other_interaction = bool(seen_types - passive_only_types)
-
-        dismissed_quickly = (dwell_ms < 3000) and not has_other_interaction
-
-        return ExplanationFeedbackSummary(
-            explanation_id=exp.id,
-            user_id=exp.user_id,
-            concept_ids=exp.concept_ids,
-            style=exp.style,
-            style_source=exp.style_source,
-            effective_dwell_ms=dwell_ms,
-            expanded=expanded,
-            replays=replays,
-            clarity_rating=clarity_rating,
-            followup_correct=followup_correct,
-            dismissed_quickly=dismissed_quickly,
+        explanation = self.session.get(m.ExplanationRow, explanation_id)
+        if explanation is None:
+            raise LookupError(f"unknown explanation {explanation_id}")
+        # the follow-up result comes from the graded attempt, never from a client event
+        followup = self.session.scalar(
+            select(m.AttemptRow.correct)
+            .where(
+                m.AttemptRow.explanation_id == explanation_id,
+                m.AttemptRow.item_id == explanation.followup_item_id,
+            )
+            .order_by(m.AttemptRow.created_at)
+            .limit(1)
         )
+        return summarize_events(explanation, self.events(explanation_id), followup)
 
-
-telemetry_analyzer = TelemetryFeedbackAnalyzer()
+    def store_summary(self, summary: ExplanationFeedbackSummary) -> None:
+        """Write the explanation_feedback row the analysis reads (tasks/ronit.md, M2)."""
+        row = self.session.get(m.ExplanationFeedbackRow, summary.explanation_id)
+        data = summary.model_dump(mode="json")
+        if row is None:
+            self.session.add(
+                m.ExplanationFeedbackRow(explanation_id=summary.explanation_id, summary=data)
+            )
+        elif row.applied_at is None:
+            row.summary = data
+        self.session.flush()
