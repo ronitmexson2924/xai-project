@@ -221,6 +221,43 @@
     loop works**.
   - On pilot day: sign off S2, run `--from-db`, and tick the boxes above.
 
+## R9: Faithful decision rationale + counterfactuals (XAI E1, E2)
+- **Depends on:** R4, R5; the `contract` PR adding `backend/app/contracts/xai.py`
+  (docs/XAI_DESIGN.md §4), which Mit must approve
+- **Do:**
+  1. Make the planner return a trace with each decision: the rule that fired, evidence
+     values, thresholds, and the runner-up decision.
+  2. `app/planner/rationale.py`: `explain_recommendation(trace, state) -> Rationale`, with a
+     plain-language summary built only from the trace (XAI_DESIGN §3, rule 1).
+  3. Counterfactuals: simulate BKT forward ("n more correct answers") to the threshold that
+     flips the rule (0.6 prereq, 0.85 frontier, 0.95 mastered, 2-in-a-row for misconceptions).
+- **Acceptance:**
+  - [ ] Every rule (diagnostic, misconception, prereq gap, frontier, review) has a rationale test
+  - [ ] **Faithfulness test:** apply each counterfactual to the state, re-run the planner, and
+        the decision changes as stated (100%)
+  - [ ] No psychological labels in any generated text (test against a banned-word list)
+- [ ] **R9 done**
+
+## R10: Style rationale and open-learner-model explanations (XAI E3, E4, E5)
+- **Depends on:** R9 contract PR
+- **Do:**
+  - `explain_style(...) -> StyleRationale`, with `p_best` from Monte-Carlo samples of the
+    bandit posterior, and exploration stated as an experiment.
+  - `explain_belief(user, subject) -> BeliefExplanation`, with the top contributing
+    `state_updates` events and a confidence level from variance / n_observations.
+  - `explain_change(delta) -> str` for E5 notices.
+- **Acceptance:**
+  - [ ] `p_best` matches the empirical argmax frequency within 0.05
+  - [ ] Confidence levels follow the thresholds in XAI_DESIGN
+  - [ ] Demo learners Asha/Ben/Chen produce the texts in XAI_DESIGN §6 (golden tests)
+- [ ] **R10 done**
+
+## R11: XAI evaluation in the pre-registration
+- **Do:** add the faithfulness, comprehensibility, usefulness and behaviour measures
+  (XAI_DESIGN §5) to `research/preregistration.md`, and add their analysis to
+  `research/analyze.py`.
+- [ ] **R11 done**
+
 ---
 
 ## Asks for Mit
