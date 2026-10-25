@@ -112,3 +112,15 @@ def soft_delete_user(session: Session, user: m.User) -> None:
     user.deleted_at = now
     user.tokens_valid_after = now
     session.flush()
+
+
+def is_onboarded(session: Session, user_id: UUID) -> bool:
+    """The learner submitted the starting questionnaire (it is recorded once, in state_updates)."""
+    return (
+        session.scalar(
+            select(m.StateUpdateRow.id)
+            .where(m.StateUpdateRow.user_id == user_id, m.StateUpdateRow.source == "questionnaire")
+            .limit(1)
+        )
+        is not None
+    )

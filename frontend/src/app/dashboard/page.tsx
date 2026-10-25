@@ -1,205 +1,218 @@
 "use client";
 
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
-
-import ConceptDetailModal from "@/components/ConceptDetailModal";
-import ConceptGraph from "@/components/ConceptGraph";
-import Navbar from "@/components/Navbar";
-import { useLearnerGuard } from "@/lib/guards";
+import { motion } from "motion/react";
+import React, { useEffect, useMemo, useState } from "react";
+import { AppShell, PageLoading } from "@/components/AppShell";
+import { MasteryMap } from "@/components/MasteryMap";
 import TraitCard from "@/components/TraitCard";
-import WhyWeThinkThis from "@/components/WhyWeThinkThis";
-import {
-  api,
-  Concept,
-  ConceptEdge,
-  LearnerState,
-  StateUpdateView,
-} from "@/lib/api";
+import { ButtonLink } from "@/components/ui/Button";
+import { Card, SectionTitle } from "@/components/ui/Card";
+import { fadeUp, Stagger } from "@/components/ui/motion";
+import { api, Concept, LearnerState, StateUpdateView, TestOut } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { useLearnerGuard } from "@/lib/guards";
+import { MASTERED } from "@/lib/mastery";
+
+interface Data {
+  state: LearnerState;
+  concepts: Concept[];
+  history: StateUpdateView[];
+  pretest: TestOut | null;
+  posttest: TestOut | null;
+}
+
+function greeting(): string {
+  const h = new Date().getHours();
+  return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+}
 
 export default function DashboardPage() {
   const ready = useLearnerGuard();
-  const [learnerState, setLearnerState] = useState<LearnerState | null>(null);
-  const [history, setHistory] = useState<StateUpdateView[]>([]);
-  const [concepts, setConcepts] = useState<Concept[]>([]);
-  const [edges, setEdges] = useState<ConceptEdge[]>([]);
-  const [selectedConcept, setSelectedConcept] = useState<Concept | null>(null);
-
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!ready) return;
-    let mounted = true;
-
-    async function fetchData() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const [state, hist, graphData] = await Promise.all([
-          api.learners.getState().catch((err) => {
-            console.error("Failed to load learner state", err);
-            return null;
-          }),
-          api.learners.getHistory().catch((err) => {
-            console.error("Failed to load audit history", err);
-            return [];
-          }),
-          api.graph.get().catch((err) => {
-            console.error("Failed to load graph", err);
-            return { concepts: [], edges: [] };
-          }),
-        ]);
-
-        if (mounted) {
-          setLearnerState(state);
-          setHistory(hist);
-          setConcepts(graphData.concepts);
-          setEdges(graphData.edges);
-        }
-      } catch (err: unknown) {
-        if (mounted) {
-          setError(err instanceof Error ? err.message : "Failed to load dashboard data");
-        }
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      mounted = false;
-    };
+    Promise.all([
+      api.learners.getState(),
+      api.graph.get(),
+      api.learners.getHistory(30),
+      api.tests.get("pretest").catch(() => null),
+      api.tests.get("posttest").catch(() => null),
+    ])
+      .then(([state, graph, history, pretest, posttest]) =>
+        setData({ state, concepts: graph.concepts, history, pretest, posttest })
+      )
+      .catch(() => setError("Could not load your dashboard. Check your connection and refresh."));
   }, [ready]);
 
-  const masteredCount = Object.values(learnerState?.mastery || {}).filter(
-    (m) => m.p_mastery >= 0.7
-  ).length;
+  const names = useMemo(() => Object.fromEntries((data?.concepts ?? []).map((c) => [c.id, c.name])), [data]);
 
-  const inProgressCount = Object.values(learnerState?.mastery || {}).filter(
-    (m) => m.p_mastery >= 0.4 && m.p_mastery < 0.7
-  ).length;
+  if (!ready) return <PageLoading />;
+  const first = (user?.display_name ?? "").split(" ")[0];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Navbar />
+    <AppShell>
+      <Stagger className="space-y-10" gap={0.07}>
+        <motion.div variants={fadeUp}>
+          <h1 className="text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
+            {greeting()}
+            {first ? `, ${first}` : ""}
+          </h1>
+          <p className="mt-1 text-muted">Here is where you are, and what is next.</p>
+        </motion.div>
 
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Dashboard Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                Open Learner Model
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Knowledge Graph &amp; Trait Model
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
-              Your estimated mastery of every concept, how sure the app is, and the record of every answer and rating that changed it. Select a concept to see why we think what we think.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/session"
-              className="px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-indigo-500/25 flex items-center gap-1.5"
-            >
-              <span>Practice DSA</span>
-              <span>→</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Overview Stats Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-4">
-            <div className="text-[11px] text-slate-400 font-medium">Concepts Mastered</div>
-            <div className="text-2xl font-black text-emerald-400 font-mono mt-1">
-              {masteredCount}
-              <span className="text-xs font-normal text-slate-500 ml-1">/ {concepts.length || 48}</span>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-4">
-            <div className="text-[11px] text-slate-400 font-medium">In Progress</div>
-            <div className="text-2xl font-black text-amber-400 font-mono mt-1">
-              {inProgressCount}
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-4">
-            <div className="text-[11px] text-slate-400 font-medium">Practice Attempts</div>
-            <div className="text-2xl font-black text-indigo-300 font-mono mt-1">
-              {learnerState?.total_attempts ?? 0}
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-4">
-            <div className="text-[11px] text-slate-400 font-medium">Logged Provenance Events</div>
-            <div className="text-2xl font-black text-slate-200 font-mono mt-1">
-              {history.length}
-            </div>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 space-y-4">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
-            <p className="text-xs text-slate-400">Loading Open Learner Model graph &amp; traits...</p>
-          </div>
-        ) : error ? (
-          <div className="rounded-2xl border border-rose-500/30 bg-rose-950/20 p-6 text-center text-rose-300 text-xs">
+        {error && (
+          <p role="alert" className="rounded-xl border border-danger/30 bg-danger-soft p-4 text-sm text-danger">
             {error}
+          </p>
+        )}
+
+        {!data && !error && (
+          <div className="grid gap-4 sm:grid-cols-3" aria-busy>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-28 animate-pulse rounded-2xl bg-surface-2" />
+            ))}
           </div>
-        ) : (
+        )}
+
+        {data && (
           <>
-            {/* Interactive Concept Graph */}
-            <section className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                    <span>🌐</span> Interactive Curriculum DAG
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Click any concept node to view definition, worked examples, common pitfalls, and detected misconceptions.
-                  </p>
-                </div>
-              </div>
-
-              <ConceptGraph
-                concepts={concepts}
-                edges={edges}
-                learnerState={learnerState}
-                onSelectConcept={(c) => setSelectedConcept(c)}
-                selectedConceptId={selectedConcept?.id}
-              />
-            </section>
-
-            {/* Plain-Language Traits Section */}
-            {learnerState?.traits && (
-              <section>
-                <TraitCard traits={learnerState.traits} />
-              </section>
-            )}
-
-            {/* Why We Think This Audit Section */}
-            <section>
-              <WhyWeThinkThis history={history} />
-            </section>
+            <motion.div variants={fadeUp}>
+              <NextStep data={data} />
+            </motion.div>
+            <motion.div variants={fadeUp}>
+              <Stats state={data.state} total={data.concepts.length} />
+            </motion.div>
+            <motion.div variants={fadeUp}>
+              <MasteryMap concepts={data.concepts} state={data.state} />
+            </motion.div>
+            <motion.div variants={fadeUp}>
+              <TraitCard traits={data.state.traits} />
+            </motion.div>
+            <motion.div variants={fadeUp}>
+              <Activity history={data.history} names={names} />
+            </motion.div>
           </>
         )}
-      </main>
+      </Stagger>
+    </AppShell>
+  );
+}
 
-      {/* Concept Detail Drawer / Modal */}
-      <ConceptDetailModal
-        concept={selectedConcept}
-        learnerState={learnerState}
-        onClose={() => setSelectedConcept(null)}
-      />
+function NextStep({ data }: { data: Data }) {
+  const pretestOpen = data.pretest && data.pretest.items.length > 0 && !data.pretest.submitted;
+  const answered = data.state.total_attempts;
+  const step = pretestOpen
+    ? {
+        eyebrow: "Step 1 of the study",
+        title: "Take the pre-test",
+        body: `${data.pretest!.items.length} questions, about 10 minutes, taken once. There is no score: it measures where you start so the study can see how much you learn.`,
+        href: "/tests/pretest",
+        cta: "Start the pre-test",
+      }
+    : answered === 0
+      ? {
+          eyebrow: "Ready when you are",
+          title: "Start learning",
+          body: "The first few questions find your level. After that, each step comes with an explanation written for you.",
+          href: "/session",
+          cta: "Start",
+        }
+      : {
+          eyebrow: "Pick up where you left off",
+          title: "Continue learning",
+          body: `You have answered ${answered} question${answered === 1 ? "" : "s"}. Your next step is chosen from what you know now.`,
+          href: "/session",
+          cta: "Continue",
+        };
+
+  return (
+    <Card className="relative overflow-hidden p-6 sm:p-8" data-testid="next-step">
+      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+      <p className="text-xs font-medium uppercase tracking-wide text-accent">{step.eyebrow}</p>
+      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-fg">{step.title}</h2>
+      <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">{step.body}</p>
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <ButtonLink href={step.href} size="lg">
+          {step.cta} <span aria-hidden>→</span>
+        </ButtonLink>
+        {!pretestOpen && data.posttest && !data.posttest.submitted && data.posttest.items.length > 0 && (
+          <Link href="/tests/posttest" className="text-sm text-muted hover:text-fg">
+            At the end of the study: take the post-test
+          </Link>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function Stats({ state, total }: { state: LearnerState; total: number }) {
+  const records = Object.values(state.mastery);
+  const started = records.filter((m) => m.n_attempts > 0).length;
+  const mastered = records.filter((m) => m.n_attempts > 0 && m.p_mastery >= MASTERED).length;
+  const items = [
+    { label: "Questions answered", value: state.total_attempts },
+    { label: "Concepts started", value: `${started}`, sub: `of ${total}` },
+    { label: "Concepts mastered", value: `${mastered}`, sub: "95% or higher" },
+  ];
+  return (
+    <div className="grid gap-4 sm:grid-cols-3">
+      {items.map((s) => (
+        <Card key={s.label} className="p-5">
+          <p className="text-sm text-muted">{s.label}</p>
+          <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-fg">
+            {s.value}
+            {s.sub && <span className="ml-1.5 text-sm font-normal text-subtle">{s.sub}</span>}
+          </p>
+        </Card>
+      ))}
     </div>
+  );
+}
+
+function Activity({ history, names }: { history: StateUpdateView[]; names: Record<string, string> }) {
+  const rows = history
+    .map((h) => {
+      const when = new Date(h.created_at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+      if (h.source === "questionnaire") return { id: h.id, when, text: "Set your starting profile from the questionnaire" };
+      if (h.source === "attempt") {
+        const [cid, [before, after]] = Object.entries(h.delta.mastery_changes)[0] ?? ["", [0, 0]];
+        if (!cid) return null;
+        const up = after >= before;
+        return {
+          id: h.id,
+          when,
+          text: `Answered a question on ${names[cid] ?? cid}`,
+          detail: `${Math.round(before * 100)}% → ${Math.round(after * 100)}%`,
+          up,
+        };
+      }
+      const traits = Object.keys(h.delta.trait_changes).length;
+      return { id: h.id, when, text: traits ? "Your feedback tuned how explanations are written" : "Recorded your feedback on an explanation" };
+    })
+    .filter(Boolean)
+    .slice(0, 8) as Array<{ id: number; when: string; text: string; detail?: string; up?: boolean }>;
+
+  return (
+    <section className="space-y-4">
+      <SectionTitle title="Recent activity" hint="Every change to your estimates, newest first." />
+      <Card className="divide-y divide-line">
+        {rows.length === 0 && <p className="p-5 text-sm text-muted">Nothing yet. Your first answers will show up here.</p>}
+        {rows.map((r) => (
+          <div key={r.id} className="flex items-center justify-between gap-4 px-5 py-3.5">
+            <div className="min-w-0">
+              <p className="truncate text-sm text-fg">{r.text}</p>
+              <p className="text-xs text-subtle">{r.when}</p>
+            </div>
+            {r.detail && (
+              <span className={`flex-none text-sm font-medium tabular-nums ${r.up ? "text-success" : "text-warning"}`}>{r.detail}</span>
+            )}
+          </div>
+        ))}
+      </Card>
+    </section>
   );
 }

@@ -36,7 +36,7 @@ class CurrentUser:
     def is_admin(self) -> bool:
         return self.row.is_admin
 
-    def response(self) -> UserResponse:
+    def response(self, onboarded: bool = False) -> UserResponse:
         return UserResponse(
             id=self.row.id,
             email=self.row.email,
@@ -45,6 +45,7 @@ class CurrentUser:
             consent_at=self.row.consent_at,
             created_at=self.row.created_at,
             is_admin=self.row.is_admin,
+            onboarded=onboarded,
         )
 
 

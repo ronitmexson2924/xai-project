@@ -8,6 +8,7 @@ from app.auth.store import (
     UserAlreadyExistsError,
     get_active_user,
     get_user_by_email,
+    is_onboarded,
     normalise_email,
     register_user,
     revoke_tokens,
@@ -68,7 +69,10 @@ def login(payload: UserLoginIn, request: Request, session: DbDep) -> AuthRespons
     login_throttle.succeeded(keys[0])
     found = get_active_user(session, user.id)
     assert found is not None
-    return AuthResponse(token=create_access_token(user.id), user=_response(*found))
+    return AuthResponse(
+        token=create_access_token(user.id),
+        user=_response(*found, onboarded=is_onboarded(session, user.id)),
+    )
 
 
 @router.post("/auth/consent", response_model=ConsentResponse, summary="Record informed consent")
@@ -91,8 +95,8 @@ def logout(current: UserDep, session: DbDep) -> Response:
 
 @router.get("/auth/me", response_model=UserResponse, summary="Get current user details")
 @router.get("/me", response_model=UserResponse, include_in_schema=False)
-def get_me(current: UserDep) -> UserResponse:
-    return current.response()
+def get_me(current: UserDep, session: DbDep) -> UserResponse:
+    return current.response(onboarded=is_onboarded(session, current.id))
 
 
 @router.delete(
@@ -106,7 +110,7 @@ def delete_me(current: UserDep, session: DbDep) -> Response:
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-def _response(user, arm) -> UserResponse:
+def _response(user, arm, onboarded: bool = False) -> UserResponse:
     return UserResponse(
         id=user.id,
         email=user.email,
@@ -115,4 +119,5 @@ def _response(user, arm) -> UserResponse:
         consent_at=user.consent_at,
         created_at=user.created_at,
         is_admin=user.is_admin,
+        onboarded=onboarded,
     )

@@ -49,7 +49,11 @@ def test_arms_are_balanced(client: TestClient) -> None:
 
 def test_full_learning_loop(client: TestClient, db: Session) -> None:
     ada = learner(client, db, "closed_loop")
+    assert ada.get("/auth/me").json()["onboarded"] is False
     delta = ada.questionnaire(5)
+    assert ada.get("/auth/me").json()["onboarded"] is True
+    login = client.post(f"{API}/auth/login", json={"email": ada.email, "password": ada.password})
+    assert login.json()["user"]["onboarded"] is True
     assert delta["source"] == "questionnaire"
     assert ada.questionnaire(1) == delta  # taken once: a second submission changes nothing
 

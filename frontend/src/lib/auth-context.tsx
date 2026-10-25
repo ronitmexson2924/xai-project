@@ -18,6 +18,7 @@ interface AuthContextType {
   login: (data: LoginRequest) => Promise<UserResponse>;
   register: (data: RegisterRequest) => Promise<UserResponse>;
   giveConsent: () => Promise<void>;
+  markOnboarded: () => void;
   logout: () => Promise<void>;
   withdraw: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -75,6 +76,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser((current) => (current ? { ...current, consent_at: res.consent_at } : current));
   };
 
+  const markOnboarded = () => setUser((current) => (current ? { ...current, onboarded: true } : current));
+
   const logout = async () => {
     try {
       await api.auth.logout(); // revokes the token on the server too
@@ -93,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, register, giveConsent, logout, withdraw, refreshUser }}
+      value={{ user, isLoading, login, register, giveConsent, markOnboarded, logout, withdraw, refreshUser }}
     >
       {children}
     </AuthContext.Provider>
