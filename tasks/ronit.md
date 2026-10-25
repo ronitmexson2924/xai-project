@@ -165,22 +165,24 @@
         changes documented
 - [x] **R6 done**: `research/reports/simulation.md` (regenerate: see `research/README.md`)
   - _Findings (40 paired learners per arm, 60 explanations; well-specified world):_
-    1. _With a self-report gap (SD 0.2), the closed loop cuts style-trait error by 36%
-       (0.158 → 0.102) and keeps improving (0.079 after 150). With accurate self-report there
-       is little to learn (0.089 → 0.081). The loop's value depends on how wrong self-report
+    1. _With a self-report gap (SD 0.2), the closed loop cuts style-trait error by 25%
+       (0.158 → 0.118) and keeps improving (0.091 after 150). With accurate self-report there
+       is less to learn (0.089 → 0.066). The loop's value depends on how wrong self-report
        is, so **the pilot should measure that gap**._
-    2. _It does not invent preferences: with no true preference it claims one in 18% of
+    2. _It does not invent preferences: with no true preference it claims one in 22% of
        estimates, vs 47% for questionnaire-only (it corrects questionnaire noise)._
     3. _Short horizons cost: over 60 explanations the closed loop beats generic on learning
-       gain (+0.027, CI +0.006 to +0.047) but trails static (−0.016, CI −0.029 to −0.003),
-       because Thompson sampling explores a lot. Regret only catches up with static after
+       gain (+0.037, CI +0.019 to +0.054) and ties static (−0.002, CI −0.014 to +0.011; the
+       first run's significant −0.016 did not survive the reproducibility fixes), but pays more
+       regret than static (0.128 vs 0.091) because Thompson sampling explores a lot. Regret only catches up with static after
        ~100 explanations. **Decision for Ronit:** keep full Thompson sampling (best for
        identifying traits, the research claim) or exploit more (better short-term
        learning). See MODEL_SPEC §2.2 "Checked in R6"._
-    4. _The behavioural-trait EWMA made persistence/self-efficacy worse (0.160 → 0.223), so
+    4. _The behavioural-trait EWMA made persistence/self-efficacy worse (0.160 → 0.221), so
        it is now off by default until calibrated (MODEL_SPEC §2.3)._
-    5. _Constants kept (ε = 0.1, questionnaire variance 0.04); the sweep did not justify a
-       change._
+    5. _Constants kept (ε = 0.1, questionnaire variance 0.04), but in the rerun ε = 0.1 is no
+       longer clearly better for recovery than ε = 0 and costs ~20% more regret; worth
+       revisiting with decision 3._
 
 ## R7: Hardening (weeks 7–8)
 - **Depends on:** R5
