@@ -1187,6 +1187,11 @@ export interface components {
              * @default false
              */
             is_admin: boolean;
+            /**
+             * Onboarded
+             * @default false
+             */
+            onboarded: boolean;
         };
         /** ValidationError */
         ValidationError: {

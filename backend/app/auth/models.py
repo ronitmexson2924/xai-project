@@ -55,6 +55,8 @@ class UserResponse(BaseModel):
     consent_at: datetime | None = None
     created_at: datetime
     is_admin: bool = False
+    # the starting questionnaire is done, so the app goes to the dashboard instead of onboarding
+    onboarded: bool = False
 
 
 class AuthResponse(BaseModel):

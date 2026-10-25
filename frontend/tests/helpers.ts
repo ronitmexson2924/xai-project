@@ -9,40 +9,46 @@ export function uniqueEmail(tag: string): string {
 }
 
 export async function register(page: Page, email: string, name = "E2E Learner", password = PASSWORD) {
-  await page.goto("/login");
-  await page.getByRole("button", { name: "Register here" }).click();
-  await page.getByPlaceholder("e.g. Ada Lovelace").fill(name);
-  await page.getByPlaceholder("you@domain.edu").fill(email);
-  await page.getByPlaceholder("••••••••").fill(password);
-  await page.getByRole("button", { name: "Create Account" }).click();
+  await page.goto("/signup");
+  await page.getByLabel("Name", { exact: true }).fill(name);
+  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "Create account" }).click();
 }
 
 export async function login(page: Page, email: string, password = PASSWORD) {
   await page.goto("/login");
-  await page.getByPlaceholder("you@domain.edu").fill(email);
-  await page.getByPlaceholder("••••••••").fill(password);
-  await page.locator("form").getByRole("button", { name: "Sign In" }).click();
+  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.locator("form").getByRole("button", { name: "Log in" }).click();
 }
 
+/** The first onboarding step: read the study information and agree. */
 export async function consent(page: Page) {
-  await expect(page).toHaveURL(/\/consent/);
-  await page.getByRole("button", { name: /Give Research Consent/i }).click();
   await expect(page).toHaveURL(/\/onboarding/);
+  const agree = page.getByRole("button", { name: "Agree and continue" });
+  await expect(agree).toBeDisabled(); // nothing is agreed by default
+  await page.getByLabel(/I have read this and agree/).check();
+  await agree.click();
+  await expect(page.getByText(/Question 1 of \d+/)).toBeVisible();
 }
 
+/** Answer every questionnaire item ("Agree"), finish, and land on the dashboard. */
 export async function answerQuestionnaire(page: Page) {
-  await expect(page.getByText("How much do you agree?")).toBeVisible();
-  for (;;) {
-    await page.locator('button[role="radio"]').nth(3).click();
-    const next = page.getByRole("button", { name: /Next Question/ });
-    if (await next.isVisible()) {
-      await next.click();
-    } else {
-      break;
-    }
+  const counter = page.getByText(/Question \d+ of \d+/);
+  await expect(counter).toBeVisible();
+  const total = Number((await counter.innerText()).match(/of (\d+)/)![1]);
+  for (let n = 1; n <= total; n++) {
+    await expect(page.getByText(`Question ${n} of ${total}`)).toBeVisible();
+    await page
+      .getByRole("radiogroup", { name: "How much do you agree?" })
+      .getByRole("radio", { name: "Agree", exact: true })
+      .click();
   }
-  await page.getByRole("button", { name: "Finish questionnaire" }).click();
-  await expect(page.getByRole("heading", { name: "Next: a short pre-test" })).toBeVisible();
+  await page.getByRole("button", { name: "Finish" }).click();
+  await page.getByRole("button", { name: /Go to your dashboard/ }).click();
+  await expect(page).toHaveURL(/\/dashboard/);
+  await expect(page.getByTestId("next-step")).toBeVisible();
 }
 
 /** Answer whatever the session shows: pick the first option or type a short answer. */
@@ -53,7 +59,7 @@ export async function answerCurrentQuestion(page: Page) {
   } else {
     await page.locator('[role="radiogroup"][aria-label="Question options"] button[role="radio"]').first().click();
   }
-  await page.getByRole("button", { name: "Submit Answer" }).click();
+  await page.getByRole("button", { name: "Submit answer" }).click();
   await expect(page.getByTestId("attempt-result")).toBeVisible();
 }
 

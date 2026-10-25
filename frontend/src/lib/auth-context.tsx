@@ -15,9 +15,12 @@ import {
 interface AuthContextType {
   user: UserResponse | null;
   isLoading: boolean;
+  /** true after the user logged out or withdrew on purpose (pages then go to the landing page, not login) */
+  signedOut: boolean;
   login: (data: LoginRequest) => Promise<UserResponse>;
   register: (data: RegisterRequest) => Promise<UserResponse>;
   giveConsent: () => Promise<void>;
+  markOnboarded: () => void;
   logout: () => Promise<void>;
   withdraw: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -28,6 +31,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [signedOut, setSignedOut] = useState(false);
 
   const refreshUser = useCallback(async () => {
     const saved = getStoredToken();
@@ -39,7 +43,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setUser(await api.auth.me(saved));
     } catch {
-      setStoredToken(null);
+      // a 401 has already cleared the stored token (api.ts); any other failure (offline, or the
+      // request cancelled by leaving the page) must not log the user out
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -58,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (data: LoginRequest) => {
     const res = await api.auth.login(data);
+    setSignedOut(false);
     setStoredToken(res.token);
     setUser(res.user);
     return res.user;
@@ -65,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (data: RegisterRequest) => {
     const res = await api.auth.register(data);
+    setSignedOut(false);
     setStoredToken(res.token);
     setUser(res.user);
     return res.user;
@@ -75,6 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser((current) => (current ? { ...current, consent_at: res.consent_at } : current));
   };
 
+  const markOnboarded = () => setUser((current) => (current ? { ...current, onboarded: true } : current));
+
   const logout = async () => {
     try {
       await api.auth.logout(); // revokes the token on the server too
@@ -82,18 +91,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // already invalid or offline: forgetting it locally is enough
     }
     setStoredToken(null);
+    setSignedOut(true);
     setUser(null);
   };
 
   const withdraw = async () => {
     await api.auth.deleteMe();
     setStoredToken(null);
+    setSignedOut(true);
     setUser(null);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, register, giveConsent, logout, withdraw, refreshUser }}
+      value={{ user, isLoading, signedOut, login, register, giveConsent, markOnboarded, logout, withdraw, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

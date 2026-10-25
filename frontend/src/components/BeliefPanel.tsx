@@ -2,12 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { api, ApiException, BeliefExplanation } from "@/lib/api";
+import { Badge } from "./ui/Badge";
+import { Progress } from "./ui/Progress";
 
-const CONFIDENCE_STYLE: Record<string, string> = {
-  tentative: "text-amber-300 bg-amber-500/10 border-amber-500/20",
-  moderate: "text-indigo-300 bg-indigo-500/10 border-indigo-500/20",
-  confident: "text-emerald-300 bg-emerald-500/10 border-emerald-500/20",
-};
+const CONFIDENCE = { tentative: "warning", moderate: "accent", confident: "success" } as const;
 
 /** XAI E4: "Why do you think that about me?" for one concept or trait, from the audit log. */
 export function BeliefPanel({ subject, showValue = true }: { subject: string; showValue?: boolean }) {
@@ -25,26 +23,32 @@ export function BeliefPanel({ subject, showValue = true }: { subject: string; sh
     };
   }, [subject]);
 
-  if (error) return <p className="text-xs text-rose-300">{error}</p>;
-  if (!belief) return <p className="text-xs text-slate-500">Loading…</p>;
-  return (
-    <div className="space-y-2" data-testid={`belief-${subject}`}>
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-semibold text-white">{belief.label}</span>
-        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${CONFIDENCE_STYLE[belief.confidence] ?? ""}`}>
-          {belief.confidence}
-        </span>
+  if (error) return <p className="text-sm text-danger">{error}</p>;
+  if (!belief)
+    return (
+      <div className="space-y-2" aria-busy>
+        <div className="h-4 w-1/2 animate-pulse rounded bg-surface-2" />
+        <div className="h-3 w-full animate-pulse rounded bg-surface-2" />
+        <div className="h-3 w-4/5 animate-pulse rounded bg-surface-2" />
       </div>
-      {showValue && (
-        <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden" aria-hidden>
-          <div className="h-full bg-indigo-500" style={{ width: `${Math.round(belief.value * 100)}%` }} />
-        </div>
-      )}
-      <p className="text-xs text-slate-300 leading-relaxed">{belief.summary}</p>
+    );
+  return (
+    <div className="space-y-3" data-testid={`belief-${subject}`}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-semibold text-fg">{belief.label}</span>
+        <Badge tone={CONFIDENCE[belief.confidence as keyof typeof CONFIDENCE] ?? "neutral"}>{belief.confidence}</Badge>
+      </div>
+      {showValue && <Progress value={belief.value} label={`${belief.label} estimate`} />}
+      <p className="text-sm leading-relaxed text-muted">{belief.summary}</p>
       {belief.top_evidence.length > 0 && (
-        <details className="text-xs text-slate-400">
-          <summary className="cursor-pointer text-indigo-400">What this is based on</summary>
-          <ul className="list-disc pl-5 mt-1 space-y-0.5">
+        <details className="group text-sm">
+          <summary className="cursor-pointer list-none text-accent hover:text-accent-hover">
+            <span className="inline-flex items-center gap-1">
+              What this is based on
+              <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
+            </span>
+          </summary>
+          <ul className="mt-2 space-y-1.5 border-l border-line pl-3 text-muted">
             {belief.top_evidence.map((e, i) => (
               <li key={i}>{e}</li>
             ))}

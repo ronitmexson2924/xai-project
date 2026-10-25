@@ -23,7 +23,7 @@ against the caller. Another learner's id answers `404`, exactly like an id that 
 | `POST /auth/login` | `{email, password}` → `{token, user}` | Same error for unknown email and wrong password. 5 failures per email (25 per client) in 15 min → `429 TOO_MANY_LOGIN_ATTEMPTS` |
 | `POST /auth/logout` | → 204 | Revokes every token issued so far |
 | `POST /auth/consent` | `{}` → `{consent_at}` | Learning routes return `403 CONSENT_REQUIRED` until this is called; recorded once |
-| `GET /auth/me` | → `user` | Includes `is_admin` |
+| `GET /auth/me` | → `user` | Includes `is_admin` and `onboarded` (the questionnaire is done; the UI sends new users to onboarding until it is) |
 | `DELETE /me` | → 204 | Withdraw: the account stops working now; `app.auth.purge` deletes it and its data |
 | `GET /onboarding/questionnaire` | → `list[QuestionnaireItem]` | From `content/questionnaire.yaml` |
 | `POST /onboarding/questionnaire` | `{answers: {item_id: 1..5}}` → `StateDelta` | Every item required. Taken once: a resubmission returns the first result |

@@ -12,15 +12,21 @@ import {
 } from "./helpers";
 
 test.describe("what a curious or hostile user tries in the browser", () => {
-  test("protected pages send visitors to login, then to consent", async ({ page }) => {
-    for (const path of ["/session", "/dashboard", "/tests/pretest", "/admin"]) {
+  test("protected pages send visitors to login, then new learners to onboarding", async ({ page }) => {
+    for (const path of ["/session", "/dashboard", "/tests/pretest", "/admin", "/account", "/onboarding"]) {
       await page.goto(path);
       await expect(page).toHaveURL(/\/login/);
     }
     await register(page, uniqueEmail("guard"));
-    await expect(page).toHaveURL(/\/consent/);
-    await page.goto("/session");
-    await expect(page).toHaveURL(/\/consent/);
+    await expect(page).toHaveURL(/\/onboarding/);
+    for (const path of ["/session", "/dashboard", "/tests/pretest"]) {
+      await page.goto(path); // no learning before consent and the questionnaire
+      await expect(page).toHaveURL(/\/onboarding/);
+    }
+    await consent(page);
+    await page.goto("/dashboard"); // consent alone is not enough either
+    await expect(page).toHaveURL(/\/onboarding/);
+    await expect(page.getByText(/Question 1 of/)).toBeVisible(); // resumes at the questionnaire
   });
 
   test("a learner cannot open the admin page", async ({ page }) => {
@@ -39,15 +45,16 @@ test.describe("what a curious or hostile user tries in the browser", () => {
     });
     await register(page, uniqueEmail("xss"), "<img src=x onerror=alert(1)><script>alert(2)</script>");
     await consent(page);
-    await page.goto("/");
-    await expect(page.getByTestId("nav-user")).toContainText("<img src=x");
+    await answerQuestionnaire(page);
+    await page.getByTestId("nav-user").click();
+    await expect(page.getByRole("menu")).toContainText("<img src=x onerror=alert(1)>");
     expect(dialog).toBe(false);
   });
 
   test("duplicate sign-up and wrong passwords give clear messages; guessing gets locked", async ({ page }) => {
     const email = uniqueEmail("dup");
     await register(page, email);
-    await expect(page).toHaveURL(/\/consent/);
+    await expect(page).toHaveURL(/\/onboarding/);
     await page.evaluate(() => localStorage.clear());
 
     await register(page, email);
@@ -87,7 +94,7 @@ test.describe("what a curious or hostile user tries in the browser", () => {
     const text = page.getByLabel("Your answer");
     if (await text.isVisible().catch(() => false)) await text.fill("x");
     else await page.locator('[aria-label="Question options"] button[role="radio"]').first().click();
-    const submit = page.getByRole("button", { name: "Submit Answer" });
+    const submit = page.getByRole("button", { name: "Submit answer" });
     await submit.dblclick();
     await expect(page.getByTestId("attempt-result")).toBeVisible();
 
@@ -99,6 +106,7 @@ test.describe("what a curious or hostile user tries in the browser", () => {
   test("the pre-test can be taken only once, even by going back", async ({ page }) => {
     await register(page, uniqueEmail("retake"));
     await consent(page);
+    await answerQuestionnaire(page);
     await page.goto("/tests/pretest");
     await page.locator('input[type="radio"]').first().check();
     await page.getByRole("button", { name: "Submit" }).click();
@@ -113,6 +121,7 @@ test.describe("what a curious or hostile user tries in the browser", () => {
   test("answers are never in the page before the learner answers", async ({ page }) => {
     await register(page, uniqueEmail("peek"));
     await consent(page);
+    await answerQuestionnaire(page);
     const responses: string[] = [];
     page.on("response", async (r) => {
       if (r.url().includes("/session/next") || r.url().includes("/tests/")) {
@@ -120,21 +129,37 @@ test.describe("what a curious or hostile user tries in the browser", () => {
       }
     });
     await page.goto("/session");
-    await expect(page.locator("main")).toContainText(/Submit Answer|Continue/);
+    await expect(page.locator("main")).toContainText(/Submit answer|Continue/);
     await page.goto("/tests/pretest");
     await expect(page.getByRole("button", { name: "Submit" })).toBeVisible();
     expect(responses.length).toBeGreaterThan(0);
     for (const body of responses) expect(body).not.toContain('"answer"');
   });
 
+  test("a dropped connection while the app loads does not log the user out", async ({ page }) => {
+    await register(page, uniqueEmail("dropped"));
+    await consent(page);
+    await answerQuestionnaire(page);
+    // e.g. leaving a page while it checks who is signed in, or a flaky network
+    await page.route("**/api/v1/auth/me", (route) => route.abort(), { times: 1 });
+    await page.reload();
+    expect(await token(page)).not.toBe("");
+    await page.goto("/dashboard");
+    await expect(page).toHaveURL(/\/dashboard/);
+    await expect(page.getByTestId("next-step")).toBeVisible();
+  });
+
   test("withdrawing deletes access for good", async ({ page }) => {
     const email = uniqueEmail("withdraw");
     await register(page, email);
     await consent(page);
-    await page.goto("/");
+    await answerQuestionnaire(page);
+    await page.getByTestId("nav-user").click();
+    await page.getByRole("menuitem", { name: /Account/ }).click();
+    await expect(page).toHaveURL(/\/account/);
     await page.getByRole("button", { name: "Withdraw" }).click();
     await page.getByRole("button", { name: /Yes, withdraw/ }).click();
-    await expect(page).toHaveURL(/\/login/);
+    await expect(page).toHaveURL(/:\d+\/$/);
     await login(page, email);
     await expect(page.getByText("Incorrect email or password")).toBeVisible();
   });
@@ -148,7 +173,7 @@ test.describe("what a curious or hostile user tries in the browser", () => {
     await expect(page.getByRole("alert").filter({ hasText: /Cannot reach the server/ })).toBeVisible();
     await page.unroute("**/api/v1/session/next");
     await page.getByRole("button", { name: "Retry" }).click();
-    await expect(page.getByRole("button", { name: "Submit Answer" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Submit answer" })).toBeVisible();
     await answerCurrentQuestion(page);
   });
 });

@@ -27,9 +27,12 @@ presenter.
 
 ## Scenes
 
-1. **A new learner (1 min).** Register a fresh account → the consent page explains the data
-   collected and that the version of the app is assigned at random → the 20-item questionnaire
-   (no trait names shown) → the pre-test (submitted once, no score) → `/session`.
+1. **A new learner (1 min).** The landing page (`/`) → **Get started** → sign up (`/signup`) →
+   onboarding (`/onboarding`): the consent step explains the data collected and that the version of
+   the app is assigned at random (nothing is pre-ticked) → the 20-item questionnaire, one statement
+   per screen, answerable with keys 1–5 (no trait names shown) → "You're all set" → the dashboard,
+   whose next-step card offers the pre-test (submitted once, no score) → `/session`. Logging in
+   again goes straight to the dashboard.
 2. **Placement (30 s).** The first questions are placement questions: the question comes first,
    and the explanation only after the answer. Open **Why this?**: "This is placement question 1 of
    8 …".
@@ -41,16 +44,23 @@ presenter.
 4. **Chen: adaptation you can inspect (1 min).** Log in as Chen → `/session` → **Why this?** →
    *Why the explanation looks like this*: the style source, the posterior probability that this
    style suits Chen best, and how sure the system is. Rate the explanation with the 1-tap prompt.
-5. **Open learner model (1 min).** `/dashboard`: concept graph with mastery and how many answers
-   each estimate rests on; select a concept for *why we think this*; the trait panel shows each
-   estimate's own explanation and evidence; the history lists every update.
+5. **Open learner model (1 min).** `/dashboard`: the concept map grouped by topic and coloured by
+   estimated mastery; select a concept for a drawer with *why we think this*, how many answers the
+   estimate rests on, and the concept's key idea; the trait panel shows each estimate's own
+   explanation and evidence; recent activity lists every update in plain words. `/account` shows
+   the learner's details and lets them withdraw.
 6. **Study admin (30 s).** Log in as the admin → `/admin`: arm balance, measured explanation
    latency against the 300 ms budget, clarity ratings, and pseudonymised CSV exports.
+
+Every screen follows the system's light or dark setting, works at phone width (tabs move to a
+bottom bar) and honours "reduce motion".
 
 ## Things worth showing a sceptical reviewer
 
 - `backend/tests/test_security.py`: forged tokens, other learners' ids, replays, injection.
 - `frontend/tests/abuse.spec.ts`: the same in a real browser (XSS in names, double submits, token
   tampering, offline API).
+- `frontend/tests/experience.spec.ts`: keyboard-only onboarding, dark mode, phone width, and basic
+  accessibility checks (named controls, labelled inputs, one heading per page) on every screen.
 - `research/reports/llm_audit.md`: the explanation audit is still to be done by two human raters;
   no figures are claimed before it is.

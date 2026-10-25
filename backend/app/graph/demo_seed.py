@@ -6,7 +6,8 @@ For local development and demos only; never run it against the pilot database. W
 the demo accounts can log in (asha@demo.example.com, ben@..., chen@...); without it they cannot.
 It is idempotent:
 existing demo learners are deleted and rebuilt. Concepts without approved items get clearly
-labelled draft placeholder items so the demo works before the real item bank (M5) exists.
+labelled draft placeholder items so the demo works before the real item bank (M5) exists;
+concepts that already have real (even draft) items keep only those.
 
 - Asha (closed loop): new learner; questionnaire says example-first, short explanations.
 - Ben (static): basics fine, but a misconception on recursion base cases and a prerequisite gap.
@@ -21,6 +22,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
+from app.api.session import PENDING_TTL
 from app.contracts.explanation import ExplanationFeedbackSummary, StyleParams
 from app.contracts.learner import AttemptRecord, ExperimentArm
 from app.db import models as m
@@ -43,12 +45,15 @@ def _clock() -> Iterator[datetime]:
 
 
 def ensure_items(session: Session, concept_ids: list[str]) -> None:
-    """Give each concept without an approved practice item a draft placeholder MCQ and
-    micro-check."""
+    """Give each concept without any real practice item (approved or draft) a draft placeholder
+    MCQ and micro-check. Real draft items are preferred: demos run with INCLUDE_DRAFT_ITEMS, so a
+    placeholder next to them would be served to every learner."""
     have = set(
         session.scalars(
             select(m.ItemRow.concept_id).where(
-                m.ItemRow.review_status == "approved", m.ItemRow.is_microcheck.is_(False)
+                m.ItemRow.review_status.in_(["approved", "draft"]),
+                m.ItemRow.is_microcheck.is_(False),
+                m.ItemRow.id.not_like(f"{PLACEHOLDER_PREFIX}%"),
             )
         )
     )
@@ -145,6 +150,11 @@ class DemoLearner:
     def explanation_feedback(self, style: StyleParams, clarity: int, followup_correct: bool):
         state = self.model.get_state(self.user_id)
         rec = self.planner.next_step(state)
+        # a finished step: date it before the pending window, or /session would resume it and show
+        # the stub explanation below instead of planning a real step
+        self.session.get(m.RecommendationRow, rec.id).created_at = (
+            datetime.now(UTC) - PENDING_TTL - timedelta(minutes=1)
+        )
         explanation_id = uuid.uuid4()
         self.session.add(
             m.ExplanationRow(

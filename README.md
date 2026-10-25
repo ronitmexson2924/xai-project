@@ -52,6 +52,14 @@ INCLUDE_DRAFT_ITEMS=true uvicorn app.main:app --reload   # drafts until the bank
 cd ../frontend && npm ci && npm run dev      # http://localhost:3000
 ```
 
+### The app
+
+`/` landing page → `/signup` or `/login` → new learners go through `/onboarding` (study consent,
+then the 20-statement questionnaire) → `/dashboard` (next step, concept map, how explanations adapt,
+recent activity). Learning happens in `/session`, the study tests in `/tests`, account and
+withdrawal in `/account`, and study admins see `/admin`. Light and dark themes follow the system
+setting, and animations respect "reduce motion".
+
 ## Checks
 
 ```bash

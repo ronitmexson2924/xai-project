@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
 import { PublicItem } from "@/lib/api";
+import { Markdown } from "./Markdown";
+import { Badge } from "./ui/Badge";
+import { Button } from "./ui/Button";
+import { Card } from "./ui/Card";
+import { cn } from "./ui/cn";
 
 interface ItemCardProps {
   item: PublicItem;
@@ -80,68 +86,28 @@ export function ItemCard({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [disabled, isChoice, item.options, selectedOption, isSubmitting, handleSubmit]);
 
-  // Render question stem, highlighting code blocks if present
-  const renderStem = (stemText: string) => {
-    // If stem has markdown code fence
-    if (stemText.includes("```")) {
-      const parts = stemText.split(/(```[\s\S]*?```)/g);
-      return parts.map((part, idx) => {
-        if (part.startsWith("```") && part.endsWith("```")) {
-          const lines = part.slice(3, -3).trim().split("\n");
-          // Remove optional language identifier
-          const code = (lines[0].match(/^[a-z]+$/) ? lines.slice(1) : lines).join("\n");
-          return (
-            <pre
-              key={idx}
-              className="my-3 p-3.5 rounded-xl bg-slate-950 font-mono text-xs text-indigo-300 border border-slate-800 overflow-x-auto"
-            >
-              <code>{code}</code>
-            </pre>
-          );
-        }
-        return (
-          <p key={idx} className="whitespace-pre-line">
-            {part}
-          </p>
-        );
-      });
-    }
-
-    return <p className="whitespace-pre-line">{stemText}</p>;
-  };
-
+  const letters = item.options.map((_, idx) => String.fromCharCode(65 + idx));
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 sm:p-7 shadow-2xl backdrop-blur-xl space-y-6">
-      {/* Item Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+    <Card className="space-y-6 p-5 sm:p-7">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-          <span className="text-xs uppercase tracking-wider font-semibold text-slate-400">
-            Concept Check
-          </span>
-          {conceptName && (
-            <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-              {conceptName}
-            </span>
-          )}
+          <Badge tone="accent">Question</Badge>
+          {conceptName && <span className="text-sm text-muted">{conceptName}</span>}
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-slate-500 uppercase">{item.kind}</span>
-          <span className={isChoice ? "text-[11px] text-slate-500 hidden sm:inline" : "hidden"}>
-            (Shortcuts: <kbd className="px-1 py-0.5 rounded bg-slate-800 font-mono text-[10px]">A-D</kbd> or <kbd className="px-1 py-0.5 rounded bg-slate-800 font-mono text-[10px]">1-4</kbd>)
+        {isChoice && !disabled && (
+          <span className="hidden text-xs text-subtle sm:inline">
+            Keys <Kbd>A</Kbd>–<Kbd>{letters[letters.length - 1]}</Kbd> to choose, <Kbd>Enter</Kbd> to submit
           </span>
-        </div>
+        )}
       </div>
 
-      {/* Stem */}
-      <div className="text-sm sm:text-base text-slate-100 font-medium leading-relaxed">
-        {renderStem(item.stem)}
+      <div className="text-base font-medium leading-relaxed text-fg">
+        <Markdown text={item.stem} />
       </div>
 
-      {/* Free-text answer for short and code-trace questions */}
       {!isChoice && (
         <div className="space-y-2">
-          <label htmlFor={`answer-${item.id}`} className="text-xs text-slate-400">
+          <label htmlFor={`answer-${item.id}`} className="text-sm font-medium text-fg">
             Your answer
           </label>
           <input
@@ -158,80 +124,70 @@ export function ItemCard({
                 handleSubmit();
               }
             }}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-white font-mono focus:border-indigo-500 focus:outline-none"
+            className="h-11 w-full rounded-lg border border-line bg-surface px-3.5 font-mono text-sm text-fg transition-colors focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/15 disabled:opacity-70"
           />
         </div>
       )}
 
-      {/* Options */}
-      <div className={isChoice ? "space-y-3" : "hidden"} role="radiogroup" aria-label="Question options">
-        {item.options.map((option, idx) => {
-          const letter = String.fromCharCode(65 + idx);
-          const isSelected = selectedOption === option;
-
-          let optionStyle =
-            "border-slate-800 bg-slate-950/50 hover:border-slate-700 hover:bg-slate-950/80 text-slate-300";
-          let badgeStyle = "bg-slate-800 text-slate-400 border-slate-700";
-
-          if (isSelected) {
-            optionStyle =
-              "border-indigo-500 bg-indigo-500/10 text-white shadow-md shadow-indigo-500/10 ring-1 ring-indigo-500";
-            badgeStyle = "bg-indigo-600 text-white border-indigo-500";
-          }
-
-          if (disabled && isSelected) {
-            if (isCorrect === true) {
-              optionStyle =
-                "border-emerald-500 bg-emerald-500/10 text-emerald-200 ring-1 ring-emerald-500";
-              badgeStyle = "bg-emerald-600 text-white border-emerald-500";
-            } else if (isCorrect === false) {
-              optionStyle =
-                "border-rose-500 bg-rose-500/10 text-rose-200 ring-1 ring-rose-500";
-              badgeStyle = "bg-rose-600 text-white border-rose-500";
-            }
-          }
-
-          return (
-            <button
-              key={`${item.id}-opt-${idx}`}
-              type="button"
-              role="radio"
-              aria-checked={isSelected}
-              disabled={disabled || isSubmitting}
-              onClick={() => setSelectedOption(option)}
-              className={`w-full text-left p-3.5 sm:p-4 rounded-xl border transition-all flex items-start gap-3.5 ${optionStyle}`}
-            >
-              <div
-                className={`w-6 h-6 rounded-lg border flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 transition-colors ${badgeStyle}`}
+      {isChoice && (
+        <div className="space-y-2.5" role="radiogroup" aria-label="Question options">
+          {item.options.map((option, idx) => {
+            const isSelected = selectedOption === option;
+            const verdict = disabled && isSelected ? (isCorrect === true ? "right" : isCorrect === false ? "wrong" : null) : null;
+            return (
+              <motion.button
+                key={`${item.id}-opt-${idx}`}
+                type="button"
+                role="radio"
+                aria-checked={isSelected}
+                disabled={disabled || isSubmitting}
+                onClick={() => setSelectedOption(option)}
+                whileTap={{ scale: 0.99 }}
+                className={cn(
+                  "flex w-full items-start gap-3.5 rounded-xl border p-3.5 text-left transition-colors sm:p-4",
+                  verdict === "right"
+                    ? "border-success bg-success-soft"
+                    : verdict === "wrong"
+                      ? "border-danger bg-danger-soft"
+                      : isSelected
+                        ? "border-accent bg-accent-soft ring-1 ring-accent"
+                        : "border-line bg-surface hover:border-line-strong hover:bg-surface-2",
+                  disabled && !isSelected && "opacity-60"
+                )}
               >
-                {letter}
-              </div>
-              <span className="text-xs sm:text-sm leading-relaxed self-center">{option}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Submission CTA */}
-      {!disabled && (
-        <div className="pt-2 flex items-center justify-between">
-          <span className="text-xs text-slate-500 hidden sm:inline">
-            Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[11px]">Enter ↵</kbd> to submit
-          </span>
-          <button
-            type="button"
-            disabled={!selectedOption || isSubmitting}
-            onClick={handleSubmit}
-            className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md ${
-              selectedOption && !isSubmitting
-                ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30"
-                : "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50"
-            }`}
-          >
-            {isSubmitting ? "Submitting answer..." : "Submit Answer"}
-          </button>
+                <span
+                  className={cn(
+                    "mt-px flex h-6 w-6 flex-none items-center justify-center rounded-md border text-xs font-semibold transition-colors",
+                    verdict === "right"
+                      ? "border-success bg-success text-white"
+                      : verdict === "wrong"
+                        ? "border-danger bg-danger text-white"
+                        : isSelected
+                          ? "border-accent bg-accent text-accent-fg"
+                          : "border-line text-muted"
+                  )}
+                  aria-hidden
+                >
+                  {letters[idx]}
+                </span>
+                <span className="self-center text-sm leading-relaxed text-fg">{option}</span>
+              </motion.button>
+            );
+          })}
         </div>
       )}
-    </div>
+
+      {!disabled && (
+        <div className="flex justify-end">
+          <Button onClick={handleSubmit} disabled={!selectedOption?.trim()} loading={isSubmitting} className="w-full sm:w-auto">
+            Submit answer
+          </Button>
+        </div>
+      )}
+    </Card>
   );
+}
+
+function Kbd({ children }: { children: React.ReactNode }) {
+  return <kbd className="rounded border border-line bg-surface-2 px-1 py-px font-mono text-[11px] text-muted">{children}</kbd>;
 }
