@@ -41,10 +41,10 @@
   3. Extend the CI frontend job (it runs automatically once
      `frontend/package.json` exists): `npm ci && npm run lint && npm run build`.
 - **Acceptance:**
-  - [ ] Register → login → consent works through the API (tests with httpx)
-  - [ ] The frontend builds in CI; the login page works against a local
+  - [x] Register → login → consent works through the API (tests with httpx)
+  - [x] The frontend builds in CI; the login page works against a local
         backend
-- [ ] **M0 done**
+- [x] **M0 done**
 
 ## M1: API layer (weeks 2–3)
 - **Depends on:** M0
