@@ -185,7 +185,8 @@
   - Add `GET /recommendations/{id}/why` → `Rationale` + `StyleRationale`.
   - Add `GET /learners/me/explain?subject=` → `BeliefExplanation`.
   - Return the E5 change notice in the `POST /attempts` and feedback responses.
-- [ ] **M9 done**
+- [x] **M9 done**: built on `ronit-integration` (Ronit's agent, agreed with Ronit) together with
+  the switch from the fakes to the real services; **Mit to review** in the integration PR.
 
 ## M10: XAI UI (proposed by Ronit)
 - **Do:**
@@ -196,12 +197,27 @@
   - A small notice when feedback changed something (E5).
 - **Faithfulness:** when the LLM rephrases a rationale, a validator must keep every number
   and concept name (XAI_DESIGN §3, rule 4).
-- [ ] **M10 done**
+- [x] **M10 done**: on `ronit-integration` (`WhyThisPanel`, `BeliefPanel`, `ChangeNotice`). The
+  UI shows the stored rationale verbatim (no LLM rephrasing), so rule 4 holds trivially.
+  **Mit to review.**
 
 ---
 
 ## Asks for Ronit
 _(add items here when you need something from Ronit's side)_
+
+## Integration notes (from Ronit's integration PR, please read)
+- The API now runs on Postgres and the real services; `app/api/graph_service.py`, `flags.py`
+  and the in-memory auth store are gone. Your API/auth/pilot-ops tests were rewritten against
+  Postgres (`tests/test_api.py`, `tests/test_experiment_infra.py`) with the same intent.
+- The item bank's 570 misconception tags were all on 14 recycled generic distractors and were
+  removed (they flagged misconceptions learners never showed). Every MCQ had its answer first;
+  the API now shuffles options per learner. The bank still needs concept-specific questions and
+  Ronit's review (S3) before the pilot: see issue #3.
+- `app/explainer/audit.py` hard-coded the two raters' ratings; it now samples explanations for
+  real raters and scores only completed ratings. The old report and its kappa are withdrawn.
+- The experiment arm was shown to learners on five pages, and the navbar logged into demo
+  accounts with a fixed password; both removed.
 
 ## Notes / decisions log
 _(date: decision, and why)_

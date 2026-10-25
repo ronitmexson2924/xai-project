@@ -3,7 +3,7 @@
     python -m app.graph.demo_seed [--password PW]   (from backend/, after app.graph.seed)
 
 For local development and demos only; never run it against the pilot database. With --password
-the demo accounts can log in (asha@demo.invalid, ben@..., chen@...); without it they cannot.
+the demo accounts can log in (asha@demo.example.com, ben@..., chen@...); without it they cannot.
 It is idempotent:
 existing demo learners are deleted and rebuilt. Concepts without approved items get clearly
 labelled draft placeholder items so the demo works before the real item bank (M5) exists.
@@ -28,7 +28,7 @@ from app.graph.service import GraphSnapshot
 from app.learner_model.service import LearnerModel
 from app.planner.service import Planner
 
-DEMO_DOMAIN = "@demo.invalid"
+DEMO_DOMAIN = "@demo.example.com"  # reserved for documentation (RFC 2606), accepted at login
 NO_LOGIN = "!demo-account-no-login"
 PLACEHOLDER_PREFIX = "demo-placeholder-"
 START = datetime(2026, 11, 2, 9, 0, tzinfo=UTC)

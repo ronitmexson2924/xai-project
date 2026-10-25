@@ -8,13 +8,14 @@ the content. This doc defines what the app must explain, how the explanations st
 
 | Part | Status | Where |
 |---|---|---|
-| Contract (`contracts/xai.py`, `ExplainabilityService`, fakes, `why_*` events) | ✅ Built; **needs both approvals** (branch `contract/xai`) | `backend/app/contracts/` |
+| Contract (`contracts/xai.py`, `ExplainabilityService`, fakes, `why_*` events) | ✅ Merged | `backend/app/contracts/` |
 | E1 + E2: decision rationale and verified counterfactuals (R9) | ✅ Built and tested | `app/planner/rationale.py`, `app/planner/policy.py` |
 | E3: style rationale with `p_best` (R10) | ✅ Built and tested | `app/planner/style.py` (`explain_style`) |
 | E4 + E5: beliefs and change notices (R10) | ✅ Built and tested | `app/learner_model/explain.py` |
 | One service for the API (R10) | ✅ `Explainability(learner_model)` | `app/planner/xai.py` |
 | Evaluation measures (R11) | ✅ In the pre-registration (X1, X2) and `research/analyze.py` | `research/` |
-| API endpoints (M9) and UI panels (M10) | ⏳ Mit | `backend/app/api/`, `frontend/` |
+| API endpoints (M9) | ✅ `GET /recommendations/{id}/why`, `GET /learners/me/explain`, `change` on answers and close | `backend/app/api/` |
+| UI panels (M10) | ✅ "Why this?" panel with 1-tap rating, belief panels on the dashboard, change notices | `frontend/src/components/` |
 
 **See it now:** `cd backend && python -m app.planner.xai_demo` prints every explanation for the
 three demo learners (rolled back; the database is unchanged).

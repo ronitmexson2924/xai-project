@@ -1,5 +1,6 @@
 from typing import Literal
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 WEAK_SECRETS = {"", "change-me", "secret", "changeme", "dev", "test"}
@@ -32,6 +33,15 @@ class Settings(BaseSettings):
 
     # salt for pseudonyms in research exports; exports are refused while it is empty
     analysis_salt: str = ""
+
+    @field_validator("database_url")
+    @classmethod
+    def use_psycopg3(cls, url: str) -> str:
+        """Hosts hand out postgres:// or postgresql:// URLs; we ship the psycopg 3 driver."""
+        for prefix in ("postgres://", "postgresql://"):
+            if url.startswith(prefix):
+                return "postgresql+psycopg://" + url[len(prefix) :]
+        return url
 
     @property
     def cors_origin_list(self) -> list[str]:

@@ -7,6 +7,27 @@
 **Date:** 2026-10-25  
 **Version:** 1.0 (Production Release Candidate)  
 
+> **Corrections (integration review, 2026-10-25). Read before citing this chapter.**
+> The system was rewired to Postgres and the real learner model, planner and XAI services
+> (`ronit-integration`). Several statements below described the earlier in-memory build or were
+> never measured. Until the chapter is rewritten, treat them as follows:
+>
+> 1. **§7.2 audit results are withdrawn.** The kappa of 0.906, the 98% agreement and the ratings
+>    attributed to Mit and Ronit were hard-coded in `app/explainer/audit.py`, not given by raters.
+>    The audit has not been conducted; see `research/reports/llm_audit.md` for the procedure.
+> 2. **Latency figures** (p95 < 50 ms, 1500 ms LLM budget, "SLA satisfied") were not measured.
+>    Measured explanation latency is reported at `/admin/metrics` and `/ops/status`; the budget is
+>    300 ms p95 for `POST /session/next` (ARCHITECTURE.md).
+> 3. **§6.1 arm feature flags** were removed: the arm is applied by the planner's style selection
+>    (`app/planner/style.py`), which also records the style rationale shown to learners.
+> 4. **§4.1 telemetry:** events on page close are sent with `fetch(keepalive)` (sendBeacon could
+>    not authenticate and was always rejected). Scroll depth is not collected.
+> 5. **§6.2 purge:** withdrawal deletes the account and all its data (no pseudonymised logs are
+>    kept), per the consent text.
+> 6. **§8 counts:** the test suite is now 205 backend tests (including `test_security.py`) and 12
+>    Playwright tests; the item bank has 222 items whose quality review (S3) is still open.
+> 7. **Model names** are configuration (`GEMINI_MODEL_*`), not a fixed "Gemini 1.5 Flash".
+
 ---
 
 ## 1. Executive Summary & Design Philosophy
@@ -166,7 +187,7 @@ The engine enforces experimental integrity through explicit service-level featur
 
 ---
 
-## 7. Quality Audit & Inter-Rater Reliability (M7)
+## 7. Quality Audit & Inter-Rater Reliability (M7) — WITHDRAWN, see Corrections
 
 To validate system reliability prior to pilot launch, an independent dual-rater audit was conducted evaluating 100 stratified explanations across all 8 curriculum clusters.
 
