@@ -147,30 +147,20 @@ export default function OnboardingPage() {
               <span className="text-xs font-mono uppercase tracking-widest text-emerald-400">
                 Questionnaire Complete
               </span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
-                Next: Diagnostic Calibration
-              </h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Next: a short pre-test</h1>
               <p className="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
-                Your psychometric intake profile has been registered. Before starting customized
-                remediation, we will present 3 baseline diagnostic items.
+                Thanks. Before you start learning, take the pre-test once. It is not graded and you will
+                not see a score: it lets the study measure how much you learn. Then the app starts with a
+                few placement questions to find your level.
               </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-left space-y-2 text-xs text-slate-400">
-              <div className="font-semibold text-slate-200">How this works:</div>
-              <ul className="list-disc pl-4 space-y-1">
-                <li>3 quick questions covering loops, recursion, and search bounds.</li>
-                <li>There is no penalty for incorrect answers—this only sets your starting baseline.</li>
-                <li>After each item, you will see a grounded explanation tailored to your learning track.</li>
-              </ul>
             </div>
 
             <div className="pt-2">
               <Link
-                href="/session"
+                href="/tests/pretest"
                 className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-6 shadow-lg shadow-indigo-600/30 transition-all text-sm"
               >
-                Start Diagnostic Session →
+                Take the pre-test →
               </Link>
             </div>
           </div>
@@ -223,9 +213,7 @@ export default function OnboardingPage() {
           <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
-                  Trait: {currentItem.trait.replace(/_/g, " ")}
-                </span>
+                <span className="text-xs text-slate-500">How much do you agree?</span>
                 <span className="text-[11px] text-slate-500 hidden sm:inline">
                   (Press <kbd className="px-1 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">1-5</kbd> to select)
                 </span>
@@ -312,7 +300,7 @@ export default function OnboardingPage() {
                         : "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50"
                     }`}
                   >
-                    {submitting ? "Calculating profile..." : "Complete & Begin Diagnostic"}
+                    {submitting ? "Calculating profile..." : "Finish questionnaire"}
                   </button>
                 )}
               </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BeliefPanel } from "./BeliefPanel";
 import React from "react";
 import type { Concept, LearnerState } from "@/lib/api";
 
@@ -18,8 +19,6 @@ export default function ConceptDetailModal({
   if (!concept) return null;
 
   const masteryData = learnerState?.mastery?.[concept.id];
-  const pMastery = masteryData?.p_mastery ?? 0.2;
-  const uncertainty = (masteryData as { uncertainty?: number } | undefined)?.uncertainty ?? 0.25;
   const attempts = masteryData?.n_attempts ?? 0;
   const misconceptions = masteryData?.misconception_ids ?? [];
 
@@ -57,38 +56,14 @@ export default function ConceptDetailModal({
         </h2>
         <p className="text-xs sm:text-sm text-slate-300 mb-6">{concept.description}</p>
 
-        {/* Open Learner Model Stats Row */}
-        <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 mb-6 text-center">
-          <div>
-            <div className="text-[11px] text-slate-400 font-medium">BKT Mastery</div>
-            <div className="text-lg font-black text-emerald-400 font-mono">
-              {Math.round(pMastery * 100)}%
-            </div>
+        {/* Open learner model: the estimate and why we believe it (XAI E4) */}
+        <div className="mb-6 rounded-2xl bg-slate-800/50 border border-slate-700/60 p-4 space-y-2">
+          <div className="text-[11px] text-slate-400">
+            {attempts} answer{attempts === 1 ? "" : "s"} on this concept
+            {misconceptions.length > 0 && " · a common mistake is flagged"}
           </div>
-          <div>
-            <div className="text-[11px] text-slate-400 font-medium">Uncertainty (σ)</div>
-            <div className="text-lg font-black text-indigo-300 font-mono">
-              {uncertainty.toFixed(2)}
-            </div>
-          </div>
-          <div>
-            <div className="text-[11px] text-slate-400 font-medium">Attempts Logged</div>
-            <div className="text-lg font-black text-slate-200 font-mono">{attempts}</div>
-          </div>
+          <BeliefPanel subject={concept.id} />
         </div>
-
-        {/* Misconception Warning Banner if applicable */}
-        {misconceptions.length > 0 && (
-          <div className="mb-6 rounded-2xl border border-rose-500/40 bg-rose-950/30 p-4 text-xs text-rose-200">
-            <div className="font-bold text-rose-300 mb-1 flex items-center gap-1.5">
-              <span>⚠️</span> Misconception Detected
-            </div>
-            <p>
-              Your recent attempts indicated a possible misconception ({misconceptions.join(", ")}).
-              The adaptive explainer is tailoring upcoming exercises to remediate this conceptual gap.
-            </p>
-          </div>
-        )}
 
         {/* Concept Card Content */}
         {concept.card && (

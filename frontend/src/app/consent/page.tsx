@@ -42,14 +42,6 @@ export default function ConsentPage() {
     );
   }
 
-  const armDescription = {
-    generic: "Standard benchmark track with uniform concept explanations.",
-    static_personalized:
-      "Personalized track configured from initial intake preferences.",
-    closed_loop:
-      "Dynamic adaptive track continuously calibrated by your interaction feedback.",
-  }[user.arm];
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       <div className="w-full max-w-2xl space-y-6">
@@ -83,18 +75,11 @@ export default function ConsentPage() {
               (DSA) pedagogical explanations to optimize understanding and concept mastery.
             </p>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 space-y-2">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Assigned Study Track
-              </h4>
-              <div className="flex items-center gap-2">
-                <span className="inline-block px-2.5 py-0.5 rounded-md text-xs font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  {user.arm}
-                </span>
-                <span className="text-xs text-slate-400">{armDescription}</span>
-              </div>
-            </div>
-
+            <p>
+              Participants are placed at random in one of several versions of the app, which differ in
+              how explanations are adapted. You will not be told which version you use until the study
+              ends, so that the comparison stays fair.
+            </p>
             <h3 className="text-base font-semibold text-white pt-2">Data Collection & Telemetry</h3>
             <ul className="list-disc pl-5 space-y-1.5 text-slate-400">
               <li>
@@ -106,18 +91,23 @@ export default function ConsentPage() {
                 expansion, replay actions, and optional clarity ratings.
               </li>
               <li>
-                <strong className="text-slate-200">Check Responses:</strong> Follow-up
-                micro-checks measuring pedagogical efficacy.
+                <strong className="text-slate-200">Your answers:</strong> to practice questions and to a
+                short test at the start and at the end.
+              </li>
+              <li>
+                <strong className="text-slate-200">A starting questionnaire</strong> about how you like
+                explanations and how you approach problems. The app turns it into estimates that you can
+                see, with the reasons, on your progress page.
               </li>
             </ul>
 
             <h3 className="text-base font-semibold text-white pt-2">Privacy & Participant Rights</h3>
             <ul className="list-disc pl-5 space-y-1.5 text-slate-400">
-              <li>All telemetry is stored with pseudonymous identifiers.</li>
+              <li>Research exports use pseudonymous identifiers, never your name or email.</li>
               <li>No third-party analytics or external trackers are loaded.</li>
               <li>
-                You retain full rights to delete your account and research data at any time via
-                your dashboard.
+                Taking part is voluntary. You can withdraw at any time from the home page; your account
+                stops working immediately and your data is deleted.
               </li>
             </ul>
           </div>

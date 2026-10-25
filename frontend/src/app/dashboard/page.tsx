@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import ConceptDetailModal from "@/components/ConceptDetailModal";
 import ConceptGraph from "@/components/ConceptGraph";
 import Navbar from "@/components/Navbar";
+import { useLearnerGuard } from "@/lib/guards";
 import TraitCard from "@/components/TraitCard";
 import WhyWeThinkThis from "@/components/WhyWeThinkThis";
 import {
@@ -14,11 +15,10 @@ import {
   ConceptEdge,
   LearnerState,
   StateUpdateView,
-  UserResponse,
 } from "@/lib/api";
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<UserResponse | null>(null);
+  const ready = useLearnerGuard();
   const [learnerState, setLearnerState] = useState<LearnerState | null>(null);
   const [history, setHistory] = useState<StateUpdateView[]>([]);
   const [concepts, setConcepts] = useState<Concept[]>([]);
@@ -29,6 +29,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!ready) return;
     let mounted = true;
 
     async function fetchData() {
@@ -36,8 +37,7 @@ export default function DashboardPage() {
         setLoading(true);
         setError(null);
 
-        const [u, state, hist, graphData] = await Promise.all([
-          api.auth.me().catch(() => null),
+        const [state, hist, graphData] = await Promise.all([
           api.learners.getState().catch((err) => {
             console.error("Failed to load learner state", err);
             return null;
@@ -53,7 +53,6 @@ export default function DashboardPage() {
         ]);
 
         if (mounted) {
-          setUser(u);
           setLearnerState(state);
           setHistory(hist);
           setConcepts(graphData.concepts);
@@ -73,7 +72,7 @@ export default function DashboardPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [ready]);
 
   const masteredCount = Object.values(learnerState?.mastery || {}).filter(
     (m) => m.p_mastery >= 0.7
@@ -95,17 +94,12 @@ export default function DashboardPage() {
               <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 Open Learner Model
               </span>
-              {user && (
-                <span className="text-xs font-mono text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/20">
-                  Arm: {user.arm}
-                </span>
-              )}
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               Knowledge Graph &amp; Trait Model
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
-              Inspect your Bayesian Knowledge Tracing mastery across 48 DSA concepts, explore uncertainty halos, and review the exact provenance behind every adaptation.
+              Your estimated mastery of every concept, how sure the app is, and the record of every answer and rating that changed it. Select a concept to see why we think what we think.
             </p>
           </div>
 

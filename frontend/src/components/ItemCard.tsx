@@ -10,6 +10,7 @@ interface ItemCardProps {
   disabled?: boolean;
   selectedAnswer?: string | null;
   isCorrect?: boolean | null;
+  conceptName?: string;
 }
 
 export function ItemCard({
@@ -19,6 +20,7 @@ export function ItemCard({
   disabled = false,
   selectedAnswer = null,
   isCorrect = null,
+  conceptName,
 }: ItemCardProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(selectedAnswer);
   const mountTimeRef = useRef<number>(0);
@@ -33,15 +35,17 @@ export function ItemCard({
   }, [item.id, selectedAnswer]);
 
   const handleSubmit = React.useCallback(() => {
-    if (!selectedOption || disabled || isSubmitting) return;
+    if (!selectedOption || !selectedOption.trim() || disabled || isSubmitting) return;
     const start = mountTimeRef.current > 0 ? mountTimeRef.current : Date.now();
     const latencyMs = Math.max(50, Date.now() - start);
     onAnswer(selectedOption, latencyMs);
   }, [selectedOption, disabled, isSubmitting, onAnswer]);
 
   // Keyboard accessibility: 1-4, A-D to select; Enter to submit
+  const isChoice = item.options.length > 0;
+
   useEffect(() => {
-    if (disabled) return;
+    if (disabled || !isChoice) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger if user is in an input field
@@ -74,7 +78,7 @@ export function ItemCard({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [disabled, item.options, selectedOption, isSubmitting, handleSubmit]);
+  }, [disabled, isChoice, item.options, selectedOption, isSubmitting, handleSubmit]);
 
   // Render question stem, highlighting code blocks if present
   const renderStem = (stemText: string) => {
@@ -115,13 +119,15 @@ export function ItemCard({
           <span className="text-xs uppercase tracking-wider font-semibold text-slate-400">
             Concept Check
           </span>
-          <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-            {item.concept_id}
-          </span>
+          {conceptName && (
+            <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+              {conceptName}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono text-slate-500 uppercase">{item.kind}</span>
-          <span className="text-[11px] text-slate-500 hidden sm:inline">
+          <span className={isChoice ? "text-[11px] text-slate-500 hidden sm:inline" : "hidden"}>
             (Shortcuts: <kbd className="px-1 py-0.5 rounded bg-slate-800 font-mono text-[10px]">A-D</kbd> or <kbd className="px-1 py-0.5 rounded bg-slate-800 font-mono text-[10px]">1-4</kbd>)
           </span>
         </div>
@@ -132,8 +138,33 @@ export function ItemCard({
         {renderStem(item.stem)}
       </div>
 
+      {/* Free-text answer for short and code-trace questions */}
+      {!isChoice && (
+        <div className="space-y-2">
+          <label htmlFor={`answer-${item.id}`} className="text-xs text-slate-400">
+            Your answer
+          </label>
+          <input
+            id={`answer-${item.id}`}
+            type="text"
+            maxLength={2000}
+            autoComplete="off"
+            value={selectedOption ?? ""}
+            disabled={disabled || isSubmitting}
+            onChange={(e) => setSelectedOption(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-white font-mono focus:border-indigo-500 focus:outline-none"
+          />
+        </div>
+      )}
+
       {/* Options */}
-      <div className="space-y-3" role="radiogroup" aria-label="Question options">
+      <div className={isChoice ? "space-y-3" : "hidden"} role="radiogroup" aria-label="Question options">
         {item.options.map((option, idx) => {
           const letter = String.fromCharCode(65 + idx);
           const isSelected = selectedOption === option;

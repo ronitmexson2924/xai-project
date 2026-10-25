@@ -45,7 +45,7 @@ export default function LoginPage() {
       }
     } catch (err) {
       if (err instanceof ApiException) {
-        setErrorMsg(`[${err.code}] ${err.message}`);
+        setErrorMsg(err.message);
       } else {
         setErrorMsg("Failed to connect to authentication service.");
       }
@@ -148,7 +148,8 @@ export default function LoginPage() {
               <input
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
+                maxLength={72}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"

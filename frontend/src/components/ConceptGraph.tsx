@@ -83,8 +83,6 @@ export default function ConceptGraph({
 
       const masteryData = learnerState?.mastery?.[c.id];
       const pMastery = masteryData?.p_mastery ?? 0.2;
-      const uncertainty =
-        (masteryData as { uncertainty?: number } | undefined)?.uncertainty ?? 0.25;
       const attempts = masteryData?.n_attempts ?? 0;
       const misconceptions = masteryData?.misconception_ids ?? [];
 
@@ -101,7 +99,6 @@ export default function ConceptGraph({
           cluster: c.cluster,
           difficulty: c.difficulty,
           mastery: pMastery,
-          uncertainty,
           misconceptions,
           attempts,
         },

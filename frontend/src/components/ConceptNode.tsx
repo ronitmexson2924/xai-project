@@ -9,7 +9,6 @@ export interface ConceptNodeData {
   cluster: string;
   difficulty: number;
   mastery: number; // 0.0 to 1.0
-  uncertainty: number; // 0.0 to 1.0
   misconceptions: string[];
   attempts: number;
 }
@@ -50,14 +49,11 @@ function getMasteryTheme(p: number) {
   };
 }
 
-function getUncertaintyRing(u: number) {
-  if (u > 0.28) {
-    return "ring-4 ring-indigo-500/40 animate-pulse shadow-lg shadow-indigo-500/20";
-  }
-  if (u >= 0.15) {
-    return "ring-2 ring-indigo-400/30";
-  }
-  return "ring-1 ring-white/10";
+// fewer answers = less evidence: the ring says how much the estimate rests on
+function getEvidenceRing(attempts: number) {
+  if (attempts === 0) return "ring-1 ring-dashed ring-slate-600";
+  if (attempts < 3) return "ring-1 ring-slate-500/60";
+  return "ring-2 ring-white/20";
 }
 
 const CLUSTER_BADGES: Record<string, string> = {
@@ -73,7 +69,7 @@ const CLUSTER_BADGES: Record<string, string> = {
 
 export default memo(function ConceptNode({ data, selected }: ConceptNodeProps) {
   const theme = getMasteryTheme(data.mastery);
-  const ringStyle = getUncertaintyRing(data.uncertainty);
+  const ringStyle = getEvidenceRing(data.attempts ?? 0);
   const clusterBadge =
     CLUSTER_BADGES[data.cluster] || "bg-slate-700/40 text-slate-300 border-slate-600/30";
 
@@ -126,8 +122,8 @@ export default memo(function ConceptNode({ data, selected }: ConceptNodeProps) {
 
       {/* Footer Metrics & Uncertainty Indicators */}
       <div className="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between text-[9px] text-slate-400 font-mono">
-        <span title="Uncertainty standard deviation (BKT)">
-          σ: {(data.uncertainty).toFixed(2)}
+        <span title="How many of your answers this estimate is based on">
+          {data.attempts ? `${data.attempts} answer${data.attempts === 1 ? "" : "s"}` : "no answers yet"}
         </span>
         {data.misconceptions && data.misconceptions.length > 0 ? (
           <span

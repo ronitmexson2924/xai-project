@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, EventBatchIn } from "./api";
+import { api, ExplanationEvent, sendEventsOnUnload } from "./api";
 
 export type TelemetryEventType =
   | "shown"
@@ -11,13 +11,15 @@ export type TelemetryEventType =
   | "hidden"
   | "visible"
   | "clarity_rated"
-  | "dismissed";
+  | "dismissed"
+  | "why_opened"
+  | "why_rated";
 
 export interface TelemetryEvent {
   idempotency_key: string;
   type: TelemetryEventType;
   client_ts: string;
-  payload?: Record<string, unknown>;
+  payload?: Record<string, string | number | boolean | null>;
 }
 
 export function generateUUID(): string {
@@ -92,7 +94,7 @@ export function useExplanationTelemetry(
     try {
       await api.explanations.sendEvents(
         explanationId,
-        batchToSend as unknown as EventBatchIn["events"]
+        batchToSend.slice(0, 100) as unknown as ExplanationEvent[]
       );
 
       // Remove successfully sent events by matching idempotency keys
@@ -107,7 +109,7 @@ export function useExplanationTelemetry(
   }, [explanationId, saveQueueToStorage]);
 
   const recordEvent = useCallback(
-    (type: TelemetryEventType, payload?: Record<string, unknown>) => {
+    (type: TelemetryEventType, payload?: TelemetryEvent["payload"]) => {
       if (!explanationId) return;
 
       const event: TelemetryEvent = {
@@ -120,8 +122,8 @@ export function useExplanationTelemetry(
       queueRef.current.push(event);
       saveQueueToStorage();
 
-      // Immediate flush for terminal events
-      if (type === "dismissed") {
+      // Immediate flush for terminal events and ratings
+      if (type === "dismissed" || type === "clarity_rated" || type === "why_rated") {
         void flushQueue();
       }
     },
@@ -203,19 +205,12 @@ export function useExplanationTelemetry(
 
     document.addEventListener("visibilitychange", onDocVisibilityChange);
 
-    // Send on pagehide via navigator.sendBeacon
+    // On page close, send what is queued with keepalive (sendBeacon cannot authenticate)
     const onPageHide = () => {
       if (isVisibleRef.current) {
         recordEvent("hidden");
       }
-      if (queueRef.current.length > 0 && typeof navigator !== "undefined" && navigator.sendBeacon) {
-        const url = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/explanations/${explanationId}/events`;
-        const blob = new Blob(
-          [JSON.stringify({ events: queueRef.current })],
-          { type: "application/json" }
-        );
-        navigator.sendBeacon(url, blob);
-      }
+      sendEventsOnUnload(explanationId, queueRef.current as unknown as ExplanationEvent[]);
     };
 
     window.addEventListener("pagehide", onPageHide);

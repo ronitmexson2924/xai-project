@@ -140,7 +140,13 @@ def record_attempt(
         delta = learner_model.apply_attempt(record)
         notice = explainability.explain_change(delta)
         messages = list(notice.messages)
-        if explanation is not None and explanation.followup_item_id == item.id:
+        # The answer is the explanation's micro-check, except for placement questions: those are
+        # answered before the explanation is shown, so its feedback is summarised on close.
+        if (
+            explanation is not None
+            and explanation.followup_item_id == item.id
+            and rec.kind != "diagnostic_item"
+        ):
             feedback = close_feedback_loop(session, analyzer, learner_model, explanation, correct)
             messages += explainability.explain_change(feedback).messages
         session.commit()

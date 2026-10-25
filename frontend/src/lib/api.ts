@@ -1,6 +1,7 @@
 import type { paths } from "./api.d";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const TOKEN_KEY = "pcg_token";
 
 export interface ApiError {
   code: string;
@@ -19,78 +20,84 @@ export class ApiException extends Error {
   }
 }
 
-// Auth types
-export type RegisterRequest =
-  paths["/api/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"];
-export type RegisterResponse =
-  paths["/api/v1/auth/register"]["post"]["responses"]["201"]["content"]["application/json"];
+type Json<P extends keyof paths, M extends keyof paths[P], S extends number> = paths[P][M] extends {
+  responses: { [K in S]: { content: { "application/json": infer T } } };
+}
+  ? T
+  : never;
+type Body<P extends keyof paths, M extends keyof paths[P]> = paths[P][M] extends {
+  requestBody: { content: { "application/json": infer T } };
+}
+  ? T
+  : never;
 
-export type LoginRequest =
-  paths["/api/v1/auth/login"]["post"]["requestBody"]["content"]["application/json"];
-export type LoginResponse =
-  paths["/api/v1/auth/login"]["post"]["responses"]["200"]["content"]["application/json"];
+// Auth
+export type RegisterRequest = Body<"/api/v1/auth/register", "post">;
+export type RegisterResponse = Json<"/api/v1/auth/register", "post", 201>;
+export type LoginRequest = Body<"/api/v1/auth/login", "post">;
+export type LoginResponse = Json<"/api/v1/auth/login", "post", 200>;
+export type ConsentResponse = Json<"/api/v1/auth/consent", "post", 200>;
+export type UserResponse = Json<"/api/v1/auth/me", "get", 200>;
 
-export type ConsentResponse =
-  paths["/api/v1/auth/consent"]["post"]["responses"]["200"]["content"]["application/json"];
+// Onboarding
+export type QuestionnaireItem = Json<"/api/v1/onboarding/questionnaire", "get", 200>[number];
+export type StateDelta = Json<"/api/v1/onboarding/questionnaire", "post", 200>;
 
-export type UserResponse =
-  paths["/api/v1/auth/me"]["get"]["responses"]["200"]["content"]["application/json"];
-
-// Onboarding types
-export type QuestionnaireItem =
-  paths["/api/v1/onboarding/questionnaire"]["get"]["responses"]["200"]["content"]["application/json"][number];
-export type StateDelta =
-  paths["/api/v1/onboarding/questionnaire"]["post"]["responses"]["200"]["content"]["application/json"];
-
-// Session types
-export type NextStepResponse =
-  paths["/api/v1/session/next"]["post"]["responses"]["200"]["content"]["application/json"];
+// Session and answers
+export type NextStepResponse = Json<"/api/v1/session/next", "post", 200>;
 export type PublicItem = NonNullable<NextStepResponse["item"]>;
 export type Recommendation = NextStepResponse["recommendation"];
 export type ReasonEvidence = Recommendation["reasons"][number];
+export type AttemptIn = Body<"/api/v1/attempts", "post">;
+export type AttemptResult = Json<"/api/v1/attempts", "post", 200>;
+export type ChangeNotice = NonNullable<AttemptResult["change"]>;
 
-// Attempts types
-export type AttemptIn =
-  paths["/api/v1/attempts"]["post"]["requestBody"]["content"]["application/json"];
-export type AttemptResult =
-  paths["/api/v1/attempts"]["post"]["responses"]["200"]["content"]["application/json"];
+// Explanations and telemetry
+export type Explanation = Json<"/api/v1/explanations/{explanation_id}", "get", 200>;
+export type EventBatchIn = Body<"/api/v1/explanations/{explanation_id}/events", "post">;
+export type ExplanationEvent = EventBatchIn["events"][number];
+export type EventBatchResponse = Json<"/api/v1/explanations/{explanation_id}/events", "post", 200>;
+export type FeedbackOut = Json<"/api/v1/explanations/{explanation_id}/close", "post", 200>;
 
-// Explanation & Telemetry types
-export type Explanation =
-  paths["/api/v1/explanations/{explanation_id}"]["get"]["responses"]["200"]["content"]["application/json"];
-export type EventBatchIn =
-  paths["/api/v1/explanations/{explanation_id}/events"]["post"]["requestBody"]["content"]["application/json"];
-export type EventBatchResponse =
-  paths["/api/v1/explanations/{explanation_id}/events"]["post"]["responses"]["200"]["content"]["application/json"];
-export type ExplanationFeedbackSummary =
-  paths["/api/v1/explanations/{explanation_id}/close"]["post"]["responses"]["200"]["content"]["application/json"];
+// Explainability (XAI E1-E5)
+export type RecommendationWhy = Json<"/api/v1/recommendations/{recommendation_id}/why", "get", 200>;
+export type BeliefExplanation = Json<"/api/v1/learners/me/explain", "get", 200>;
 
-// Learner State & History types
-export type LearnerState =
-  paths["/api/v1/learners/me/state"]["get"]["responses"]["200"]["content"]["application/json"];
-export type StateUpdateView =
-  paths["/api/v1/learners/me/history"]["get"]["responses"]["200"]["content"]["application/json"][number];
-
-// Graph & Admin types
-export type GraphResponse =
-  paths["/api/v1/graph"]["get"]["responses"]["200"]["content"]["application/json"];
+// Learner state, graph, tests, admin
+export type LearnerState = Json<"/api/v1/learners/me/state", "get", 200>;
+export type StateUpdateView = Json<"/api/v1/learners/me/history", "get", 200>[number];
+export type GraphResponse = Json<"/api/v1/graph", "get", 200>;
 export type Concept = GraphResponse["concepts"][number];
 export type ConceptEdge = GraphResponse["edges"][number];
-export type AdminMetricsResponse =
-  paths["/api/v1/admin/metrics"]["get"]["responses"]["200"]["content"]["application/json"];
+export type TestPhase = "pretest" | "posttest";
+export type TestOut = Json<"/api/v1/tests/{phase}", "get", 200>;
+export type TestSubmitted = Json<"/api/v1/tests/{phase}", "post", 201>;
+export type AdminMetricsResponse = Json<"/api/v1/admin/metrics", "get", 200>;
+export type OpsStatus = Json<"/api/v1/ops/status", "get", 200>;
 
-function getStoredToken(): string | null {
+export function getStoredToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("pcg_token");
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
 }
 
 export function setStoredToken(token: string | null): void {
   if (typeof window === "undefined") return;
-  if (token) {
-    localStorage.setItem("pcg_token", token);
-  } else {
-    localStorage.removeItem("pcg_token");
+  try {
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    else localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    // storage unavailable (private mode): the session lasts until the tab closes
   }
+}
+
+/** Called when the server says the token is no longer valid, so the UI can return to login. */
+let onUnauthorized: (() => void) | null = null;
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  onUnauthorized = handler;
 }
 
 async function request<T>(
@@ -103,152 +110,129 @@ async function request<T>(
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+  } catch {
+    throw new ApiException(0, {
+      code: "NETWORK_ERROR",
+      message: "Cannot reach the server. Check your connection and try again.",
+    });
   }
-
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
-
-  if (res.status === 204) {
-    return {} as T;
-  }
+  if (res.status === 204) return {} as T;
 
   const data = await res.json().catch(() => ({}));
-
   if (!res.ok) {
     const error: ApiError = data?.error || {
       code: "UNKNOWN_ERROR",
       message: res.statusText || "An unexpected error occurred",
     };
+    if (res.status === 401 && token && !path.startsWith("/api/v1/auth/login")) {
+      setStoredToken(null);
+      onUnauthorized?.();
+    }
     throw new ApiException(res.status, error);
   }
-
   return data as T;
 }
+
+const post = <T>(path: string, body: unknown = {}) =>
+  request<T>(path, { method: "POST", body: JSON.stringify(body) });
+const get = <T>(path: string) => request<T>(path, { method: "GET" });
 
 export const api = {
   auth: {
     register: (payload: RegisterRequest) =>
-      request<RegisterResponse>("/api/v1/auth/register", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
-
-    login: (payload: LoginRequest) =>
-      request<LoginResponse>("/api/v1/auth/login", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
-
-    consent: () =>
-      request<ConsentResponse>("/api/v1/auth/consent", {
-        method: "POST",
-        body: JSON.stringify({}),
-      }),
-
-    getMe: (token?: string) =>
-      request<UserResponse>("/api/v1/auth/me", { method: "GET" }, token),
-
-    me: (token?: string) =>
-      request<UserResponse>("/api/v1/auth/me", { method: "GET" }, token),
-
-    logout: async () => {
-      setStoredToken(null);
-    },
-
-    deleteMe: () =>
-      request<void>("/api/v1/me", {
-        method: "DELETE",
-      }),
+      post<RegisterResponse>("/api/v1/auth/register", payload),
+    login: (payload: LoginRequest) => post<LoginResponse>("/api/v1/auth/login", payload),
+    consent: () => post<ConsentResponse>("/api/v1/auth/consent"),
+    me: (token?: string) => request<UserResponse>("/api/v1/auth/me", { method: "GET" }, token),
+    logout: () => post<void>("/api/v1/auth/logout"),
+    deleteMe: () => request<void>("/api/v1/me", { method: "DELETE" }),
   },
 
   onboarding: {
-    getQuestionnaire: () =>
-      request<QuestionnaireItem[]>("/api/v1/onboarding/questionnaire", {
-        method: "GET",
-      }),
-
+    getQuestionnaire: () => get<QuestionnaireItem[]>("/api/v1/onboarding/questionnaire"),
     submitQuestionnaire: (answers: Record<string, number>) =>
-      request<StateDelta>("/api/v1/onboarding/questionnaire", {
-        method: "POST",
-        body: JSON.stringify({ answers }),
-      }),
+      post<StateDelta>("/api/v1/onboarding/questionnaire", { answers }),
   },
 
   session: {
-    next: () =>
-      request<NextStepResponse>("/api/v1/session/next", {
-        method: "POST",
-        body: JSON.stringify({}),
-      }),
+    next: () => post<NextStepResponse>("/api/v1/session/next"),
   },
 
   attempts: {
-    submit: (payload: AttemptIn) =>
-      request<AttemptResult>("/api/v1/attempts", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    submit: (payload: AttemptIn) => post<AttemptResult>("/api/v1/attempts", payload),
   },
 
   explanations: {
-    get: (id: string) =>
-      request<Explanation>(`/api/v1/explanations/${id}`, {
-        method: "GET",
+    get: (id: string) => get<Explanation>(`/api/v1/explanations/${encodeURIComponent(id)}`),
+    sendEvents: (id: string, events: ExplanationEvent[]) =>
+      post<EventBatchResponse>(`/api/v1/explanations/${encodeURIComponent(id)}/events`, {
+        events,
       }),
-
-    sendEvents: (id: string, events: EventBatchIn["events"]) =>
-      request<EventBatchResponse>(`/api/v1/explanations/${id}/events`, {
-        method: "POST",
-        body: JSON.stringify({ events }),
-      }),
-
     close: (id: string) =>
-      request<ExplanationFeedbackSummary>(`/api/v1/explanations/${id}/close`, {
-        method: "POST",
-        body: JSON.stringify({}),
-      }),
+      post<FeedbackOut>(`/api/v1/explanations/${encodeURIComponent(id)}/close`),
+  },
+
+  xai: {
+    why: (recommendationId: string) =>
+      get<RecommendationWhy>(`/api/v1/recommendations/${encodeURIComponent(recommendationId)}/why`),
+    belief: (subject: string) =>
+      get<BeliefExplanation>(`/api/v1/learners/me/explain?subject=${encodeURIComponent(subject)}`),
   },
 
   learners: {
-    getState: () =>
-      request<LearnerState>("/api/v1/learners/me/state", {
-        method: "GET",
-      }),
-
-    getHistory: () =>
-      request<StateUpdateView[]>("/api/v1/learners/me/history", {
-        method: "GET",
-      }),
+    getState: () => get<LearnerState>("/api/v1/learners/me/state"),
+    getHistory: (limit = 50) => get<StateUpdateView[]>(`/api/v1/learners/me/history?limit=${limit}`),
   },
 
   graph: {
-    get: () =>
-      request<GraphResponse>("/api/v1/graph", {
-        method: "GET",
-      }),
+    get: () => get<GraphResponse>("/api/v1/graph"),
+  },
+
+  tests: {
+    get: (phase: TestPhase) => get<TestOut>(`/api/v1/tests/${phase}`),
+    submit: (phase: TestPhase, answers: Record<string, string>) =>
+      post<TestSubmitted>(`/api/v1/tests/${phase}`, { answers }),
   },
 
   admin: {
-    getMetrics: () =>
-      request<AdminMetricsResponse>("/api/v1/admin/metrics", {
-        method: "GET",
-      }),
-
-    downloadCsv: async (table: string) => {
+    getMetrics: () => get<AdminMetricsResponse>("/api/v1/admin/metrics"),
+    getOps: () => get<OpsStatus>("/api/v1/ops/status"),
+    downloadCsv: async (table: "users" | "assignments" | "attempts") => {
       const token = getStoredToken();
       const res = await fetch(`${API_BASE_URL}/api/v1/admin/export.csv?table=${table}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      if (!res.ok) throw new Error(`Export failed with status ${res.status}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new ApiException(res.status, data?.error || { code: "EXPORT_FAILED", message: "Export failed" });
+      }
       return await res.blob();
     },
   },
 
-  health: () =>
-    request<{ status: string; version: string }>("/health", { method: "GET" }),
+  health: () => request<{ status: string; version: string }>("/health", { method: "GET" }),
 };
+
+/**
+ * Send telemetry while the page is being closed. sendBeacon cannot carry the Authorization
+ * header, so this uses fetch with keepalive, which can.
+ */
+export function sendEventsOnUnload(explanationId: string, events: ExplanationEvent[]): void {
+  const token = getStoredToken();
+  if (!token || events.length === 0) return;
+  try {
+    void fetch(`${API_BASE_URL}/api/v1/explanations/${encodeURIComponent(explanationId)}/events`, {
+      method: "POST",
+      keepalive: true,
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ events: events.slice(0, 100) }),
+    });
+  } catch {
+    // best effort: the events stay queued in localStorage and are retried next visit
+  }
+}

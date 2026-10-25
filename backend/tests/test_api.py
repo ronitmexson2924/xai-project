@@ -71,6 +71,8 @@ def test_full_learning_loop(client: TestClient, db: Session) -> None:
         assert result.status_code == 200, result.text
         body = result.json()
         assert body["delta"]["source"] == "attempt" and body["change"]["source"] == "attempt"
+        # "Continue" closes the explanation (placement answers are not its micro-check)
+        assert ada.post(f"/explanations/{explanation['id']}/close").status_code == 200
 
     state = ada.get("/learners/me/state").json()
     assert state["total_attempts"] == 4
@@ -98,6 +100,18 @@ def test_style_follows_the_learners_arm(client: TestClient, db: Session) -> None
     assert sources["generic"] == "generic"
     assert sources["static_personalized"] == "trait_mapped"
     assert sources["closed_loop"] in ("thompson", "exploration")
+
+
+def test_placement_answers_do_not_score_an_unseen_explanation(
+    client: TestClient, db: Session
+) -> None:
+    who = learner(client, db)
+    step = who.next()
+    assert step["recommendation"]["kind"] == "diagnostic_item"
+    who.answer()
+    assert db.scalar(select(func.count()).select_from(m.ExplanationFeedbackRow)) == 0
+    summary = who.post(f"/explanations/{step['explanation']['id']}/close").json()
+    assert summary["followup_correct"] is None  # the answer came before the explanation
 
 
 def test_close_without_answer_is_idempotent(client: TestClient, db: Session) -> None:
@@ -176,6 +190,7 @@ def test_admin_metrics_export_and_ops(client: TestClient, db: Session) -> None:
         who.next()
         who.events(who.last["explanation"]["id"], ("clarity_rated", 1, {"rating": 5}))
         who.answer()
+        who.post(f"/explanations/{who.last['explanation']['id']}/close")
 
     metrics = boss.get("/admin/metrics").json()
     assert metrics["total_users"] == 2 and metrics["consented_users"] == 2  # admin not counted

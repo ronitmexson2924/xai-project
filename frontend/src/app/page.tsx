@@ -1,248 +1,148 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import Navbar from "@/components/Navbar";
+import { api, ApiException } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
-export default function Home() {
-  const { user, logout, isLoading } = useAuth();
-  const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+interface Progress {
+  questionnaireDone: boolean;
+  pretestDone: boolean;
+  posttestDone: boolean;
+  answered: number;
+}
 
-  const handleDeleteAccount = async () => {
-    if (!deleteConfirm) {
-      setDeleteConfirm(true);
+export default function Home() {
+  const { user, isLoading, withdraw } = useAuth();
+  const router = useRouter();
+  const [progress, setProgress] = useState<Progress | null>(null);
+  const [confirmWithdraw, setConfirmWithdraw] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user?.consent_at) return;
+    let alive = true;
+    Promise.all([
+      api.learners.getHistory(200),
+      api.learners.getState(),
+      api.tests.get("pretest").catch(() => null),
+      api.tests.get("posttest").catch(() => null),
+    ])
+      .then(([history, state, pre, post]) => {
+        if (!alive) return;
+        setProgress({
+          questionnaireDone: history.some((h) => h.source === "questionnaire"),
+          pretestDone: Boolean(pre?.submitted),
+          posttestDone: Boolean(post?.submitted),
+          answered: state.total_attempts,
+        });
+      })
+      .catch(() => alive && setProgress(null));
+    return () => {
+      alive = false;
+    };
+  }, [user]);
+
+  const handleWithdraw = async () => {
+    if (!confirmWithdraw) {
+      setConfirmWithdraw(true);
       return;
     }
-    setDeleting(true);
     try {
-      const token = localStorage.getItem("pcg_token");
-      await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/me`,
-        {
-          method: "DELETE",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      );
-      logout();
-    } finally {
-      setDeleting(false);
-      setDeleteConfirm(false);
+      await withdraw();
+      router.push("/login");
+    } catch (err) {
+      setError(err instanceof ApiException ? err.message : "Could not withdraw. Please try again.");
     }
   };
 
+  const steps = progress
+    ? [
+        { label: "Consent", done: true, href: "/consent" },
+        { label: "Starting questionnaire", done: progress.questionnaireDone, href: "/onboarding" },
+        { label: "Pre-test", done: progress.pretestDone, href: "/tests/pretest" },
+        { label: `Learn (${progress.answered} answered)`, done: false, href: "/session" },
+        { label: "Post-test (at the end of the study)", done: progress.posttestDone, href: "/tests/posttest" },
+      ]
+    : [];
+  const nextStep = steps.find((s) => !s.done);
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
-      {/* Top Navbar */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-md shadow-indigo-500/30">
-              Ψ
-            </div>
-            <div>
-              <span className="font-semibold text-white tracking-tight">PCG Engine</span>
-              <span className="hidden sm:inline-block ml-2 text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
-                DSA Adaptive Learning
-              </span>
-            </div>
-          </div>
+      <Navbar />
+      <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-10 space-y-8">
+        <section className="space-y-3">
+          <h1 className="text-3xl font-bold text-white">Learn data structures and algorithms, one step at a time</h1>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            The app picks your next question from a map of 63 DSA concepts, explains each concept in a
+            style it adjusts to your feedback, and always tells you why it chose what it did.
+          </p>
+        </section>
 
-          <div className="flex items-center gap-3">
-            {isLoading ? (
-              <span className="text-xs text-slate-500">Checking auth...</span>
-            ) : user ? (
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-300 hidden md:inline">
-                  {user.display_name}
-                </span>
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                  {user.arm}
-                </span>
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded-md border border-slate-800 hover:border-slate-700 transition-colors"
-                >
-                  Sign Out
-                </button>
-              </div>
-            ) : (
+        {isLoading ? (
+          <p className="text-sm text-slate-500">Loading…</p>
+        ) : !user ? (
+          <div className="flex gap-3">
+            <Link href="/login" className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold text-white">
+              Log in or create an account
+            </Link>
+          </div>
+        ) : !user.consent_at ? (
+          <Link href="/consent" className="inline-block px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-sm font-semibold text-white">
+            Read the study information to start
+          </Link>
+        ) : (
+          <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4" data-testid="study-steps">
+            <h2 className="text-base font-semibold text-white">Your study path</h2>
+            <ol className="space-y-2">
+              {steps.map((s) => (
+                <li key={s.label} className="flex items-center justify-between text-sm">
+                  <span className={s.done ? "text-slate-500 line-through" : "text-slate-200"}>{s.label}</span>
+                  {s.done ? (
+                    <span className="text-xs text-emerald-400">done</span>
+                  ) : (
+                    <Link href={s.href} className="text-xs text-indigo-400 hover:text-indigo-300">
+                      open →
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ol>
+            {nextStep && (
               <Link
-                href="/login"
-                className="text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-1.5 rounded-lg shadow-md transition-colors"
+                href={nextStep.href}
+                className="inline-block px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm font-semibold text-white"
               >
-                Sign In / Register
+                Continue: {nextStep.label}
               </Link>
             )}
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
-        {/* Hero Section */}
-        <div className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900/90 to-indigo-950/40 p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
-
-          <div className="max-w-2xl space-y-4 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-              Adaptive DSA Explanation & Feedback Engine
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              Personalized Algorithm Explanations Tuned to How You Learn
-            </h1>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Every learner processes abstraction, formal rules, and worked examples
-              differently. PCG combines Bayesian Knowledge Tracing with psychometric trait
-              inference to continuously close the feedback loop.
-            </p>
-
-            <div className="pt-2 flex flex-wrap gap-3">
-              {!user ? (
-                <Link
-                  href="/login"
-                  className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 transition-all"
-                >
-                  Join Research Study →
-                </Link>
-              ) : !user.consent_at ? (
-                <Link
-                  href="/consent"
-                  className="rounded-xl bg-amber-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-600/30 hover:bg-amber-500 transition-all animate-pulse"
-                >
-                  Complete Informed Consent →
-                </Link>
-              ) : (
-                <div className="flex flex-wrap items-center gap-3">
-                  <Link
-                    href="/session"
-                    className="rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2"
-                  >
-                    <span>Adaptive Session</span>
-                    <span>→</span>
-                  </Link>
-                  <Link
-                    href="/dashboard"
-                    className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-3 text-sm font-semibold shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2"
-                  >
-                    <span>Open Learner Model</span>
-                    <span>→</span>
-                  </Link>
-                  <Link
-                    href="/admin"
-                    className="rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-3 text-sm font-medium border border-slate-700 transition-all"
-                  >
-                    Admin Analytics
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* User Status Card */}
-        {user && (
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold text-white">Learner Account Status</h2>
-              <span
-                className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
-                  user.consent_at
-                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                }`}
-              >
-                {user.consent_at ? "Consent Active" : "Consent Pending"}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <div className="p-3.5 rounded-xl bg-slate-950/50 border border-slate-800">
-                <span className="text-xs text-slate-400 block mb-1">Participant</span>
-                <span className="font-semibold text-white text-sm block truncate">
-                  {user.display_name}
-                </span>
-                <span className="text-xs text-slate-500 block truncate">{user.email}</span>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-slate-950/50 border border-slate-800">
-                <span className="text-xs text-slate-400 block mb-1">Study Track</span>
-                <span className="font-mono font-bold text-indigo-400 text-sm block">
-                  {user.arm}
-                </span>
-                <span className="text-xs text-slate-500 block">Balanced allocation</span>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-slate-950/50 border border-slate-800">
-                <span className="text-xs text-slate-400 block mb-1">Consent Date</span>
-                <span className="text-sm font-medium text-slate-200 block">
-                  {user.consent_at
-                    ? new Date(user.consent_at).toLocaleDateString()
-                    : "Not provided yet"}
-                </span>
-                {!user.consent_at && (
-                  <Link
-                    href="/consent"
-                    className="text-xs text-amber-400 underline hover:text-amber-300 block mt-1"
-                  >
-                    Provide consent now
-                  </Link>
-                )}
-              </div>
-            </div>
-
-            {/* Right to be forgotten (D11 privacy) */}
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-500">
-              <span>GDPR / Study Rights: You can request immediate erasure of your records.</span>
-              <button
-                type="button"
-                onClick={handleDeleteAccount}
-                disabled={deleting}
-                className="text-rose-400 hover:text-rose-300 font-medium transition-colors"
-              >
-                {deleteConfirm ? "Click again to confirm delete" : "Delete My Data"}
-              </button>
-            </div>
-          </div>
+          </section>
         )}
 
-        {/* Closed Loop Architecture Modules */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5 space-y-2.5 hover:border-slate-700 transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-sm">
-              A
-            </div>
-            <h3 className="font-semibold text-white text-sm">Unified Learner State</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Bayesian Knowledge Tracing over 60 DSA concepts, paired with a 5-dimensional
-              Gaussian psychometric trait vector (abstraction, load tolerance, depth, persistence,
-              efficacy).
+        {user && (
+          <section className="rounded-2xl border border-rose-500/20 bg-rose-950/10 p-5 space-y-2">
+            <h2 className="text-sm font-semibold text-rose-200">Withdraw from the study</h2>
+            <p className="text-xs text-slate-400">
+              Your account stops working immediately and all your data is deleted by the next clean-up run.
+              This cannot be undone.
             </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5 space-y-2.5 hover:border-slate-700 transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-sm">
-              B
-            </div>
-            <h3 className="font-semibold text-white text-sm">Grounded Explainer</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              12 discrete presentation variants per concept card. Guaranteed factual grounding
-              with precomputed cache, fast live LLM fallback, and deterministic template fail-safe.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5 space-y-2.5 hover:border-slate-700 transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-sm">
-              C
-            </div>
-            <h3 className="font-semibold text-white text-sm">Feedback Analyzer</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              High-resolution client telemetry tracking viewport dwell, expansions, replays, and
-              micro-checks to feed back into trait estimates and close the loop.
-            </p>
-          </div>
-        </div>
+            {error && <p className="text-xs text-rose-300">{error}</p>}
+            <button
+              type="button"
+              onClick={handleWithdraw}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white"
+            >
+              {confirmWithdraw ? "Yes, withdraw and delete my data" : "Withdraw"}
+            </button>
+            {confirmWithdraw && (
+              <button type="button" onClick={() => setConfirmWithdraw(false)} className="ml-2 text-xs text-slate-400">
+                Cancel
+              </button>
+            )}
+          </section>
+        )}
       </main>
     </div>
   );
