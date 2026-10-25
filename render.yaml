@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: pcg-engine-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pcg-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL_EXPLAIN
+        value: gemini-2.5-flash
+      - key: GEMINI_MODEL_OFFLINE
+        value: gemini-2.5-flash
+      - key: LLM_TIMEOUT_SECONDS
+        value: "4.0"
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+      - key: RATE_LIMIT_REQUESTS_PER_MINUTE
+        value: "120"
+
+databases:
+  - name: pcg-db
+    databaseName: pcg
+    user: pcg
+    plan: free

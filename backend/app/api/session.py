@@ -14,8 +14,9 @@ from app.api.deps import (
     LearnerModelDep,
     PlannerDep,
 )
+from app.api.flags import get_arm_features
 from app.auth import UserResponse, require_consent
-from app.contracts.explanation import ExplanationRequest
+from app.contracts.explanation import ExplanationRequest, StyleParams
 from app.contracts.graph import PublicItem
 from app.contracts.planning import NextStepResponse
 
@@ -41,8 +42,27 @@ def next_step(
     # 2. Re-planner decides next concept recommendation and reason evidence
     rec = planner.next_step(state)
 
-    # 3. Re-planner chooses presentation style based on psychometrics
-    style, style_source = planner.choose_style(state, rec.target_concept_id)
+    # 3. Choose presentation style governed by study arm feature flags
+    features = get_arm_features(current_user.arm)
+    if features.forced_style is not None:
+        style = features.forced_style
+        style_source = "generic"
+    else:
+        style, style_source = planner.choose_style(state, rec.target_concept_id)
+        if features.allow_trait_personalization and style_source == "generic":
+            traits = state.traits.traits
+            abs_pref = (
+                traits["abstraction_preference"].mean if "abstraction_preference" in traits else 0.5
+            )
+            depth_pref = traits["depth_preference"].mean if "depth_preference" in traits else 0.5
+            style = StyleParams(
+                example_first=abs_pref < 0.5,
+                length="medium",
+                depth="why" if depth_pref > 0.6 else "how",
+            )
+            style_source = "trait_mapped"
+        elif not features.allow_exploration and style_source in ("thompson", "exploration"):
+            style_source = "trait_mapped"
 
     # 4. Explainer generates or retrieves grounded explanation
     req = ExplanationRequest(

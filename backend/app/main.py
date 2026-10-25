@@ -8,7 +8,9 @@ from fastapi.responses import JSONResponse
 
 from app import __version__
 from app.api import api_router
+from app.api.middleware import RateLimitMiddleware
 from app.auth import router as auth_router
+from app.config import settings
 
 
 @asynccontextmanager
@@ -28,6 +30,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+app.add_middleware(
+    RateLimitMiddleware,
+    max_requests=settings.rate_limit_requests_per_minute,
+    window_seconds=60,
+    enabled=settings.rate_limit_enabled,
 )
 
 

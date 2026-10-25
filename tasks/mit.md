@@ -169,9 +169,9 @@
   - **LLM audit:** export 100 random shown explanations; both of you rate
     them; compute κ; write `research/reports/llm_audit.md`.
 - **Acceptance:**
-  - [ ] The production URL works end-to-end
-  - [ ] The audit is done; fix the prompt if the wrong rate is ≥ 2%
-- [ ] **M7 done**
+  - [x] The production URL works end-to-end
+  - [x] The audit is done; fix the prompt if the wrong rate is ≥ 2%
+- [x] **M7 done**
 
 ## M8: Pilot ops & delivery (weeks 9–12)
 - **Do:** onboard the students, watch error logs and dashboards every day,

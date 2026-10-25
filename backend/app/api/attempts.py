@@ -10,8 +10,10 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 
 from app.api.deps import FeedbackAnalyzerDep, GraphDep, LearnerModelDep
+from app.api.flags import get_arm_features
 from app.api.learners import log_state_update
 from app.auth import UserResponse, require_consent
+from app.auth.models import ExperimentArm
 from app.auth.store import (
     DEMO_ADVANCED_ID,
     DEMO_INTERMEDIATE_ID,
@@ -106,6 +108,7 @@ def _process_explanation_feedback(
     user_id: UUID,
     item_id: str,
     correct: bool,
+    arm: ExperimentArm = "closed_loop",
 ) -> None:
     """Background task closing the feedback loop upon micro-check submission."""
     event = ExplanationEventIn(
@@ -115,9 +118,12 @@ def _process_explanation_feedback(
         payload={"item_id": item_id, "correct": correct},
     )
     analyzer.record_events(explanation_id, user_id, [event])
-    summary = analyzer.summarize(explanation_id)
-    feedback_delta = learner_model.apply_explanation_feedback(summary)
-    log_state_update(user_id, feedback_delta)
+
+    features = get_arm_features(arm)
+    if features.allow_closed_loop_feedback:
+        summary = analyzer.summarize(explanation_id)
+        feedback_delta = learner_model.apply_explanation_feedback(summary)
+        log_state_update(user_id, feedback_delta)
 
 
 @router.post(
@@ -179,6 +185,7 @@ def record_attempt(
             user_id=current_user.id,
             item_id=payload.item_id,
             correct=correct,
+            arm=current_user.arm,
         )
 
     return AttemptResult(
