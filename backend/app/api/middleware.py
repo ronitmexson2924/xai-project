@@ -58,9 +58,10 @@ def reset_rate_limiter() -> None:
 
 
 def client_ip(request: Request) -> str:
-    # X-Forwarded-For is client-controlled unless a trusted proxy overwrites it
+    # X-Forwarded-For is client-controlled; a trusted proxy appends the address it saw, so only
+    # the last entry can be believed (the earlier ones are whatever the client sent)
     if settings.trust_proxy_headers:
-        forwarded = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+        forwarded = request.headers.get("x-forwarded-for", "").split(",")[-1].strip()
         if forwarded:
             return forwarded
     return request.client.host if request.client else "unknown"

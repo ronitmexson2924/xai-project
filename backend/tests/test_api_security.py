@@ -547,6 +547,24 @@ def test_spoofed_forwarded_for_does_not_bypass_rate_limits(api: ApiClient) -> No
     assert codes.count(429) >= 3
 
 
+def test_behind_a_proxy_only_the_address_it_appended_counts(api: ApiClient) -> None:
+    settings.rate_limit_enabled = True
+    settings.trust_proxy_headers = True
+    old = settings.rate_limit_requests_per_minute
+    settings.rate_limit_requests_per_minute = 5
+    try:
+        codes = [  # the client forges the first entry; the proxy appends the real address
+            api.get(f"{API}/graph", headers={"X-Forwarded-For": f"10.0.0.{i}, 203.0.113.7"})
+            for i in range(8)
+        ]
+        other = api.get(f"{API}/graph", headers={"X-Forwarded-For": "203.0.113.8"})
+    finally:
+        settings.rate_limit_requests_per_minute = old
+        settings.trust_proxy_headers = False
+    assert [r.status_code for r in codes].count(429) >= 3
+    assert other.status_code != 429  # a different real client is not blocked
+
+
 def test_oversized_bodies_are_refused(api: ApiClient) -> None:
     r = api.post(
         f"{API}/auth/login",

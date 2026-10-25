@@ -1,24 +1,40 @@
+# Backend + database on Render. The frontend is a separate Next.js deploy (Vercel or a Render
+# web service) with NEXT_PUBLIC_API_URL pointing at this service; put its origin in CORS_ORIGINS.
 services:
   - type: web
     name: pcg-engine-backend
     runtime: python
     rootDir: backend
     buildCommand: pip install .
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    # Migrations and the (idempotent) content seed run on every start, so a deploy never serves
+    # an old schema. One worker: the rate limiters and the graph cache live in process memory.
+    startCommand: >-
+      alembic upgrade head && python -m app.graph.seed ../content &&
+      uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
+      - key: ENVIRONMENT
+        value: production # refuses to start with weak secrets or a wildcard CORS origin
       - key: DATABASE_URL
         fromDatabase:
           name: pcg-db
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
+      - key: EXPORT_SALT
+        generateValue: true # keeps export pseudonyms stable; never rotate mid-study
+      - key: CORS_ORIGINS
+        sync: false # e.g. https://pcg-engine.vercel.app
+      - key: TRUST_PROXY_HEADERS
+        value: "true" # Render's proxy sets X-Forwarded-For; needed for per-client rate limits
+      - key: INCLUDE_DRAFT_ITEMS
+        value: "false" # true only for a demo; the study serves reviewed items only (S3)
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL_EXPLAIN
-        value: gemini-2.5-flash
+        sync: false # model names are configuration; leave empty to serve stored variants only
       - key: GEMINI_MODEL_OFFLINE
-        value: gemini-2.5-flash
+        sync: false
       - key: LLM_TIMEOUT_SECONDS
         value: "4.0"
       - key: RATE_LIMIT_ENABLED
