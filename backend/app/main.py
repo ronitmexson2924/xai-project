@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app import __version__
+from app.api import api_router
 from app.auth import router as auth_router
 
 
@@ -47,3 +48,4 @@ def health() -> dict[str, str]:
 
 
 app.include_router(auth_router, prefix="/api/v1")
+app.include_router(api_router, prefix="/api/v1")

@@ -55,10 +55,10 @@
   background tasks for feedback application. `/session/next` follows the
   sequence diagram in `ARCHITECTURE.md` exactly.
 - **Acceptance:**
-  - [ ] An API test runs the whole loop with fakes: register → consent →
+  - [x] An API test runs the whole loop with fakes: register → consent →
         questionnaire → next → events → attempt (micro-check) → state changed
-  - [ ] OpenAPI includes every contract model
-- [ ] **M1 done**
+  - [x] OpenAPI includes every contract model
+- [x] **M1 done**
 
 ## M2: Explanation telemetry (Module C capture) (weeks 2–3)
 - **Depends on:** M0 (frontend), M1 (route)

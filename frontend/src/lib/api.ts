@@ -19,6 +19,7 @@ export class ApiException extends Error {
   }
 }
 
+// Auth types
 export type RegisterRequest =
   paths["/api/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"];
 export type RegisterResponse =
@@ -34,6 +35,44 @@ export type ConsentResponse =
 
 export type UserResponse =
   paths["/api/v1/auth/me"]["get"]["responses"]["200"]["content"]["application/json"];
+
+// Onboarding types
+export type QuestionnaireItem =
+  paths["/api/v1/onboarding/questionnaire"]["get"]["responses"]["200"]["content"]["application/json"][number];
+export type StateDelta =
+  paths["/api/v1/onboarding/questionnaire"]["post"]["responses"]["200"]["content"]["application/json"];
+
+// Session types
+export type NextStepResponse =
+  paths["/api/v1/session/next"]["post"]["responses"]["200"]["content"]["application/json"];
+
+// Attempts types
+export type AttemptIn =
+  paths["/api/v1/attempts"]["post"]["requestBody"]["content"]["application/json"];
+export type AttemptResult =
+  paths["/api/v1/attempts"]["post"]["responses"]["200"]["content"]["application/json"];
+
+// Explanation & Telemetry types
+export type Explanation =
+  paths["/api/v1/explanations/{explanation_id}"]["get"]["responses"]["200"]["content"]["application/json"];
+export type EventBatchIn =
+  paths["/api/v1/explanations/{explanation_id}/events"]["post"]["requestBody"]["content"]["application/json"];
+export type EventBatchResponse =
+  paths["/api/v1/explanations/{explanation_id}/events"]["post"]["responses"]["200"]["content"]["application/json"];
+export type ExplanationFeedbackSummary =
+  paths["/api/v1/explanations/{explanation_id}/close"]["post"]["responses"]["200"]["content"]["application/json"];
+
+// Learner State & History types
+export type LearnerState =
+  paths["/api/v1/learners/me/state"]["get"]["responses"]["200"]["content"]["application/json"];
+export type StateUpdateView =
+  paths["/api/v1/learners/me/history"]["get"]["responses"]["200"]["content"]["application/json"][number];
+
+// Graph & Admin types
+export type GraphResponse =
+  paths["/api/v1/graph"]["get"]["responses"]["200"]["content"]["application/json"];
+export type AdminMetricsResponse =
+  paths["/api/v1/admin/metrics"]["get"]["responses"]["200"]["content"]["application/json"];
 
 function getStoredToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -112,6 +151,80 @@ export const api = {
     deleteMe: () =>
       request<void>("/api/v1/me", {
         method: "DELETE",
+      }),
+  },
+
+  onboarding: {
+    getQuestionnaire: () =>
+      request<QuestionnaireItem[]>("/api/v1/onboarding/questionnaire", {
+        method: "GET",
+      }),
+
+    submitQuestionnaire: (answers: Record<string, number>) =>
+      request<StateDelta>("/api/v1/onboarding/questionnaire", {
+        method: "POST",
+        body: JSON.stringify({ answers }),
+      }),
+  },
+
+  session: {
+    next: () =>
+      request<NextStepResponse>("/api/v1/session/next", {
+        method: "POST",
+        body: JSON.stringify({}),
+      }),
+  },
+
+  attempts: {
+    submit: (payload: AttemptIn) =>
+      request<AttemptResult>("/api/v1/attempts", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+  },
+
+  explanations: {
+    get: (id: string) =>
+      request<Explanation>(`/api/v1/explanations/${id}`, {
+        method: "GET",
+      }),
+
+    sendEvents: (id: string, events: EventBatchIn["events"]) =>
+      request<EventBatchResponse>(`/api/v1/explanations/${id}/events`, {
+        method: "POST",
+        body: JSON.stringify({ events }),
+      }),
+
+    close: (id: string) =>
+      request<ExplanationFeedbackSummary>(`/api/v1/explanations/${id}/close`, {
+        method: "POST",
+        body: JSON.stringify({}),
+      }),
+  },
+
+  learners: {
+    getState: () =>
+      request<LearnerState>("/api/v1/learners/me/state", {
+        method: "GET",
+      }),
+
+    getHistory: () =>
+      request<StateUpdateView[]>("/api/v1/learners/me/history", {
+        method: "GET",
+      }),
+  },
+
+  graph: {
+    get: () =>
+      request<GraphResponse>("/api/v1/graph", {
+        method: "GET",
+      }),
+  },
+
+  admin: {
+    getMetrics: () =>
+      request<AdminMetricsResponse>("/api/v1/admin/metrics", {
+        method: "GET",
       }),
   },
 
