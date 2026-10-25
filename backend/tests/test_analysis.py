@@ -76,3 +76,12 @@ def test_pipeline_end_to_end_on_simulated_logs(db: Session) -> None:
     r4 = h.h4(frames, n_boot=50)
     assert r4["available"] and set(r4["vs_generic"]) == {"static_personalized", "closed_loop"}
     assert set(backtest(frames)) and all(r["events"] >= 0 for r in backtest(frames).values())
+
+    rx = h.xai(frames, n_boot=20)
+    assert rx["available"] and set(rx["per_arm"]) == {
+        "generic",
+        "static_personalized",
+        "closed_loop",
+    }
+    assert all(r["with_rationale"] == 1.0 for r in rx["per_arm"].values())  # every decision
+    assert all(r["with_counterfactual"] > 0 for r in rx["per_arm"].values())

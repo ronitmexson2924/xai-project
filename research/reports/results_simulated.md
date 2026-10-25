@@ -13,40 +13,54 @@
 
 | model | AUC | log-loss |
 |---|---|---|
-| BKT p̂ only | 0.748 | 0.521 |
-| + explanation feedback | 0.747 | 0.521 |
+| BKT p̂ only | 0.748 | 0.526 |
+| + explanation feedback | 0.749 | 0.526 |
 
-AUC gain -0.000 (95% learner-bootstrap CI -0.003 to +0.003); log-loss reduction +0.0000 (CI -0.0012 to +0.0013). **H1 is supported only if both CIs exclude 0.**
+AUC gain +0.001 (95% learner-bootstrap CI -0.002 to +0.004); log-loss reduction -0.0000 (CI -0.0015 to +0.0014). **H1 is supported only if both CIs exclude 0.**
 
 ## H2: arm effect on micro-check accuracy
 
 | arm | micro-checks | accuracy |
 |---|---|---|
-| closed_loop | 1205 | 0.695 |
-| generic | 1208 | 0.625 |
-| static_personalized | 1174 | 0.732 |
+| closed_loop | 1189 | 0.693 |
+| generic | 1213 | 0.629 |
+| static_personalized | 1185 | 0.729 |
 
 GEE logistic regression (exchangeable correlation within learner), adjusted for concept cluster; odds ratios vs. generic:
 
 | arm | odds ratio | 95% CI | p |
 |---|---|---|---|
-| closed_loop | 1.373 | 1.085 to 1.738 | 0.00842 |
-| static_personalized | 1.639 | 1.292 to 2.078 | 4.62e-05 |
+| closed_loop | 1.339 | 1.039 to 1.726 | 0.0243 |
+| static_personalized | 1.595 | 1.248 to 2.040 | 0.000196 |
 
 ## H4: normalised learning gain (pre/post test)
 
 | arm | learners | mean gain | 95% CI |
 |---|---|---|---|
-| closed_loop | 30 | 0.209 | 0.152 to 0.272 |
-| generic | 30 | 0.126 | 0.059 to 0.207 |
-| static_personalized | 30 | 0.090 | 0.009 to 0.162 |
+| closed_loop | 30 | 0.190 | 0.138 to 0.237 |
+| generic | 30 | 0.099 | 0.020 to 0.179 |
+| static_personalized | 30 | 0.105 | 0.017 to 0.188 |
 
 | vs. generic | difference | 95% CI | Cohen's d |
 |---|---|---|---|
-| closed_loop | +0.083 | -0.012 to +0.181 | +0.42 |
-| static_personalized | -0.036 | -0.133 to +0.075 | -0.17 |
+| closed_loop | +0.091 | +0.003 to +0.188 | +0.49 |
+| static_personalized | +0.007 | -0.112 to +0.119 | +0.03 |
 
 Pre-registered as underpowered: report the effect size and CI, not a significance claim.
+
+## Explainability (XAI_DESIGN §5)
+
+Faithfulness is checked automatically in CI: every counterfactual is carried out through the real learner model and must produce the promised recommendation (`tests/test_rationale.py`). From the logs:
+
+| arm | recommendations | with rationale | with a counterfactual | 'Why this?' opened per explanation | 1-tap ratings | rated helpful (95% CI) |
+|---|---|---|---|---|---|---|
+| closed_loop | 1500 | 100% | 100% | 0.000 | 0 | — |
+| generic | 1500 | 100% | 99% | 0.000 | 0 | — |
+| static_personalized | 1500 | 100% | 100% | 0.000 | 0 | — |
+
+Decision rules behind the recommendations: DIAGNOSTIC 425, MISCONCEPTION_DETECTED 1662, MISCONCEPTION_SUSPECTED 2, PREREQ_GAP 12, READY_FOR_NEXT 2032, REVIEW_DUE 367.
+
+'Why this?' panel events (`why_opened`, `why_rated`) come from Mit's UI (M10); they are empty until it exists. The three survey items are analysed separately.
 
 ## Questionnaire reliability
 
@@ -64,10 +78,10 @@ A struggle run = two wrong answers in a row on one concept. A detector warns **e
 
 | detector | struggle runs | early-warning recall | precision | median lead | alarms / 100 answers |
 |---|---|---|---|---|---|
-| naive (last answer wrong) | 564 | 0.629 | 0.288 | 3.0 | 16.0 |
-| drift (CUSUM) | 564 | 0.135 | 0.271 | 2.0 | 3.5 |
-| resonance (R < 0.6) | 564 | 0.557 | 0.361 | 2.0 | 11.0 |
+| naive (last answer wrong) | 575 | 0.630 | 0.305 | 3.0 | 15.8 |
+| drift (CUSUM) | 575 | 0.160 | 0.285 | 2.5 | 4.0 |
+| resonance (R < 0.6) | 575 | 0.541 | 0.363 | 2.0 | 11.0 |
 
 A detector is only useful if it beats the naive baseline on lead time *and* precision; resonance and drift may drive live decisions only if this holds on pilot data (decision D10).
 
-_Analysis time 2.6 s._
+_Analysis time 2.9 s._

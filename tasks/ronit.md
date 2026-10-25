@@ -267,7 +267,12 @@
 - **Do:** add the faithfulness, comprehensibility, usefulness and behaviour measures
   (XAI_DESIGN §5) to `research/preregistration.md`, and add their analysis to
   `research/analyze.py`.
-- [ ] **R11 done**
+- [x] **R11 done**
+  - _Pre-registration X1 (faithfulness, rationale and counterfactual coverage, "Why this?" use and
+    helpfulness, per arm) and X2 (three survey items), plus decision D (show "Why this?" in the
+    generic arm too?). `hypotheses.xai` and the report section are in `research/analyze.py`.
+    Simulated run: 100% of recommendations carry a rationale and 99-100% a verified
+    counterfactual. Panel-use columns stay empty until Mit's M10 exists._
 
 ---
 

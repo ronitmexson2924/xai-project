@@ -6,7 +6,7 @@ The predicted P(correct) for every attempt is recovered from the live model's ow
 """
 
 import hashlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import pandas as pd
 from sqlalchemy import select
@@ -24,10 +24,20 @@ class Frames:
     attempts: pd.DataFrame  # one row per answer, incl. p_hat and test phase
     explanations: pd.DataFrame  # one row per shown explanation + its feedback summary
     questionnaire: pd.DataFrame  # learner, item_id, value
+    # XAI (docs/XAI_DESIGN.md §5): one row per recommendation, one per "Why this?" panel event
+    recommendations: pd.DataFrame = field(default_factory=pd.DataFrame)
+    xai_events: pd.DataFrame = field(default_factory=pd.DataFrame)
 
     def save(self, directory) -> None:
         directory.mkdir(parents=True, exist_ok=True)
-        for name in ("learners", "attempts", "explanations", "questionnaire"):
+        for name in (
+            "learners",
+            "attempts",
+            "explanations",
+            "questionnaire",
+            "recommendations",
+            "xai_events",
+        ):
             getattr(self, name).to_csv(directory / f"{name}.csv", index=False)
 
 
@@ -137,9 +147,56 @@ def load_frames(
         ],
         columns=["learner", "item_id", "value"],
     )
+    recommendations = pd.DataFrame(
+        [
+            {
+                "learner": ids[r.user_id],
+                "recommendation_id": str(r.id),
+                "created_at": r.created_at,
+                "kind": r.kind,
+                "rule": (r.rationale or {}).get("rule"),
+                "has_rationale": r.rationale is not None,
+                "n_counterfactuals": len((r.rationale or {}).get("counterfactuals", [])),
+                "style_source": (r.style_rationale or {}).get("source"),
+                "style_confidence": (r.style_rationale or {}).get("confidence"),
+            }
+            for r in session.scalars(select(m.RecommendationRow))
+            if r.user_id in ids
+        ],
+        columns=[
+            "learner",
+            "recommendation_id",
+            "created_at",
+            "kind",
+            "rule",
+            "has_rationale",
+            "n_counterfactuals",
+            "style_source",
+            "style_confidence",
+        ],
+    )
+    xai_events = pd.DataFrame(
+        [
+            {
+                "learner": ids[ev.user_id],
+                "explanation_id": str(ev.explanation_id),
+                "type": ev.type,
+                "helpful": ev.payload.get("helpful") if ev.type == "why_rated" else None,
+            }
+            for ev in session.scalars(
+                select(m.ExplanationEventRow).where(
+                    m.ExplanationEventRow.type.in_(("why_opened", "why_rated"))
+                )
+            )
+            if ev.user_id in ids
+        ],
+        columns=["learner", "explanation_id", "type", "helpful"],
+    )
     return Frames(
         learners=learners,
         attempts=pd.DataFrame(attempts),
         explanations=pd.DataFrame(explanations),
         questionnaire=questionnaire,
+        recommendations=recommendations,
+        xai_events=xai_events,
     )

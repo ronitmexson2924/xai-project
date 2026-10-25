@@ -237,3 +237,42 @@ def reliability(frames: Frames, items: list[QuestionnaireItem]) -> dict[str, tup
     for row in frames.questionnaire.itertuples():
         responses.setdefault(row.learner, {})[row.item_id] = int(row.value)
     return alpha_per_trait(items, responses)
+
+
+# --- XAI measures (docs/XAI_DESIGN.md §5) -------------------------------------------------------
+
+
+def xai(frames: Frames, n_boot: int = 1000, seed: int = 0) -> dict:
+    """Per arm: rationale and counterfactual coverage of recommendations, how often learners open
+    "Why this?" per explanation shown, and the share of 1-tap ratings that say it was helpful
+    (learner-level bootstrap CI). Faithfulness itself is checked in CI (tests/test_rationale.py)."""
+    recs = frames.recommendations.merge(frames.learners, on="learner")
+    if recs.empty:
+        return {"available": False}
+    shown = frames.explanations.merge(frames.learners, on="learner")
+    events = frames.xai_events.merge(frames.learners, on="learner")
+    per_arm = {}
+    for arm, group in recs.groupby("arm"):
+        arm_shown = shown[shown.arm == arm]
+        arm_events = events[events.arm == arm]
+        opened = arm_events[arm_events.type == "why_opened"].explanation_id.nunique()
+        ratings = arm_events[arm_events.type == "why_rated"].dropna(subset=["helpful"])
+        row = {
+            "recommendations": len(group),
+            "with_rationale": float(group.has_rationale.mean()),
+            "with_counterfactual": float((group.n_counterfactuals > 0).mean()),
+            "explanations_shown": len(arm_shown),
+            "why_open_rate": opened / len(arm_shown) if len(arm_shown) else float("nan"),
+            "ratings": len(ratings),
+            "helpful_share": float(ratings.helpful.astype(bool).mean())
+            if len(ratings)
+            else float("nan"),
+            "helpful_ci": (float("nan"), float("nan")),
+        }
+        if len(ratings) >= 2 and ratings.learner.nunique() >= 2:
+            helpful = ratings.helpful.astype(float).to_numpy()
+            row["helpful_ci"] = cluster_bootstrap(
+                ratings.learner.to_numpy(), lambda i, h=helpful: float(h[i].mean()), n_boot, seed
+            )
+        per_arm[arm] = row
+    return {"available": True, "per_arm": per_arm, "rules": recs.rule.value_counts().to_dict()}

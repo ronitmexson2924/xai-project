@@ -38,6 +38,8 @@
 | **H4** | Does the full system improve learning gain? | Normalised gain `(post − pre)/(1 − pre)`, learners with pre < 1. Per-arm mean with bootstrap CI; difference vs `generic` with bootstrap CI and Cohen's d. (`hypotheses.h4`) | **Underpowered by design:** report effect sizes and CIs only, with no significance claim. |
 | **H5** *(exploratory)* | Do drift or resonance alarms warn before struggle? | Struggle run = 2 wrong answers in a row on one concept. Early warning = an alarm onset within the 5 answers up to and including the run's first wrong answer. Recall, precision, median lead and alarm rate, against a naive "last answer wrong" baseline. (`backtest/early_warning.py`) | A detector beats the baseline on both lead and precision. Only then may it drive live decisions (D10). |
 | Reliability | Are the questionnaire scales internally consistent? | Cronbach's α per trait. (`hypotheses.reliability`) | Reported; α < 0.6 flags the trait as unreliable. |
+| **X1** *(XAI, descriptive)* | Are the adaptation's explanations faithful, used and understood? | (a) **Faithfulness**, automated before the pilot: every counterfactual in a rationale is carried out through the real learner model and must give the promised recommendation (`tests/test_rationale.py`). Coverage from the logs: share of recommendations with a rationale and with ≥ 1 counterfactual. (b) **Use**: "Why this?" opens per explanation shown. (c) **Comprehensibility**: share of 1-tap ratings that say helpful, with a learner-bootstrap CI. All per arm. (`hypotheses.xai`) | Descriptive. (a) must be 100% in CI; rationale coverage must be 100% of recommendations. |
+| **X2** *(XAI, survey)* | Do learners feel they understand and can trust the adaptation? | Three 5-point items in the post-test survey: "I understood why the app chose my next question", "The explanations of my progress matched how I felt I was doing", "Knowing why helped me decide what to practise". Mean per arm with 95% CI. | Descriptive; reported with X1. |
 
 **Deviation from `EVALUATION_PLAN.md`:** H2 there names a mixed-effects logistic regression. GEE
 with learner clustering estimates the same population-level arm effect with robust standard
@@ -82,6 +84,10 @@ exploratory. All results are reported, including nulls.
 - **B. Explore/exploit.** Keep full Thompson sampling, which is best for identifying traits,
   or exploit more, which is better for short-term learning (R6 finding 3;
   `docs/MODEL_SPEC.md` §2.2 "Checked in R6")?
+- **D. Explanations in the `generic` arm.** Decision rationales (why this question, what would
+  change it) are shown in every arm, because the planner is the same for all arms. Only the
+  *style* rationale differs between arms. Confirm this, or hide "Why this?" in `generic` to
+  test the explanations themselves (that adds a factor and lowers power).
 - **C. Pilot length.** About 40 explanations per learner is enough for H2 but leaves trait
   recovery partial (R6). Can sessions be extended?
 

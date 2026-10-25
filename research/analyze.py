@@ -40,6 +40,7 @@ def render(frames: Frames, source: str, n_boot: int) -> str:
     r2 = h.h2(frames)
     r4 = h.h4(frames, n_boot=n_boot)
     alpha = h.reliability(frames, items)
+    rx = h.xai(frames, n_boot=n_boot)
     cfg = BacktestConfig()
     r5 = backtest(frames, cfg)
     arms = frames.learners.arm.value_counts().to_dict()
@@ -121,6 +122,38 @@ def render(frames: Frames, source: str, n_boot: int) -> str:
         ]
     else:
         lines.append("No pre/post-test data in this export.")
+
+    lines += ["", "## Explainability (XAI_DESIGN §5)", ""]
+    if rx["available"]:
+        lines += [
+            "Faithfulness is checked automatically in CI: every counterfactual is carried out "
+            "through the real learner model and must produce the promised recommendation "
+            "(`tests/test_rationale.py`). From the logs:",
+            "",
+            "| arm | recommendations | with rationale | with a counterfactual | "
+            "'Why this?' opened per explanation | 1-tap ratings | rated helpful (95% CI) |",
+            "|---|---|---|---|---|---|---|",
+            *(
+                f"| {arm} | {r['recommendations']} | {r['with_rationale']:.0%} | "
+                f"{r['with_counterfactual']:.0%} | {f3(r['why_open_rate'])} | {r['ratings']} | "
+                + (
+                    f"{f3(r['helpful_share'])} ({f3(r['helpful_ci'][0])} to "
+                    f"{f3(r['helpful_ci'][1])}) |"
+                    if r["ratings"]
+                    else "— |"
+                )
+                for arm, r in sorted(rx["per_arm"].items())
+            ),
+            "",
+            "Decision rules behind the recommendations: "
+            + ", ".join(f"{rule} {n}" for rule, n in sorted(rx["rules"].items(), key=str))
+            + ".",
+            "",
+            "'Why this?' panel events (`why_opened`, `why_rated`) come from Mit's UI (M10); "
+            "they are empty until it exists. The three survey items are analysed separately.",
+        ]
+    else:
+        lines.append("No recommendations in this export.")
 
     lines += [
         "",
