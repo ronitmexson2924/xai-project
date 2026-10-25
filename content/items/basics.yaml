@@ -1,382 +1,660 @@
+# Draft items for the basics cluster. Every item is review_status: draft until Ronit reviews it
+# (S3): set approved or rejected per item. Only approved items are served (GraphSnapshot).
+# Each distractor maps to a misconception of the item's own concept (content/misconceptions.yaml).
 items:
-- id: loops-1
-  concept_id: loops
+- id: variables-and-types-p1
+  concept_id: variables-and-types
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Loops & Iteration?
-  options:
-  - Every loop needs a condition that eventually changes state to terminate.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Every loop needs a condition that eventually changes state to terminate.
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: loops-2
-  concept_id: loops
-  kind: mcq
-  stem: 'Consider this concrete application of Loops & Iteration:
-
-
+  stem: |-
     ```python
-
-    for i in range(3): print(i)
-
+    x = 3
+    y = x
+    x = 10
+    print(y)
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - A loop runs code repeatedly while a termination condition holds.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: A loop runs code repeatedly while a termination condition holds.
+  - '13'
+  - '10'
+  - '3'
+  answer: '3'
   difficulty: 1
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '10': vars-assignment-links-names
+    '13': vars-assignment-links-names
   is_microcheck: false
-  review_status: approved
-- id: loops-3
+  review_status: draft
+- id: variables-and-types-p2
+  concept_id: variables-and-types
+  kind: mcq
+  stem: |-
+    ```python
+    count = 5
+    total = count
+    count = count + 1
+    total = total + 1
+    print(count, total)
+    ```
+    What does this print?
+  options:
+  - 6 7
+  - 7 7
+  - 6 6
+  answer: 6 6
+  difficulty: 1
+  distractor_misconceptions:
+    6 7: vars-assignment-links-names
+    7 7: vars-assignment-links-names
+  is_microcheck: false
+  review_status: draft
+- id: variables-and-types-p3
+  concept_id: variables-and-types
+  kind: mcq
+  stem: After `a = 7` and then `b = a`, which statement is true?
+  options:
+  - a and b are both bound to the value 7; rebinding a later leaves b as 7
+  - b is permanently tied to a, so b changes whenever a is reassigned
+  - b stores the expression 'a', which is re-evaluated every time b is used
+  answer: a and b are both bound to the value 7; rebinding a later leaves b as 7
+  difficulty: 2
+  distractor_misconceptions:
+    b is permanently tied to a, so b changes whenever a is reassigned: vars-assignment-links-names
+    b stores the expression 'a', which is re-evaluated every time b is used: vars-assignment-links-names
+  is_microcheck: false
+  review_status: draft
+- id: variables-and-types-mc
+  concept_id: variables-and-types
+  kind: mcq
+  stem: |-
+    ```python
+    price = 20
+    old = price
+    price = price * 2
+    print(old)
+    ```
+    What does this print?
+  options:
+  - '20'
+  - '60'
+  - '40'
+  answer: '20'
+  difficulty: 1
+  distractor_misconceptions:
+    '40': vars-assignment-links-names
+    '60': vars-assignment-links-names
+  is_microcheck: true
+  review_status: draft
+- id: conditionals-p1
+  concept_id: conditionals
+  kind: mcq
+  stem: |-
+    ```python
+    out = []
+    x = 15
+    if x > 10:
+        out.append("big")
+    elif x > 5:
+        out.append("medium")
+    else:
+        out.append("small")
+    print(out)
+    ```
+    What does this print?
+  options:
+  - '[''big'']'
+  - '[''big'', ''medium'', ''small'']'
+  - '[''big'', ''medium'']'
+  answer: '[''big'']'
+  difficulty: 1
+  distractor_misconceptions:
+    '[''big'', ''medium'']': cond-all-branches-checked
+    '[''big'', ''medium'', ''small'']': cond-all-branches-checked
+  is_microcheck: false
+  review_status: draft
+- id: conditionals-p2
+  concept_id: conditionals
+  kind: mcq
+  stem: |-
+    ```python
+    def label(t):
+        if t >= 0:
+            return "non-negative"
+        elif t >= 10:
+            return "ten or more"
+        return "negative"
+
+    print(label(25))
+    ```
+    What does this print?
+  options:
+  - non-negative
+  - ten or more
+  - negative
+  answer: non-negative
+  difficulty: 1
+  distractor_misconceptions:
+    ten or more: cond-all-branches-checked
+    negative: cond-all-branches-checked
+  is_microcheck: false
+  review_status: draft
+- id: conditionals-p3
+  concept_id: conditionals
+  kind: mcq
+  stem: |-
+    ```python
+    n = 0
+    x = 8
+    if x % 2 == 0:
+        n += 1
+    elif x % 4 == 0:
+        n += 10
+    elif x > 5:
+        n += 100
+    print(n)
+    ```
+    What does this print?
+  options:
+  - '111'
+  - '101'
+  - '1'
+  - '11'
+  answer: '1'
+  difficulty: 2
+  distractor_misconceptions:
+    '111': cond-all-branches-checked
+    '11': cond-all-branches-checked
+    '101': cond-all-branches-checked
+  is_microcheck: false
+  review_status: draft
+- id: conditionals-mc
+  concept_id: conditionals
+  kind: mcq
+  stem: In an `if / elif / else` chain, how many branches run?
+  options:
+  - Every branch whose condition is true, and then the else branch
+  - Every branch whose condition is true, in order
+  - 'Exactly one: the first branch whose condition is true, or the else branch if none is'
+  answer: 'Exactly one: the first branch whose condition is true, or the else branch if none is'
+  difficulty: 1
+  distractor_misconceptions:
+    Every branch whose condition is true, in order: cond-all-branches-checked
+    Every branch whose condition is true, and then the else branch: cond-all-branches-checked
+  is_microcheck: true
+  review_status: draft
+- id: loops-p1
   concept_id: loops
   kind: mcq
-  stem: When implementing Loops & Iteration, which error represents the most frequent pitfall?
+  stem: Which values does `i` take in `for i in range(2, 6):`?
   options:
-  - 'Off-by-one: range(3) stops before 3.'
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: 'Off-by-one: range(3) stops before 3.'
-  difficulty: 2
-  distractor_misconceptions: {}
+  - 2, 3, 4, 5, 6
+  - 2, 3, 4, 5
+  - 3, 4, 5, 6
+  answer: 2, 3, 4, 5
+  difficulty: 1
+  distractor_misconceptions:
+    2, 3, 4, 5, 6: loops-off-by-one
+    3, 4, 5, 6: loops-off-by-one
   is_microcheck: false
-  review_status: approved
+  review_status: draft
+- id: loops-p2
+  concept_id: loops
+  kind: mcq
+  stem: |-
+    ```python
+    i = 0
+    total = 0
+    while i < 5:
+        total += i
+    print(total)
+    ```
+    What happens when this code runs?
+  options:
+  - It prints 15
+  - It never finishes, because i is never updated
+  - It prints 0 after one pass
+  - It prints 10
+  answer: It never finishes, because i is never updated
+  difficulty: 1
+  distractor_misconceptions:
+    It prints 10: loops-while-never-ends
+    It prints 15: loops-while-never-ends
+    It prints 0 after one pass: loops-while-never-ends
+  is_microcheck: false
+  review_status: draft
+- id: loops-p3
+  concept_id: loops
+  kind: mcq
+  stem: |-
+    ```python
+    k = 1
+    total = 0
+    while k < 5:
+        total += k
+        k += 1
+    print(total)
+    ```
+    What does this print?
+  options:
+  - '10'
+  - '15'
+  - It never finishes
+  answer: '10'
+  difficulty: 2
+  distractor_misconceptions:
+    '15': loops-off-by-one
+    It never finishes: loops-while-never-ends
+  is_microcheck: false
+  review_status: draft
 - id: loops-mc
   concept_id: loops
   kind: mcq
-  stem: 'Quick Check: True or False — for Loops & Iteration, Every loop needs a condition that eventually
-    changes state to terminate.'
+  stem: How many times does the body of `for i in range(1, 4):` run?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
+  - '4'
+  - '5'
+  - '3'
+  answer: '3'
   difficulty: 1
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '4': loops-off-by-one
+    '5': loops-off-by-one
   is_microcheck: true
-  review_status: approved
-- id: nested-loops-1
-  concept_id: loop-complexity-analysis
+  review_status: draft
+- id: functions-p1
+  concept_id: functions
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Nested Loops?
+  stem: |-
+    ```python
+    def double(n):
+        print(n * 2)
+
+    result = double(4)
+    print(result)
+    ```
+    What is the second line printed?
   options:
-  - 'Total iterations multiply: outer iterations * inner iterations.'
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: 'Total iterations multiply: outer iterations * inner iterations.'
-  difficulty: 2
-  distractor_misconceptions: {}
+  - None
+  - '4'
+  - '8'
+  answer: None
+  difficulty: 1
+  distractor_misconceptions:
+    '8': func-print-is-return
+    '4': func-print-is-return
   is_microcheck: false
-  review_status: approved
-- id: nested-loops-2
-  concept_id: loop-complexity-analysis
+  review_status: draft
+- id: functions-p2
+  concept_id: functions
   kind: mcq
-  stem: "Consider this concrete application of Nested Loops:\n\n```python\nfor i in range(2):\n    for\
-    \ j in range(3): print(i, j)\n```\n\nWhat is the fundamental guarantee demonstrated by this trace?"
+  stem: |-
+    ```python
+    calls = []
+    def f(x):
+        calls.append("start")
+        return x + 1
+        calls.append("end")
+
+    f(1)
+    print(calls)
+    ```
+    What does this print?
   options:
-  - An inner loop executes its full cycle for every single step of the outer loop.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: An inner loop executes its full cycle for every single step of the outer loop.
-  difficulty: 2
-  distractor_misconceptions: {}
+  - '[''end'']'
+  - '[''start'', ''end'']'
+  - '[''start'']'
+  answer: '[''start'']'
+  difficulty: 1
+  distractor_misconceptions:
+    '[''start'', ''end'']': func-code-after-return
+    '[''end'']': func-code-after-return
   is_microcheck: false
-  review_status: approved
-- id: nested-loops-3
-  concept_id: loop-complexity-analysis
+  review_status: draft
+- id: functions-p3
+  concept_id: functions
   kind: mcq
-  stem: When implementing Nested Loops, which error represents the most frequent pitfall?
+  stem: |-
+    ```python
+    def first_even(nums):
+        for n in nums:
+            if n % 2 == 0:
+                return n
+        return -1
+
+    print(first_even([3, 4, 6]))
+    ```
+    What does this print?
   options:
-  - Confusing inner and outer index variables.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Confusing inner and outer index variables.
+  - 4 6
+  - '-1'
+  - '4'
+  - '6'
+  answer: '4'
+  difficulty: 2
+  distractor_misconceptions:
+    '6': func-code-after-return
+    4 6: func-code-after-return
+    '-1': func-code-after-return
+  is_microcheck: false
+  review_status: draft
+- id: functions-mc
+  concept_id: functions
+  kind: mcq
+  stem: A function computes a value and ends with `print(value)` but has no `return`. What does the caller
+    receive?
+  options:
+  - The printed value, as a string
+  - The printed value
+  - None
+  answer: None
+  difficulty: 1
+  distractor_misconceptions:
+    The printed value: func-print-is-return
+    The printed value, as a string: func-print-is-return
+  is_microcheck: true
+  review_status: draft
+- id: big-o-notation-p1
+  concept_id: big-o-notation
+  kind: mcq
+  stem: A function does `3n + 20` steps on an input of size n. What is its Big-O?
+  options:
+  - O(3n)
+  - O(3n + 20)
+  - O(n + 20)
+  - O(n)
+  answer: O(n)
+  difficulty: 2
+  distractor_misconceptions:
+    O(3n + 20): bigo-keeps-constants
+    O(3n): bigo-keeps-constants
+    O(n + 20): bigo-keeps-constants
+  is_microcheck: false
+  review_status: draft
+- id: big-o-notation-p2
+  concept_id: big-o-notation
+  kind: mcq
+  stem: Algorithm A is O(n) and algorithm B is O(n^2). Which statement is correct?
+  options:
+  - A is faster than B for every input size
+  - Big-O ignores constant factors, so B can still be faster than A on small inputs
+  - A finishes in about n seconds and B in about n^2 seconds
+  answer: Big-O ignores constant factors, so B can still be faster than A on small inputs
+  difficulty: 2
+  distractor_misconceptions:
+    A is faster than B for every input size: bigo-measures-seconds
+    A finishes in about n seconds and B in about n^2 seconds: bigo-measures-seconds
+  is_microcheck: false
+  review_status: draft
+- id: big-o-notation-p3
+  concept_id: big-o-notation
+  kind: mcq
+  stem: A function takes `n^2 + 100n + 7` steps. What is its Big-O?
+  options:
+  - O(100n)
+  - O(n^2)
+  - O(n^2 + 100n + 7)
+  - O(n^2 + 100n)
+  answer: O(n^2)
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    O(n^2 + 100n): bigo-keeps-constants
+    O(n^2 + 100n + 7): bigo-keeps-constants
+    O(100n): bigo-keeps-constants
   is_microcheck: false
-  review_status: approved
-- id: nested-loops-mc
+  review_status: draft
+- id: big-o-notation-mc
+  concept_id: big-o-notation
+  kind: mcq
+  stem: What does it mean that an algorithm is O(n)?
+  options:
+  - It does exactly 1 * n + 0 steps
+  - Its cost grows at most linearly with the input size n, ignoring constant factors
+  - It is faster than any O(n^2) algorithm on every input
+  - It takes exactly n seconds on an input of size n
+  answer: Its cost grows at most linearly with the input size n, ignoring constant factors
+  difficulty: 2
+  distractor_misconceptions:
+    It takes exactly n seconds on an input of size n: bigo-measures-seconds
+    It is faster than any O(n^2) algorithm on every input: bigo-measures-seconds
+    It does exactly 1 * n + 0 steps: bigo-keeps-constants
+  is_microcheck: true
+  review_status: draft
+- id: loop-complexity-analysis-p1
   concept_id: loop-complexity-analysis
   kind: mcq
-  stem: 'Quick Check: True or False — for Nested Loops, Total iterations multiply: outer iterations *
-    inner iterations.'
-  options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: time-complexity-intro-1
-  concept_id: big-o-notation
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Time Complexity Basics?
-  options:
-  - Ignore constant multipliers and lower-order terms as N approaches infinity.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Ignore constant multipliers and lower-order terms as N approaches infinity.
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: time-complexity-intro-2
-  concept_id: big-o-notation
-  kind: mcq
-  stem: 'Consider this concrete application of Time Complexity Basics:
-
-
+  stem: |-
     ```python
-
-    Single pass over N elements is O(N); nested pass is O(N^2).
-
+    def f(a):
+        for x in a:
+            print(x)
+        for x in a:
+            print(x * 2)
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What is the time complexity of f for a list of length n?
   options:
-  - Big-O characterizes the upper bound of operational steps as input N scales.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Big-O characterizes the upper bound of operational steps as input N scales.
+  - O(n)
+  - O(n^2)
+  - O(2n^2)
+  answer: O(n)
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    O(n^2): loopcx-two-loops-quadratic
+    O(2n^2): loopcx-two-loops-quadratic
   is_microcheck: false
-  review_status: approved
-- id: time-complexity-intro-3
-  concept_id: big-o-notation
+  review_status: draft
+- id: loop-complexity-analysis-p2
+  concept_id: loop-complexity-analysis
   kind: mcq
-  stem: When implementing Time Complexity Basics, which error represents the most frequent pitfall?
+  stem: |-
+    ```python
+    def g(a):
+        for x in a:
+            for k in range(3):
+                print(x + k)
+    ```
+    What is the time complexity of g for a list of length n?
   options:
-  - Treating O(1) as fast in seconds rather than invariant to input size.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Treating O(1) as fast in seconds rather than invariant to input size.
+  - O(n^2)
+  - O(3n^2)
+  - O(n)
+  answer: O(n)
+  difficulty: 2
+  distractor_misconceptions:
+    O(n^2): loopcx-inner-bound-ignored
+    O(3n^2): loopcx-inner-bound-ignored
+  is_microcheck: false
+  review_status: draft
+- id: loop-complexity-analysis-p3
+  concept_id: loop-complexity-analysis
+  kind: mcq
+  stem: |-
+    ```python
+    def h(a):
+        n = len(a)
+        for i in range(n):
+            for j in range(i + 1, n):
+                print(a[i], a[j])
+        for x in a:
+            print(x)
+    ```
+    What is the time complexity of h for a list of length n?
+  options:
+  - O(n^2)
+  - O(n^3)
+  - O(n^3), because there are three loops
+  answer: O(n^2)
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    O(n^3): loopcx-two-loops-quadratic
+    O(n^3), because there are three loops: loopcx-two-loops-quadratic
   is_microcheck: false
-  review_status: approved
-- id: time-complexity-intro-mc
-  concept_id: big-o-notation
+  review_status: draft
+- id: loop-complexity-analysis-mc
+  concept_id: loop-complexity-analysis
   kind: mcq
-  stem: 'Quick Check: True or False — for Time Complexity Basics, Ignore constant multipliers and lower-order
-    terms as N approaches infinity.'
+  stem: Two loops run one after the other, each over all n elements. What is the total cost?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
+  - O(n^2)
+  - O(n^2), because there are two loops
+  - O(n)
+  answer: O(n)
+  difficulty: 2
+  distractor_misconceptions:
+    O(n^2): loopcx-two-loops-quadratic
+    O(n^2), because there are two loops: loopcx-two-loops-quadratic
   is_microcheck: true
-  review_status: approved
-- id: space-complexity-intro-1
-  concept_id: space-complexity
+  review_status: draft
+- id: logarithmic-complexity-p1
+  concept_id: logarithmic-complexity
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Space Complexity Basics?
-  options:
-  - Creating a new array of size N requires O(N) auxiliary space.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Creating a new array of size N requires O(N) auxiliary space.
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: space-complexity-intro-2
-  concept_id: space-complexity
-  kind: mcq
-  stem: 'Consider this concrete application of Space Complexity Basics:
-
-
+  stem: |-
     ```python
-
-    Reversing in place uses O(1) auxiliary space.
-
+    def steps(n):
+        count = 0
+        while n > 1:
+            n //= 2
+            count += 1
+        return count
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What is the time complexity of steps(n)?
   options:
-  - Auxiliary space measures extra working memory beyond the input itself.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Auxiliary space measures extra working memory beyond the input itself.
+  - O(n), because no log function is called
+  - O(n)
+  - O(n / 2)
+  - O(log n)
+  answer: O(log n)
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    O(n), because no log function is called: log-needs-log-call
+    O(n / 2): log-same-as-linear-half
+    O(n): log-same-as-linear-half
   is_microcheck: false
-  review_status: approved
-- id: space-complexity-intro-3
-  concept_id: space-complexity
+  review_status: draft
+- id: logarithmic-complexity-p2
+  concept_id: logarithmic-complexity
   kind: mcq
-  stem: When implementing Space Complexity Basics, which error represents the most frequent pitfall?
+  stem: About how many times can 1,000,000 be halved before it reaches 1?
   options:
-  - Confusing input space with auxiliary space.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Confusing input space with auxiliary space.
+  - About 20
+  - About 1,000,000
+  - About 500,000
+  answer: About 20
+  difficulty: 2
+  distractor_misconceptions:
+    About 500,000: log-same-as-linear-half
+    About 1,000,000: log-same-as-linear-half
+  is_microcheck: false
+  review_status: draft
+- id: logarithmic-complexity-p3
+  concept_id: logarithmic-complexity
+  kind: mcq
+  stem: |-
+    ```python
+    def f(n):
+        i = 1
+        while i < n:
+            i *= 3
+    ```
+    What is the time complexity of f(n)?
+  options:
+  - O(n), since log is never used
+  - O(n / 3)
+  - O(log n)
+  answer: O(log n)
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    O(n / 3): log-same-as-linear-half
+    O(n), since log is never used: log-needs-log-call
   is_microcheck: false
-  review_status: approved
-- id: space-complexity-intro-mc
+  review_status: draft
+- id: logarithmic-complexity-mc
+  concept_id: logarithmic-complexity
+  kind: mcq
+  stem: What makes an algorithm O(log n)?
+  options:
+  - It calls a logarithm function such as math.log
+  - It does n / 2 work in total
+  - Each step shrinks the remaining problem by a constant factor, such as half
+  answer: Each step shrinks the remaining problem by a constant factor, such as half
+  difficulty: 2
+  distractor_misconceptions:
+    It calls a logarithm function such as math.log: log-needs-log-call
+    It does n / 2 work in total: log-same-as-linear-half
+  is_microcheck: true
+  review_status: draft
+- id: space-complexity-p1
   concept_id: space-complexity
   kind: mcq
-  stem: 'Quick Check: True or False — for Space Complexity Basics, Creating a new array of size N requires
-    O(N) auxiliary space.'
-  options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: conditional-invariants-1
-  concept_id: conditionals
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Conditional Invariants?
-  options:
-  - Mutual exclusion guarantees exactly one branch runs in an if-elif-else chain.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Mutual exclusion guarantees exactly one branch runs in an if-elif-else chain.
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: conditional-invariants-2
-  concept_id: conditionals
-  kind: mcq
-  stem: 'Consider this concrete application of Conditional Invariants:
-
-
+  stem: |-
     ```python
-
-    if x > 0: pos() else: non_pos()
-
+    def total(a):
+        s = 0
+        for x in a:
+            s += x
+        return s
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    How much extra space does total use for a list of length n?
   options:
-  - Branching routes execution based on Boolean predicates.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Branching routes execution based on Boolean predicates.
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: conditional-invariants-3
-  concept_id: conditionals
-  kind: mcq
-  stem: When implementing Conditional Invariants, which error represents the most frequent pitfall?
-  options:
-  - Assuming independent if statements are mutually exclusive.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Assuming independent if statements are mutually exclusive.
+  - O(1)
+  - 'None at all: it uses no memory'
+  - O(n), because it creates the variable s
+  answer: O(1)
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    O(n), because it creates the variable s: space-o1-means-no-memory
+    'None at all: it uses no memory': space-o1-means-no-memory
   is_microcheck: false
-  review_status: approved
-- id: conditional-invariants-mc
-  concept_id: conditionals
+  review_status: draft
+- id: space-complexity-p2
+  concept_id: space-complexity
   kind: mcq
-  stem: 'Quick Check: True or False — for Conditional Invariants, Mutual exclusion guarantees exactly
-    one branch runs in an if-elif-else chain.'
-  options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: variables-and-scope-1
-  concept_id: variables-and-types
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Variable Scope & Mutation?
-  options:
-  - Reassigning a pointer differs from modifying the object it points to.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Reassigning a pointer differs from modifying the object it points to.
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: variables-and-scope-2
-  concept_id: variables-and-types
-  kind: mcq
-  stem: 'Consider this concrete application of Variable Scope & Mutation:
-
-
+  stem: |-
     ```python
-
-    arr.append(1) mutates; arr = [1] rebinds the reference.
-
+    def count_down(n):
+        if n == 0:
+            return 0
+        return 1 + count_down(n - 1)
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    How much extra space does count_down(n) use?
   options:
-  - Scope determines identifier visibility; mutable structures mutate in place.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Scope determines identifier visibility; mutable structures mutate in place.
-  difficulty: 1
-  distractor_misconceptions: {}
+  - 'None: recursion uses no memory'
+  - O(1), because it creates no lists
+  - O(n), for the n stack frames
+  answer: O(n), for the n stack frames
+  difficulty: 3
+  distractor_misconceptions:
+    O(1), because it creates no lists: space-ignores-recursion-stack
+    'None: recursion uses no memory': space-ignores-recursion-stack
   is_microcheck: false
-  review_status: approved
-- id: variables-and-scope-3
-  concept_id: variables-and-types
+  review_status: draft
+- id: space-complexity-p3
+  concept_id: space-complexity
   kind: mcq
-  stem: When implementing Variable Scope & Mutation, which error represents the most frequent pitfall?
+  stem: Which of these uses O(n) extra space for a list `a` of length n?
   options:
-  - Unexpected side-effects from passing mutable lists to functions.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Unexpected side-effects from passing mutable lists to functions.
+  - b = a[::-1]
+  - i, j = 0, len(a) - 1
+  - best = a[0]
+  answer: b = a[::-1]
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    i, j = 0, len(a) - 1: space-o1-means-no-memory
+    best = a[0]: space-o1-means-no-memory
   is_microcheck: false
-  review_status: approved
-- id: variables-and-scope-mc
-  concept_id: variables-and-types
+  review_status: draft
+- id: space-complexity-mc
+  concept_id: space-complexity
   kind: mcq
-  stem: 'Quick Check: True or False — for Variable Scope & Mutation, Reassigning a pointer differs from
-    modifying the object it points to.'
+  stem: An algorithm uses O(1) extra space. What does that mean?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
+  - It may not create any variables
+  - It is recursive but builds no lists
+  - It uses a constant amount of extra memory, no matter how large the input is
+  - It uses no memory at all
+  answer: It uses a constant amount of extra memory, no matter how large the input is
+  difficulty: 2
+  distractor_misconceptions:
+    It uses no memory at all: space-o1-means-no-memory
+    It may not create any variables: space-o1-means-no-memory
+    It is recursive but builds no lists: space-ignores-recursion-stack
   is_microcheck: true
-  review_status: approved
+  review_status: draft

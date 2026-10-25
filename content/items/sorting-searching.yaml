@@ -1,392 +1,631 @@
+# Draft items for the sorting-searching cluster. Every item is review_status: draft until Ronit reviews it
+# (S3): set approved or rejected per item. Only approved items are served (GraphSnapshot).
+# Each distractor maps to a misconception of the item's own concept (content/misconceptions.yaml).
 items:
-- id: linear-search-1
+- id: linear-search-p1
   concept_id: linear-search
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Linear Search?
-  options:
-  - Works on unsorted collections in O(N) worst-case time.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Works on unsorted collections in O(N) worst-case time.
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: linear-search-2
-  concept_id: linear-search
-  kind: mcq
-  stem: 'Consider this concrete application of Linear Search:
-
-
+  stem: |-
     ```python
+    def index_of(a, target):
+        for i, x in enumerate(a):
+            if x == target:
+                return i
+            else:
+                return -1
 
-    for i, val in enumerate(arr): if val == target: return i
-
+    print(index_of([7, 3, 9], 9))
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - Linear search checks every element sequentially until target is found or list ends.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Linear search checks every element sequentially until target is found or list ends.
+  - '3'
+  - '-1'
+  - '2'
+  answer: '-1'
   difficulty: 1
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '2': ls-return-early-miss
+    '3': ls-return-early-miss
   is_microcheck: false
-  review_status: approved
-- id: linear-search-3
+  review_status: draft
+- id: linear-search-p2
   concept_id: linear-search
   kind: mcq
-  stem: When implementing Linear Search, which error represents the most frequent pitfall?
+  stem: Where should `return -1` go in a linear search that returns the index of the target?
   options:
-  - Stopping early before examining all items when target is absent.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Stopping early before examining all items when target is absent.
-  difficulty: 2
-  distractor_misconceptions: {}
+  - Inside the loop, in an else branch after the comparison
+  - After the loop, once every element has been checked
+  - Inside the loop, before the comparison
+  answer: After the loop, once every element has been checked
+  difficulty: 1
+  distractor_misconceptions:
+    Inside the loop, in an else branch after the comparison: ls-return-early-miss
+    Inside the loop, before the comparison: ls-return-early-miss
   is_microcheck: false
-  review_status: approved
+  review_status: draft
+- id: linear-search-p3
+  concept_id: linear-search
+  kind: mcq
+  stem: What does linear search cost in the worst case on an unsorted list of n elements?
+  options:
+  - O(1)
+  - O(n)
+  - O(1), because it stops at the first mismatch
+  answer: O(n)
+  difficulty: 2
+  distractor_misconceptions:
+    O(1), because it stops at the first mismatch: ls-return-early-miss
+    O(1): ls-return-early-miss
+  is_microcheck: false
+  review_status: draft
 - id: linear-search-mc
   concept_id: linear-search
   kind: mcq
-  stem: 'Quick Check: True or False — for Linear Search, Works on unsorted collections in O(N) worst-case
-    time.'
-  options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: binary-search-bounds-1
-  concept_id: binary-search-boundaries
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Binary Search Bounds?
-  options:
-  - Update low = mid + 1 or high = mid - 1 to guarantee progress each iteration.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Update low = mid + 1 or high = mid - 1 to guarantee progress each iteration.
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: binary-search-bounds-2
-  concept_id: binary-search-boundaries
-  kind: mcq
-  stem: 'Consider this concrete application of Binary Search Bounds:
-
-
+  stem: |-
     ```python
+    def contains(a, target):
+        for x in a:
+            if x == target:
+                return True
+        return False
 
-    while low <= high: mid = (low + high) // 2
-
+    print(contains([4, 8, 15], 15))
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - Binary search maintains low and high pointers enclosing the search space.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Binary search maintains low and high pointers enclosing the search space.
+  - 'True'
+  - False, because 4 is not 15
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': ls-return-early-miss
+    False, because 4 is not 15: ls-return-early-miss
+  is_microcheck: true
+  review_status: draft
+- id: binary-search-p1
+  concept_id: binary-search
+  kind: mcq
+  stem: |-
+    ```python
+    def binary_search(a, target):
+        lo, hi = 0, len(a) - 1
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            if a[mid] == target:
+                return mid
+            if a[mid] < target:
+                lo = mid + 1
+            else:
+                hi = mid - 1
+        return -1
+
+    print(binary_search([9, 2, 7, 1, 5], 9))
+    ```
+    What does this print?
+  options:
+  - '-1'
+  - '0'
+  - '4'
+  answer: '-1'
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '0': bs-unsorted-ok
+    '4': bs-unsorted-ok
   is_microcheck: false
-  review_status: approved
-- id: binary-search-bounds-3
+  review_status: draft
+- id: binary-search-p2
+  concept_id: binary-search
+  kind: mcq
+  stem: About how many comparisons does binary search need on a sorted list of 1,000,000 elements, in
+    the worst case?
+  options:
+  - About 20
+  - About 500,000
+  - About 1,000,000
+  answer: About 20
+  difficulty: 2
+  distractor_misconceptions:
+    About 500,000: bs-linear-time
+    About 1,000,000: bs-linear-time
+  is_microcheck: false
+  review_status: draft
+- id: binary-search-p3
+  concept_id: binary-search
+  kind: mcq
+  stem: |-
+    ```python
+    def binary_search(a, target):
+        lo, hi = 0, len(a) - 1
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            if a[mid] == target:
+                return mid
+            if a[mid] < target:
+                lo = mid + 1
+            else:
+                hi = mid - 1
+        return -1
+
+    print(binary_search([2, 5, 8, 12, 16, 23], 12))
+    ```
+    What does this print?
+  options:
+  - '4'
+  - '-1'
+  - '3'
+  answer: '3'
+  difficulty: 2
+  distractor_misconceptions:
+    '4': bs-unsorted-ok
+    '-1': bs-unsorted-ok
+  is_microcheck: false
+  review_status: draft
+- id: binary-search-mc
+  concept_id: binary-search
+  kind: mcq
+  stem: Which statement about binary search is correct?
+  options:
+  - It works on any array and runs in O(log n)
+  - It needs a sorted array and runs in O(n)
+  - It needs a sorted array and runs in O(log n)
+  answer: It needs a sorted array and runs in O(log n)
+  difficulty: 2
+  distractor_misconceptions:
+    It works on any array and runs in O(log n): bs-unsorted-ok
+    It needs a sorted array and runs in O(n): bs-linear-time
+  is_microcheck: true
+  review_status: draft
+- id: binary-search-boundaries-p1
   concept_id: binary-search-boundaries
   kind: mcq
-  stem: When implementing Binary Search Bounds, which error represents the most frequent pitfall?
+  stem: |-
+    ```python
+    def lower_bound(a, target):
+        lo, hi = 0, len(a)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if a[mid] < target:
+                lo = mid + 1
+            else:
+                hi = mid
+        return lo
+
+    print(lower_bound([1, 3, 3, 5, 8], 4))
+    ```
+    What does this print?
   options:
-  - Using high = mid with while low <= high can cause an infinite loop.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Using high = mid with while low <= high can cause an infinite loop.
+  - '4'
+  - '3'
+  - '2'
+  answer: '3'
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '2': bsb-mixed-convention
+    '4': bsb-mixed-convention
   is_microcheck: false
-  review_status: approved
-- id: binary-search-bounds-mc
+  review_status: draft
+- id: binary-search-boundaries-p2
   concept_id: binary-search-boundaries
   kind: mcq
-  stem: 'Quick Check: True or False — for Binary Search Bounds, Update low = mid + 1 or high = mid - 1
-    to guarantee progress each iteration.'
-  options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: binary-search-midpoint-1
-  concept_id: binary-search
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Binary Search Midpoint Calculation?
-  options:
-  - In bounded integer arithmetic, use low + (high - low) // 2 to avoid overflow.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: In bounded integer arithmetic, use low + (high - low) // 2 to avoid overflow.
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: binary-search-midpoint-2
-  concept_id: binary-search
-  kind: mcq
-  stem: 'Consider this concrete application of Binary Search Midpoint Calculation:
-
-
+  stem: |-
     ```python
+    def find(a, target):
+        lo, hi = 0, len(a) - 1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if a[mid] == target:
+                return mid
+            if a[mid] < target:
+                lo = mid + 1
+            else:
+                hi = mid - 1
+        return -1
 
-    mid = low + (high - low) // 2
-
+    print(find([1, 4, 7], 7))
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - Midpoint calculation partitions the active interval into two equal halves.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Midpoint calculation partitions the active interval into two equal halves.
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: binary-search-midpoint-3
-  concept_id: binary-search
-  kind: mcq
-  stem: When implementing Binary Search Midpoint Calculation, which error represents the most frequent
-    pitfall?
-  options:
-  - Floating point division instead of integer floor division.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Floating point division instead of integer floor division.
+  - '1'
+  - '-1'
+  - '2'
+  answer: '-1'
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '2': bsb-mixed-convention
+    '1': bsb-mixed-convention
   is_microcheck: false
-  review_status: approved
-- id: binary-search-midpoint-mc
-  concept_id: binary-search
+  review_status: draft
+- id: binary-search-boundaries-p3
+  concept_id: binary-search-boundaries
   kind: mcq
-  stem: 'Quick Check: True or False — for Binary Search Midpoint Calculation, In bounded integer arithmetic,
-    use low + (high - low) // 2 to avoid overflow.'
+  stem: With the half-open range `[lo, hi)` and `while lo < hi`, what should happen when `a[mid]` could
+    still be the answer?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
+  - hi = mid
+  - hi = mid - 1
+  - lo = mid
+  answer: hi = mid
+  difficulty: 3
+  distractor_misconceptions:
+    hi = mid - 1: bsb-mixed-convention
+    lo = mid: bsb-mixed-convention
+  is_microcheck: false
+  review_status: draft
+- id: binary-search-boundaries-mc
+  concept_id: binary-search-boundaries
+  kind: mcq
+  stem: Which pairing of initial `hi` and loop condition is consistent?
+  options:
+  - hi = len(a) with while lo <= hi
+  - hi = len(a) - 1 with while lo < hi, for an exact-match search
+  - hi = len(a) with while lo < hi
+  answer: hi = len(a) with while lo < hi
+  difficulty: 3
+  distractor_misconceptions:
+    hi = len(a) - 1 with while lo < hi, for an exact-match search: bsb-mixed-convention
+    hi = len(a) with while lo <= hi: bsb-mixed-convention
   is_microcheck: true
-  review_status: approved
-- id: bubble-sort-invariant-1
+  review_status: draft
+- id: elementary-sorts-p1
   concept_id: elementary-sorts
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Bubble Sort Invariant?
+  stem: What is insertion sort's running time on an already sorted list of n elements?
   options:
-  - After pass k, the k largest elements are guaranteed in their final sorted positions.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: After pass k, the k largest elements are guaranteed in their final sorted positions.
+  - O(n)
+  - O(n^2), like every elementary sort
+  - O(n log n)
+  answer: O(n)
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    O(n^2), like every elementary sort: es-all-quadratic-same
+    O(n log n): es-all-quadratic-same
   is_microcheck: false
-  review_status: approved
-- id: bubble-sort-invariant-2
+  review_status: draft
+- id: elementary-sorts-p2
   concept_id: elementary-sorts
   kind: mcq
-  stem: 'Consider this concrete application of Bubble Sort Invariant:
-
-
+  stem: |-
     ```python
+    def insertion_sort(a):
+        shifts = 0
+        for i in range(1, len(a)):
+            key = a[i]
+            j = i - 1
+            while j >= 0 and a[j] > key:
+                a[j + 1] = a[j]
+                shifts += 1
+                j -= 1
+            a[j + 1] = key
+        return shifts
 
-    for i in range(n): for j in range(n - i - 1): if arr[j] > arr[j+1]: swap()
-
+    print(insertion_sort([1, 2, 3, 4, 5]))
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - Bubble sort swaps adjacent out-of-order elements across repeated passes.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Bubble sort swaps adjacent out-of-order elements across repeated passes.
+  - '25'
+  - '0'
+  - '10'
+  answer: '0'
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '10': es-all-quadratic-same
+    '25': es-all-quadratic-same
   is_microcheck: false
-  review_status: approved
-- id: bubble-sort-invariant-3
+  review_status: draft
+- id: elementary-sorts-p3
   concept_id: elementary-sorts
   kind: mcq
-  stem: When implementing Bubble Sort Invariant, which error represents the most frequent pitfall?
+  stem: For a nearly sorted list, which elementary sort does far less work?
   options:
-  - Continuing passes even when no swaps occurred during an entire scan.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Continuing passes even when no swaps occurred during an entire scan.
+  - Insertion sort
+  - Selection sort
+  - 'Neither: both always do about n^2/2 comparisons'
+  answer: Insertion sort
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    Selection sort: es-all-quadratic-same
+    'Neither: both always do about n^2/2 comparisons': es-all-quadratic-same
   is_microcheck: false
-  review_status: approved
-- id: bubble-sort-invariant-mc
+  review_status: draft
+- id: elementary-sorts-mc
   concept_id: elementary-sorts
   kind: mcq
-  stem: 'Quick Check: True or False — for Bubble Sort Invariant, After pass k, the k largest elements
-    are guaranteed in their final sorted positions.'
+  stem: Which statement about selection sort and insertion sort is correct?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
+  - Both always take about n^2/2 comparisons, whatever the input
+  - Selection sort is O(n) on sorted input, insertion sort is not
+  - Both are O(n^2) in the worst case, but insertion sort is O(n) on sorted input
+  answer: Both are O(n^2) in the worst case, but insertion sort is O(n) on sorted input
+  difficulty: 2
+  distractor_misconceptions:
+    Both always take about n^2/2 comparisons, whatever the input: es-all-quadratic-same
+    Selection sort is O(n) on sorted input, insertion sort is not: es-all-quadratic-same
   is_microcheck: true
-  review_status: approved
-- id: merge-sort-merge-step-1
+  review_status: draft
+- id: sort-stability-p1
+  concept_id: sort-stability
+  kind: mcq
+  stem: |-
+    ```python
+    people = [("ana", 30), ("raj", 25), ("li", 30)]
+    print([p[0] for p in sorted(people, key=lambda p: p[1])])
+    ```
+    What does this print?
+  options:
+  - 'Either order of ''ana'' and ''li'': ties come out in any order'
+  - '[''raj'', ''li'', ''ana'']'
+  - '[''raj'', ''ana'', ''li'']'
+  answer: '[''raj'', ''ana'', ''li'']'
+  difficulty: 3
+  distractor_misconceptions:
+    '[''raj'', ''li'', ''ana'']': stab-all-sorts-stable
+    'Either order of ''ana'' and ''li'': ties come out in any order': stab-all-sorts-stable
+  is_microcheck: false
+  review_status: draft
+- id: sort-stability-p2
+  concept_id: sort-stability
+  kind: mcq
+  stem: Which of these sorts is NOT stable in its textbook form?
+  options:
+  - Insertion sort
+  - Selection sort
+  - Merge sort
+  answer: Selection sort
+  difficulty: 3
+  distractor_misconceptions:
+    Merge sort: stab-all-sorts-stable
+    Insertion sort: stab-all-sorts-stable
+  is_microcheck: false
+  review_status: draft
+- id: sort-stability-p3
+  concept_id: sort-stability
+  kind: mcq
+  stem: To sort records by last name and, within equal last names, by first name, using a stable sort,
+    what do you do?
+  options:
+  - Sort by last name, then by first name, with any sort algorithm
+  - Sort by first name, then stably by last name
+  - Sort by first name, then by last name, with any sort algorithm
+  answer: Sort by first name, then stably by last name
+  difficulty: 3
+  distractor_misconceptions:
+    Sort by last name, then by first name, with any sort algorithm: stab-all-sorts-stable
+    Sort by first name, then by last name, with any sort algorithm: stab-all-sorts-stable
+  is_microcheck: false
+  review_status: draft
+- id: sort-stability-mc
+  concept_id: sort-stability
+  kind: mcq
+  stem: What does it mean for a sort to be stable?
+  options:
+  - Every sort is stable, so the term only describes speed
+  - It always produces the same output on the same input, as every sort does
+  - Elements that compare equal keep their original relative order
+  answer: Elements that compare equal keep their original relative order
+  difficulty: 3
+  distractor_misconceptions:
+    It always produces the same output on the same input, as every sort does: stab-all-sorts-stable
+    Every sort is stable, so the term only describes speed: stab-all-sorts-stable
+  is_microcheck: true
+  review_status: draft
+- id: merge-sort-p1
   concept_id: merge-sort
   kind: mcq
-  stem: 'Which statement correctly characterizes the core invariant of Merge Sort: Merging Subarrays?'
-  options:
-  - Two sorted arrays of size N and M can be merged in O(N + M) time.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Two sorted arrays of size N and M can be merged in O(N + M) time.
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: merge-sort-merge-step-2
-  concept_id: merge-sort
-  kind: mcq
-  stem: 'Consider this concrete application of Merge Sort: Merging Subarrays:
-
-
+  stem: |-
     ```python
+    def merge(left, right):
+        out, i, j = [], 0, 0
+        while i < len(left) and j < len(right):
+            if left[i] <= right[j]:
+                out.append(left[i]); i += 1
+            else:
+                out.append(right[j]); j += 1
+        return out
 
-    while i < len(L) and j < len(R): take smaller; copy remaining tail.
-
+    print(merge([1, 4, 9], [2, 3]))
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - The merge step compares headers of two sorted slices and appends the smaller.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: The merge step compares headers of two sorted slices and appends the smaller.
+  - '[1, 2, 3]'
+  - '[1, 2, 3, 4, 9]'
+  - '[1, 2, 3, 4]'
+  answer: '[1, 2, 3]'
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '[1, 2, 3, 4, 9]': ms-forget-leftovers
+    '[1, 2, 3, 4]': ms-forget-leftovers
   is_microcheck: false
-  review_status: approved
-- id: merge-sort-merge-step-3
+  review_status: draft
+- id: merge-sort-p2
   concept_id: merge-sort
   kind: mcq
-  stem: 'When implementing Merge Sort: Merging Subarrays, which error represents the most frequent pitfall?'
+  stem: How much extra memory does a standard merge sort of n elements use?
   options:
-  - Forgetting to append the remaining elements when one sub-array exhausts first.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Forgetting to append the remaining elements when one sub-array exhausts first.
+  - 'None: it sorts in place'
+  - O(n)
+  - O(1)
+  answer: O(n)
+  difficulty: 3
+  distractor_misconceptions:
+    O(1): ms-in-place-free
+    'None: it sorts in place': ms-in-place-free
+  is_microcheck: false
+  review_status: draft
+- id: merge-sort-p3
+  concept_id: merge-sort
+  kind: mcq
+  stem: After the main merge loop ends because one half is exhausted, what must happen?
+  options:
+  - Append the remaining elements of the other half
+  - 'Nothing: the merge is complete'
+  - Discard the remaining elements; they are duplicates
+  answer: Append the remaining elements of the other half
+  difficulty: 3
+  distractor_misconceptions:
+    'Nothing: the merge is complete': ms-forget-leftovers
+    Discard the remaining elements; they are duplicates: ms-forget-leftovers
+  is_microcheck: false
+  review_status: draft
+- id: merge-sort-mc
+  concept_id: merge-sort
+  kind: mcq
+  stem: Which statement about merge sort is correct?
+  options:
+  - The merge can stop as soon as either half runs out
+  - It is O(n log n) in every case and uses O(n) extra space
+  - It is O(n log n) and uses O(1) extra space
+  answer: It is O(n log n) in every case and uses O(n) extra space
+  difficulty: 3
+  distractor_misconceptions:
+    It is O(n log n) and uses O(1) extra space: ms-in-place-free
+    The merge can stop as soon as either half runs out: ms-forget-leftovers
+  is_microcheck: true
+  review_status: draft
+- id: quick-sort-p1
+  concept_id: quick-sort
+  kind: mcq
+  stem: Quick sort always picks the first element as the pivot. What happens on already sorted input?
+  options:
+  - It takes O(n) time
+  - It takes O(n log n) time, as always
+  - It takes O(n^2) time
+  answer: It takes O(n^2) time
   difficulty: 4
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    It takes O(n log n) time, as always: qs-always-nlogn
+    It takes O(n) time: qs-always-nlogn
   is_microcheck: false
-  review_status: approved
-- id: merge-sort-merge-step-mc
-  concept_id: merge-sort
-  kind: mcq
-  stem: 'Quick Check: True or False — for Merge Sort: Merging Subarrays, Two sorted arrays of size N and
-    M can be merged in O(N + M) time.'
-  options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: quick-sort-partition-1
+  review_status: draft
+- id: quick-sort-p2
   concept_id: quick-sort
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Quick Sort Partitioning?
+  stem: What is quick sort's worst-case running time?
   options:
-  - The pivot lands in its absolute sorted position at the end of the partition step.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: The pivot lands in its absolute sorted position at the end of the partition step.
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: quick-sort-partition-2
-  concept_id: quick-sort
-  kind: mcq
-  stem: 'Consider this concrete application of Quick Sort Partitioning:
-
-
-    ```python
-
-    Lomuto partition iterates with boundary index i; swaps when arr[j] < pivot.
-
-    ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
-  options:
-  - Partitioning chooses a pivot and places smaller elements left, larger elements right.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Partitioning chooses a pivot and places smaller elements left, larger elements right.
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: quick-sort-partition-3
-  concept_id: quick-sort
-  kind: mcq
-  stem: When implementing Quick Sort Partitioning, which error represents the most frequent pitfall?
-  options:
-  - Worst-case O(N^2) time occurs on already-sorted arrays with naive first-element pivot.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Worst-case O(N^2) time occurs on already-sorted arrays with naive first-element pivot.
+  - O(n log n), the same in every case
+  - O(n^2)
+  - O(n log n)
+  answer: O(n^2)
   difficulty: 4
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    O(n log n): qs-always-nlogn
+    O(n log n), the same in every case: qs-always-nlogn
   is_microcheck: false
-  review_status: approved
-- id: quick-sort-partition-mc
+  review_status: draft
+- id: quick-sort-p3
   concept_id: quick-sort
   kind: mcq
-  stem: 'Quick Check: True or False — for Quick Sort Partitioning, The pivot lands in its absolute sorted
-    position at the end of the partition step.'
+  stem: |-
+    ```python
+    def quick_sort(a):
+        if len(a) <= 1:
+            return a
+        pivot = a[len(a) // 2]
+        less = [x for x in a if x < pivot]
+        equal = [x for x in a if x == pivot]
+        greater = [x for x in a if x > pivot]
+        return quick_sort(less) + equal + quick_sort(greater)
+
+    print(quick_sort([4, 1, 4, 2]))
+    ```
+    What does this print?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 2
-  distractor_misconceptions: {}
+  - '[4, 4, 2, 1]'
+  - '[1, 2, 4, 4]'
+  - '[1, 2, 4]'
+  answer: '[1, 2, 4, 4]'
+  difficulty: 4
+  distractor_misconceptions:
+    '[1, 2, 4]': qs-always-nlogn
+    '[4, 4, 2, 1]': qs-always-nlogn
+  is_microcheck: false
+  review_status: draft
+- id: quick-sort-mc
+  concept_id: quick-sort
+  kind: mcq
+  stem: When does quick sort degrade to O(n^2)?
+  options:
+  - When pivots keep splitting off only one element
+  - Only when the list contains duplicates, and then it is O(n log n) anyway
+  - 'Never: quick sort is always O(n log n)'
+  answer: When pivots keep splitting off only one element
+  difficulty: 4
+  distractor_misconceptions:
+    'Never: quick sort is always O(n log n)': qs-always-nlogn
+    Only when the list contains duplicates, and then it is O(n log n) anyway: qs-always-nlogn
   is_microcheck: true
-  review_status: approved
+  review_status: draft
+- id: counting-sort-p1
+  concept_id: counting-sort
+  kind: mcq
+  stem: Counting sort runs in O(n + k) for values in 0..k. When is it a poor choice?
+  options:
+  - Only when n is large
+  - 'Never: it is O(n) for any integers'
+  - When the values range over 0 to 10^9 and n is small
+  answer: When the values range over 0 to 10^9 and n is small
+  difficulty: 3
+  distractor_misconceptions:
+    'Never: it is O(n) for any integers': cs-any-range
+    Only when n is large: cs-any-range
+  is_microcheck: false
+  review_status: draft
+- id: counting-sort-p2
+  concept_id: counting-sort
+  kind: mcq
+  stem: |-
+    ```python
+    def counting_sort(a, k):
+        counts = [0] * (k + 1)
+        for x in a:
+            counts[x] += 1
+        out = []
+        for value, c in enumerate(counts):
+            out.extend([value] * c)
+        return out
+
+    print(counting_sort([2, 0, 2, 1], 2))
+    ```
+    What does this print?
+  options:
+  - '[0, 1, 2]'
+  - '[0, 1, 2, 2]'
+  - '[2, 0, 2, 1]'
+  answer: '[0, 1, 2, 2]'
+  difficulty: 3
+  distractor_misconceptions:
+    '[0, 1, 2]': cs-any-range
+    '[2, 0, 2, 1]': cs-any-range
+  is_microcheck: false
+  review_status: draft
+- id: counting-sort-p3
+  concept_id: counting-sort
+  kind: mcq
+  stem: You must sort 1,000 integers spread between 0 and 10^9. Counting sort would need how large a counts
+    array?
+  options:
+  - 'It does not matter: counting sort is efficient for any integers'
+  - About 10^9 entries, so a comparison sort is better here
+  - About 1,000 entries, one per value
+  answer: About 10^9 entries, so a comparison sort is better here
+  difficulty: 3
+  distractor_misconceptions:
+    About 1,000 entries, one per value: cs-any-range
+    'It does not matter: counting sort is efficient for any integers': cs-any-range
+  is_microcheck: false
+  review_status: draft
+- id: counting-sort-mc
+  concept_id: counting-sort
+  kind: mcq
+  stem: When does counting sort beat an O(n log n) comparison sort?
+  options:
+  - When the value range k is not much larger than n
+  - Whenever the values are integers, whatever their range
+  - Always, for any integers
+  answer: When the value range k is not much larger than n
+  difficulty: 3
+  distractor_misconceptions:
+    Always, for any integers: cs-any-range
+    Whenever the values are integers, whatever their range: cs-any-range
+  is_microcheck: true
+  review_status: draft

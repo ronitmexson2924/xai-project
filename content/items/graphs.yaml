@@ -1,393 +1,573 @@
+# Draft items for the graphs cluster. Every item is review_status: draft until Ronit reviews it
+# (S3): set approved or rejected per item. Only approved items are served (GraphSnapshot).
+# Each distractor maps to a misconception of the item's own concept (content/misconceptions.yaml).
 items:
-- id: graph-adjacency-list-1
+- id: graph-representation-p1
   concept_id: graph-representation
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Graph Adjacency List?
-  options:
-  - Space complexity is O(V + E), optimal for sparse graphs compared to O(V^2) matrix.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Space complexity is O(V + E), optimal for sparse graphs compared to O(V^2) matrix.
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: graph-adjacency-list-2
-  concept_id: graph-representation
-  kind: mcq
-  stem: 'Consider this concrete application of Graph Adjacency List:
-
-
+  stem: |-
     ```python
-
-    graph = {0: [1, 2], 1: [2], 2: []}
-
+    edges = [("a", "b"), ("b", "c")]
+    adj = {}
+    for u, v in edges:
+        adj.setdefault(u, []).append(v)
+        adj.setdefault(v, []).append(u)
+    print(adj["b"])
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - Adjacency list maps each vertex to a list of adjacent neighbor vertices.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Adjacency list maps each vertex to a list of adjacent neighbor vertices.
+  - '[''a'']'
+  - '[''a'', ''c'']'
+  - '[''c'']'
+  answer: '[''a'', ''c'']'
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '[''c'']': gr-undirected-one-way
+    '[''a'']': gr-undirected-one-way
   is_microcheck: false
-  review_status: approved
-- id: graph-adjacency-list-3
+  review_status: draft
+- id: graph-representation-p2
   concept_id: graph-representation
   kind: mcq
-  stem: When implementing Graph Adjacency List, which error represents the most frequent pitfall?
+  stem: |-
+    ```python
+    edges = [("a", "b"), ("b", "c")]
+    adj = {}
+    for u, v in edges:
+        adj.setdefault(u, []).append(v)
+    print(adj.get("c", []))
+    ```
+    This builds an undirected graph. What does the last line print, and is that right?
   options:
-  - Forgetting to add both (u, v) and (v, u) for undirected graphs.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Forgetting to add both (u, v) and (v, u) for undirected graphs.
-  difficulty: 3
-  distractor_misconceptions: {}
+  - '[]: right, because c has no edges'
+  - '[''b'']: right'
+  - '[]: wrong, because each undirected edge must be stored in both directions'
+  answer: '[]: wrong, because each undirected edge must be stored in both directions'
+  difficulty: 2
+  distractor_misconceptions:
+    '[''b'']: right': gr-undirected-one-way
+    '[]: right, because c has no edges': gr-undirected-one-way
   is_microcheck: false
-  review_status: approved
-- id: graph-adjacency-list-mc
+  review_status: draft
+- id: graph-representation-p3
   concept_id: graph-representation
   kind: mcq
-  stem: 'Quick Check: True or False — for Graph Adjacency List, Space complexity is O(V + E), optimal
-    for sparse graphs compared to O(V^2) matrix.'
+  stem: An undirected graph has V vertices and E edges. How many neighbour entries does its adjacency
+    list hold in total?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: breadth-first-search-queue-1
-  concept_id: graph-bfs
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Breadth-First Search (BFS)?
-  options:
-  - Guarantees finding shortest path in unweighted graphs.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Guarantees finding shortest path in unweighted graphs.
+  - 2E
+  - E
+  - E, because each edge is stored once
+  answer: 2E
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    E: gr-undirected-one-way
+    E, because each edge is stored once: gr-undirected-one-way
   is_microcheck: false
-  review_status: approved
-- id: breadth-first-search-queue-2
-  concept_id: graph-bfs
+  review_status: draft
+- id: graph-representation-mc
+  concept_id: graph-representation
   kind: mcq
-  stem: 'Consider this concrete application of Breadth-First Search (BFS):
-
-
-    ```python
-
-    queue = deque([start]); visited.add(start); while queue: u = popleft()
-
-    ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+  stem: In an adjacency list for an undirected graph, how is the edge u-v stored?
   options:
-  - BFS explores vertices in order of increasing distance from source using a FIFO queue.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: BFS explores vertices in order of increasing distance from source using a FIFO queue.
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: breadth-first-search-queue-3
-  concept_id: graph-bfs
-  kind: mcq
-  stem: When implementing Breadth-First Search (BFS), which error represents the most frequent pitfall?
-  options:
-  - Marking vertex visited when dequeued instead of when enqueued (causing duplicate entries).
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Marking vertex visited when dequeued instead of when enqueued (causing duplicate entries).
-  difficulty: 4
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: breadth-first-search-queue-mc
-  concept_id: graph-bfs
-  kind: mcq
-  stem: 'Quick Check: True or False — for Breadth-First Search (BFS), Guarantees finding shortest path
-    in unweighted graphs.'
-  options:
-  - 'True'
-  - 'False'
-  answer: 'True'
+  - Only in the list of the vertex that comes first alphabetically
+  - v is in u's list and u is in v's list
+  - v is in u's list only
+  answer: v is in u's list and u is in v's list
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    v is in u's list only: gr-undirected-one-way
+    Only in the list of the vertex that comes first alphabetically: gr-undirected-one-way
   is_microcheck: true
-  review_status: approved
-- id: depth-first-search-visited-1
-  concept_id: graph-dfs
+  review_status: draft
+- id: graph-bfs-p1
+  concept_id: graph-bfs
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Depth-First Search (DFS)?
-  options:
-  - A visited set is mandatory to prevent infinite loops in cyclic graphs.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: A visited set is mandatory to prevent infinite loops in cyclic graphs.
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: depth-first-search-visited-2
-  concept_id: graph-dfs
-  kind: mcq
-  stem: 'Consider this concrete application of Depth-First Search (DFS):
-
-
+  stem: |-
     ```python
-
-    visited.add(u); for v in adj[u]: if v not in visited: dfs(v)
-
+    from collections import deque
+    adj = {"s": ["a", "b"], "a": ["c"], "b": ["c"], "c": []}
+    dist = {"s": 0}
+    q = deque(["s"])
+    while q:
+        u = q.popleft()
+        for v in adj[u]:
+            if v not in dist:
+                dist[v] = dist[u] + 1
+                q.append(v)
+    print(dist["c"])
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - DFS explores as far along each branch as possible before backtracking.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: DFS explores as far along each branch as possible before backtracking.
+  - '3'
+  - '2'
+  - '4'
+  answer: '2'
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '3': bfs-mark-on-dequeue
+    '4': bfs-mark-on-dequeue
   is_microcheck: false
-  review_status: approved
-- id: depth-first-search-visited-3
-  concept_id: graph-dfs
+  review_status: draft
+- id: graph-bfs-p2
+  concept_id: graph-bfs
   kind: mcq
-  stem: When implementing Depth-First Search (DFS), which error represents the most frequent pitfall?
+  stem: When should BFS mark a vertex as visited?
   options:
-  - Omitting visited set on cyclic graphs causes maximum recursion depth crash.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Omitting visited set on cyclic graphs causes maximum recursion depth crash.
-  difficulty: 4
-  distractor_misconceptions: {}
+  - When it is dequeued
+  - When it is dequeued, so duplicates in the queue do not matter
+  - When it is enqueued
+  answer: When it is enqueued
+  difficulty: 3
+  distractor_misconceptions:
+    When it is dequeued: bfs-mark-on-dequeue
+    When it is dequeued, so duplicates in the queue do not matter: bfs-mark-on-dequeue
   is_microcheck: false
-  review_status: approved
-- id: depth-first-search-visited-mc
-  concept_id: graph-dfs
+  review_status: draft
+- id: graph-bfs-p3
+  concept_id: graph-bfs
   kind: mcq
-  stem: 'Quick Check: True or False — for Depth-First Search (DFS), A visited set is mandatory to prevent
-    infinite loops in cyclic graphs.'
+  stem: 'Edges: s-a weight 1, a-t weight 1, s-t weight 5. Does BFS from s find the cheapest path to t?'
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 2
-  distractor_misconceptions: {}
+  - 'No: BFS minimises the number of edges, giving s-t with cost 5 instead of 2'
+  - Yes, if the weights are positive
+  - 'Yes: BFS always finds the cheapest path'
+  answer: 'No: BFS minimises the number of edges, giving s-t with cost 5 instead of 2'
+  difficulty: 3
+  distractor_misconceptions:
+    'Yes: BFS always finds the cheapest path': bfs-weighted-shortest
+    Yes, if the weights are positive: bfs-weighted-shortest
+  is_microcheck: false
+  review_status: draft
+- id: graph-bfs-mc
+  concept_id: graph-bfs
+  kind: mcq
+  stem: What does BFS compute from a start vertex?
+  options:
+  - Shortest paths, with vertices marked visited only when dequeued
+  - Shortest paths by total weight, in any weighted graph
+  - Shortest paths measured in number of edges, in an unweighted graph
+  answer: Shortest paths measured in number of edges, in an unweighted graph
+  difficulty: 3
+  distractor_misconceptions:
+    Shortest paths by total weight, in any weighted graph: bfs-weighted-shortest
+    Shortest paths, with vertices marked visited only when dequeued: bfs-mark-on-dequeue
   is_microcheck: true
-  review_status: approved
-- id: topological-sort-1
+  review_status: draft
+- id: graph-dfs-p1
+  concept_id: graph-dfs
+  kind: mcq
+  stem: |-
+    ```python
+    adj = {1: [2], 2: [3], 3: [1]}
+    def dfs(u, out):
+        out.append(u)
+        for v in adj[u]:
+            dfs(v, out)
+
+    try:
+        out = []
+        dfs(1, out)
+        print(out)
+    except RecursionError:
+        print("RecursionError")
+    ```
+    What does this print?
+  options:
+  - '[1, 2, 3, 1]'
+  - RecursionError
+  - '[1, 2, 3]'
+  answer: RecursionError
+  difficulty: 3
+  distractor_misconceptions:
+    '[1, 2, 3]': dfs-no-visited
+    '[1, 2, 3, 1]': dfs-no-visited
+  is_microcheck: false
+  review_status: draft
+- id: graph-dfs-p2
+  concept_id: graph-dfs
+  kind: mcq
+  stem: |-
+    ```python
+    adj = {1: [2, 3], 2: [4], 3: [4], 4: [1]}
+    def dfs(u, visited):
+        visited.add(u)
+        for v in adj[u]:
+            if v not in visited:
+                dfs(v, visited)
+        return visited
+
+    print(sorted(dfs(1, set())))
+    ```
+    What does this print?
+  options:
+  - '[1, 2, 3, 4]'
+  - It never finishes
+  - '[1, 2, 4]'
+  answer: '[1, 2, 3, 4]'
+  difficulty: 3
+  distractor_misconceptions:
+    It never finishes: dfs-no-visited
+    '[1, 2, 4]': dfs-no-visited
+  is_microcheck: false
+  review_status: draft
+- id: graph-dfs-p3
+  concept_id: graph-dfs
+  kind: mcq
+  stem: Why does DFS need a visited set?
+  options:
+  - Without it, a cycle makes DFS revisit vertices forever
+  - 'It does not: DFS stops at vertices with no neighbours'
+  - Only to speed it up; the result is the same without it
+  answer: Without it, a cycle makes DFS revisit vertices forever
+  difficulty: 3
+  distractor_misconceptions:
+    'It does not: DFS stops at vertices with no neighbours': dfs-no-visited
+    Only to speed it up; the result is the same without it: dfs-no-visited
+  is_microcheck: false
+  review_status: draft
+- id: graph-dfs-mc
+  concept_id: graph-dfs
+  kind: mcq
+  stem: What is the running time of DFS with a visited set on a graph with V vertices and E edges?
+  options:
+  - It may never finish if the graph has a cycle
+  - O(V + E)
+  - O(V * E)
+  answer: O(V + E)
+  difficulty: 3
+  distractor_misconceptions:
+    It may never finish if the graph has a cycle: dfs-no-visited
+    O(V * E): dfs-no-visited
+  is_microcheck: true
+  review_status: draft
+- id: connected-components-p1
+  concept_id: connected-components
+  kind: mcq
+  stem: An undirected graph has edges 1-2, 3-4, 4-5 and an isolated vertex 6. How many connected components
+    does it have?
+  options:
+  - '2'
+  - '3'
+  - '1'
+  answer: '3'
+  difficulty: 3
+  distractor_misconceptions:
+    '1': cc-single-start
+    '2': cc-single-start
+  is_microcheck: false
+  review_status: draft
+- id: connected-components-p2
+  concept_id: connected-components
+  kind: mcq
+  stem: |-
+    ```python
+    adj = {1: [2], 2: [1], 3: [4], 4: [3], 5: []}
+    def dfs(u, seen):
+        seen.add(u)
+        for v in adj[u]:
+            if v not in seen:
+                dfs(v, seen)
+
+    seen, count = set(), 0
+    for u in adj:
+        if u not in seen:
+            count += 1
+            dfs(u, seen)
+    print(count)
+    ```
+    What does this print?
+  options:
+  - '1'
+  - '5'
+  - '3'
+  answer: '3'
+  difficulty: 3
+  distractor_misconceptions:
+    '1': cc-single-start
+    '5': cc-single-start
+  is_microcheck: false
+  review_status: draft
+- id: connected-components-p3
+  concept_id: connected-components
+  kind: mcq
+  stem: To find every connected component, where should traversals start?
+  options:
+  - From the vertex with the most edges only
+  - From every vertex not yet visited, one new traversal per component
+  - 'From one vertex: a single traversal reaches the whole graph'
+  answer: From every vertex not yet visited, one new traversal per component
+  difficulty: 3
+  distractor_misconceptions:
+    'From one vertex: a single traversal reaches the whole graph': cc-single-start
+    From the vertex with the most edges only: cc-single-start
+  is_microcheck: false
+  review_status: draft
+- id: connected-components-mc
+  concept_id: connected-components
+  kind: mcq
+  stem: You run one DFS from vertex 1 of an undirected graph. What has it found?
+  options:
+  - The connected component containing vertex 1
+  - Every component, since DFS jumps between them
+  - Every vertex in the graph
+  answer: The connected component containing vertex 1
+  difficulty: 3
+  distractor_misconceptions:
+    Every vertex in the graph: cc-single-start
+    Every component, since DFS jumps between them: cc-single-start
+  is_microcheck: true
+  review_status: draft
+- id: topological-sort-p1
   concept_id: topological-sort
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Topological Sorting (Kahn's Algorithm)?
+  stem: Edges a -> c and b -> c. How many valid topological orders are there?
   options:
-  - Vertices with in-degree 0 have no unmet dependencies and can be processed first.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Vertices with in-degree 0 have no unmet dependencies and can be processed first.
+  - '2'
+  - '1'
+  - '0'
+  answer: '2'
   difficulty: 4
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '1': topo-unique
+    '0': topo-cycles-ok
   is_microcheck: false
-  review_status: approved
-- id: topological-sort-2
+  review_status: draft
+- id: topological-sort-p2
   concept_id: topological-sort
   kind: mcq
-  stem: 'Consider this concrete application of Topological Sorting (Kahn''s Algorithm):
-
-
+  stem: Edges a -> b, b -> c, c -> a. What is a topological order?
+  options:
+  - a, b, c
+  - c, b, a
+  - None exists, because the graph has a cycle
+  answer: None exists, because the graph has a cycle
+  difficulty: 4
+  distractor_misconceptions:
+    a, b, c: topo-cycles-ok
+    c, b, a: topo-cycles-ok
+  is_microcheck: false
+  review_status: draft
+- id: topological-sort-p3
+  concept_id: topological-sort
+  kind: mcq
+  stem: |-
     ```python
+    from collections import deque
+    def topo_order(vertices, edges):
+        indeg = {v: 0 for v in vertices}
+        out = {v: [] for v in vertices}
+        for u, v in edges:
+            out[u].append(v)
+            indeg[v] += 1
+        q = deque(v for v in vertices if indeg[v] == 0)
+        order = []
+        while q:
+            u = q.popleft()
+            order.append(u)
+            for v in out[u]:
+                indeg[v] -= 1
+                if indeg[v] == 0:
+                    q.append(v)
+        return order if len(order) == len(vertices) else None
 
-    Calculate in_degrees; push 0-in-degree nodes to queue; decrement neighbors.
-
+    print(topo_order(["x", "y", "z"], [("x", "y"), ("y", "z"), ("z", "y")]))
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - Topological sort orders vertices of a Directed Acyclic Graph (DAG) by dependency.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Topological sort orders vertices of a Directed Acyclic Graph (DAG) by dependency.
+  - '[''x'']'
+  - '[''x'', ''y'', ''z'']'
+  - None
+  answer: None
   difficulty: 4
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '[''x'', ''y'', ''z'']': topo-cycles-ok
+    '[''x'']': topo-cycles-ok
   is_microcheck: false
-  review_status: approved
-- id: topological-sort-3
-  concept_id: topological-sort
-  kind: mcq
-  stem: When implementing Topological Sorting (Kahn's Algorithm), which error represents the most frequent
-    pitfall?
-  options:
-  - Attempting to topologically sort a graph with directed cycles.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Attempting to topologically sort a graph with directed cycles.
-  difficulty: 5
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: topological-sort-mc
   concept_id: topological-sort
   kind: mcq
-  stem: 'Quick Check: True or False — for Topological Sorting (Kahn''s Algorithm), Vertices with in-degree
-    0 have no unmet dependencies and can be processed first.'
+  stem: Which statement about topological orders is correct?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: dijkstra-shortest-path-1
-  concept_id: dijkstra
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Dijkstra's Algorithm?
-  options:
-  - Relaxation updates dist[v] = min(dist[v], dist[u] + weight(u, v)).
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Relaxation updates dist[v] = min(dist[v], dist[u] + weight(u, v)).
+  - Every DAG has exactly one
+  - Any directed graph has one, even with a cycle
+  - They exist only for DAGs, and a DAG can have several
+  answer: They exist only for DAGs, and a DAG can have several
   difficulty: 4
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: dijkstra-shortest-path-2
+  distractor_misconceptions:
+    Every DAG has exactly one: topo-unique
+    Any directed graph has one, even with a cycle: topo-cycles-ok
+  is_microcheck: true
+  review_status: draft
+- id: dijkstra-p1
   concept_id: dijkstra
   kind: mcq
-  stem: 'Consider this concrete application of Dijkstra''s Algorithm:
-
-
+  stem: Which kind of graph can Dijkstra's algorithm handle correctly?
+  options:
+  - Graphs whose edge weights are all non-negative
+  - Graphs with negative weights but no negative cycles
+  - Any weighted graph, including negative weights
+  answer: Graphs whose edge weights are all non-negative
+  difficulty: 4
+  distractor_misconceptions:
+    Any weighted graph, including negative weights: dij-negative-weights
+    Graphs with negative weights but no negative cycles: dij-negative-weights
+  is_microcheck: false
+  review_status: draft
+- id: dijkstra-p2
+  concept_id: dijkstra
+  kind: mcq
+  stem: |-
     ```python
+    import heapq
+    def dijkstra(adj, src):
+        dist, done = {src: 0}, set()
+        heap = [(0, src)]
+        while heap:
+            d, u = heapq.heappop(heap)
+            if u in done:
+                continue
+            done.add(u)
+            for v, w in adj.get(u, []):
+                if v not in done and d + w < dist.get(v, float("inf")):
+                    dist[v] = d + w
+                    heapq.heappush(heap, (d + w, v))
+        return dist
 
-    heap = [(0, start)]; while heap: (d, u) = heappop(heap); if d > dist[u]: continue
-
+    adj = {"s": [("a", 1), ("b", 2)], "b": [("a", -5)]}
+    print(dijkstra(adj, "s")["a"])
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    This prints 1. What is the true shortest distance from s to a?
   options:
-  - Dijkstra greedily extracts vertex with minimum provisional distance from a priority queue.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Dijkstra greedily extracts vertex with minimum provisional distance from a priority queue.
+  - '1: Dijkstra''s answer is correct even with negative edges'
+  - -3, via s -> b -> a; Dijkstra settled a before seeing the negative edge
+  - '1: a negative edge can never make a path shorter'
+  answer: -3, via s -> b -> a; Dijkstra settled a before seeing the negative edge
   difficulty: 4
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '1: Dijkstra''s answer is correct even with negative edges': dij-negative-weights
+    '1: a negative edge can never make a path shorter': dij-negative-weights
   is_microcheck: false
-  review_status: approved
-- id: dijkstra-shortest-path-3
+  review_status: draft
+- id: dijkstra-p3
   concept_id: dijkstra
   kind: mcq
-  stem: When implementing Dijkstra's Algorithm, which error represents the most frequent pitfall?
+  stem: Your graph has some negative edge weights (but no negative cycles). What should you use for shortest
+    paths?
   options:
-  - Dijkstra fails on graphs with negative edge weights.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Dijkstra fails on graphs with negative edge weights.
-  difficulty: 5
-  distractor_misconceptions: {}
+  - Bellman-Ford, not Dijkstra
+  - 'Dijkstra: it handles negative weights'
+  - Dijkstra, since there is no negative cycle
+  answer: Bellman-Ford, not Dijkstra
+  difficulty: 4
+  distractor_misconceptions:
+    'Dijkstra: it handles negative weights': dij-negative-weights
+    Dijkstra, since there is no negative cycle: dij-negative-weights
   is_microcheck: false
-  review_status: approved
-- id: dijkstra-shortest-path-mc
+  review_status: draft
+- id: dijkstra-mc
   concept_id: dijkstra
   kind: mcq
-  stem: 'Quick Check: True or False — for Dijkstra''s Algorithm, Relaxation updates dist[v] = min(dist[v],
-    dist[u] + weight(u, v)).'
+  stem: Why can a negative edge break Dijkstra's algorithm?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 3
-  distractor_misconceptions: {}
+  - 'It cannot: Dijkstra handles any weights'
+  - A vertex may be settled before a later negative edge would have lowered its distance
+  - It only breaks when the negative edge points back to the source
+  answer: A vertex may be settled before a later negative edge would have lowered its distance
+  difficulty: 4
+  distractor_misconceptions:
+    'It cannot: Dijkstra handles any weights': dij-negative-weights
+    It only breaks when the negative edge points back to the source: dij-negative-weights
   is_microcheck: true
-  review_status: approved
-- id: cycle-detection-directed-1
-  concept_id: connected-components
+  review_status: draft
+- id: union-find-p1
+  concept_id: union-find
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Cycle Detection in Directed Graphs?
-  options:
-  - A back-edge points to an ancestor node currently in the active DFS recursion stack.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: A back-edge points to an ancestor node currently in the active DFS recursion stack.
-  difficulty: 4
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: cycle-detection-directed-2
-  concept_id: connected-components
-  kind: mcq
-  stem: 'Consider this concrete application of Cycle Detection in Directed Graphs:
-
-
+  stem: |-
     ```python
+    parent = list(range(5))
+    def find(x):
+        while parent[x] != x:
+            x = parent[x]
+        return x
 
-    if state[v] == VISITING: return True  # Cycle detected
+    def union(a, b):
+        parent[a] = b
 
+    union(0, 1)
+    union(0, 2)
+    print(find(0) == find(1), find(0) == find(2))
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - A directed graph contains a cycle if and only if DFS encounters a back-edge.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: A directed graph contains a cycle if and only if DFS encounters a back-edge.
+  - False True
+  - True False
+  - True True
+  answer: False True
   difficulty: 4
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    True True: uf-link-nodes-not-roots
+    True False: uf-link-nodes-not-roots
   is_microcheck: false
-  review_status: approved
-- id: cycle-detection-directed-3
-  concept_id: connected-components
+  review_status: draft
+- id: union-find-p2
+  concept_id: union-find
   kind: mcq
-  stem: When implementing Cycle Detection in Directed Graphs, which error represents the most frequent
-    pitfall?
+  stem: |-
+    ```python
+    parent = list(range(5))
+    def find(x):
+        while parent[x] != x:
+            x = parent[x]
+        return x
+
+    def union(a, b):
+        parent[find(a)] = find(b)
+
+    union(0, 1)
+    union(0, 2)
+    print(find(0) == find(1), find(1) == find(2))
+    ```
+    What does this print?
   options:
-  - Treating cross-edges or forward-edges to finished nodes as cycle indicators.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Treating cross-edges or forward-edges to finished nodes as cycle indicators.
-  difficulty: 5
-  distractor_misconceptions: {}
+  - True True
+  - True False
+  - False True
+  answer: True True
+  difficulty: 4
+  distractor_misconceptions:
+    True False: uf-link-nodes-not-roots
+    False True: uf-link-nodes-not-roots
   is_microcheck: false
-  review_status: approved
-- id: cycle-detection-directed-mc
-  concept_id: connected-components
+  review_status: draft
+- id: union-find-p3
+  concept_id: union-find
   kind: mcq
-  stem: 'Quick Check: True or False — for Cycle Detection in Directed Graphs, A back-edge points to an
-    ancestor node currently in the active DFS recursion stack.'
+  stem: What should `union(a, b)` set?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 3
-  distractor_misconceptions: {}
+  - parent[find(a)] = find(b)
+  - parent[a] = b
+  - parent[a] = find(b)
+  answer: parent[find(a)] = find(b)
+  difficulty: 4
+  distractor_misconceptions:
+    parent[a] = b: uf-link-nodes-not-roots
+    parent[a] = find(b): uf-link-nodes-not-roots
+  is_microcheck: false
+  review_status: draft
+- id: union-find-mc
+  concept_id: union-find
+  kind: mcq
+  stem: Why must union link roots rather than the elements themselves?
+  options:
+  - Only for speed; parent[a] = b gives the same sets
+  - 'It does not matter: parent[a] = b merges the sets'
+  - Re-pointing a non-root element detaches it from its old set instead of merging the sets
+  answer: Re-pointing a non-root element detaches it from its old set instead of merging the sets
+  difficulty: 4
+  distractor_misconceptions:
+    'It does not matter: parent[a] = b merges the sets': uf-link-nodes-not-roots
+    Only for speed; parent[a] = b gives the same sets: uf-link-nodes-not-roots
   is_microcheck: true
-  review_status: approved
+  review_status: draft

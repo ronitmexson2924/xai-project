@@ -1,392 +1,456 @@
+# Draft items for the dp cluster. Every item is review_status: draft until Ronit reviews it
+# (S3): set approved or rejected per item. Only approved items are served (GraphSnapshot).
+# Each distractor maps to a misconception of the item's own concept (content/misconceptions.yaml).
 items:
-- id: overlapping-subproblems-1
+- id: overlapping-subproblems-p1
   concept_id: overlapping-subproblems
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Overlapping Subproblems?
+  stem: Which recursive algorithm gains a lot from caching its results?
   options:
-  - Caching answers transforms exponential O(2^N) calls into polynomial O(N) operations.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Caching answers transforms exponential O(2^N) calls into polynomial O(N) operations.
+  - Naive Fibonacci, fib(n - 1) + fib(n - 2)
+  - Binary search
+  - Merge sort
+  answer: Naive Fibonacci, fib(n - 1) + fib(n - 2)
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    Merge sort: ovl-dc-is-dp
+    Binary search: ovl-dc-is-dp
   is_microcheck: false
-  review_status: approved
-- id: overlapping-subproblems-2
+  review_status: draft
+- id: overlapping-subproblems-p2
   concept_id: overlapping-subproblems
   kind: mcq
-  stem: 'Consider this concrete application of Overlapping Subproblems:
-
-
+  stem: Why does caching not speed up merge sort?
+  options:
+  - Because merge sort is not recursive
+  - 'Its subproblems are disjoint: no subarray is sorted twice'
+  - 'It does: merge sort becomes O(n) with caching'
+  answer: 'Its subproblems are disjoint: no subarray is sorted twice'
+  difficulty: 3
+  distractor_misconceptions:
+    'It does: merge sort becomes O(n) with caching': ovl-dc-is-dp
+    Because merge sort is not recursive: ovl-dc-is-dp
+  is_microcheck: false
+  review_status: draft
+- id: overlapping-subproblems-p3
+  concept_id: overlapping-subproblems
+  kind: mcq
+  stem: |-
     ```python
+    calls = 0
+    def fib(n):
+        global calls
+        calls += 1
+        return n if n < 2 else fib(n - 1) + fib(n - 2)
 
-    In fib(5), fib(3) is computed twice independently without memoization.
-
+    fib(5)
+    print(calls)
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    This makes 15 calls. How many distinct values of n does it compute?
   options:
-  - A problem exhibits overlapping subproblems if a recursive solution revisits identical states.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: A problem exhibits overlapping subproblems if a recursive solution revisits identical states.
+  - '15'
+  - '6'
+  - '5'
+  answer: '6'
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '15': ovl-dc-is-dp
+    '5': ovl-dc-is-dp
   is_microcheck: false
-  review_status: approved
-- id: overlapping-subproblems-3
-  concept_id: overlapping-subproblems
-  kind: mcq
-  stem: When implementing Overlapping Subproblems, which error represents the most frequent pitfall?
-  options:
-  - Using DP when subproblems do not overlap (e.g. merge sort sub-arrays are distinct).
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Using DP when subproblems do not overlap (e.g. merge sort sub-arrays are distinct).
-  difficulty: 4
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: overlapping-subproblems-mc
   concept_id: overlapping-subproblems
   kind: mcq
-  stem: 'Quick Check: True or False — for Overlapping Subproblems, Caching answers transforms exponential
-    O(2^N) calls into polynomial O(N) operations.'
+  stem: When does a recursive problem benefit from dynamic programming?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: optimal-substructure-1
-  concept_id: dp-state-design
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Optimal Substructure?
-  options:
-  - Shortest path from A to C via B requires optimal shortest path from A to B and B to C.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Shortest path from A to C via B requires optimal shortest path from A to B and B to C.
+  - Whenever it is divide and conquer
+  - When the same subproblems are solved many times
+  - Whenever it is recursive
+  answer: When the same subproblems are solved many times
   difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: optimal-substructure-2
-  concept_id: dp-state-design
-  kind: mcq
-  stem: 'Consider this concrete application of Optimal Substructure:
-
-
-    ```python
-
-    dist(A, C) = min_B(dist(A, B) + dist(B, C)).
-
-    ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
-  options:
-  - Optimal substructure means an optimal solution contains optimal subproblem solutions.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Optimal substructure means an optimal solution contains optimal subproblem solutions.
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: optimal-substructure-3
-  concept_id: dp-state-design
-  kind: mcq
-  stem: When implementing Optimal Substructure, which error represents the most frequent pitfall?
-  options:
-  - Assuming longest simple path exhibits optimal substructure.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Assuming longest simple path exhibits optimal substructure.
-  difficulty: 4
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: optimal-substructure-mc
-  concept_id: dp-state-design
-  kind: mcq
-  stem: 'Quick Check: True or False — for Optimal Substructure, Shortest path from A to C via B requires
-    optimal shortest path from A to B and B to C.'
-  options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    Whenever it is divide and conquer: ovl-dc-is-dp
+    Whenever it is recursive: ovl-dc-is-dp
   is_microcheck: true
-  review_status: approved
-- id: memoization-top-down-1
+  review_status: draft
+- id: memoization-p1
   concept_id: memoization
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Top-Down DP (Memoization)?
+  stem: |-
+    ```python
+    calls = 0
+    def fib(n):
+        global calls
+        calls += 1
+        memo = {}
+        if n < 2:
+            return n
+        if n not in memo:
+            memo[n] = fib(n - 1) + fib(n - 2)
+        return memo[n]
+
+    fib(6)
+    print(calls)
+    ```
+    What does this print?
   options:
-  - Check memo table before computing; store result before returning.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Check memo table before computing; store result before returning.
+  - '11'
+  - '25'
+  - '7'
+  answer: '25'
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '7': memo-fresh-cache
+    '11': memo-fresh-cache
   is_microcheck: false
-  review_status: approved
-- id: memoization-top-down-2
+  review_status: draft
+- id: memoization-p2
   concept_id: memoization
   kind: mcq
-  stem: 'Consider this concrete application of Top-Down DP (Memoization):
-
-
+  stem: |-
     ```python
+    def count_calls(n, memo={}):
+        memo[n] = True
+        return len(memo)
 
-    if n in memo: return memo[n]; memo[n] = solve(n-1) + solve(n-2); return memo[n]
-
+    print(count_calls(1), count_calls(2), count_calls(1))
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - Top-down DP preserves natural recursive flow but intercepts calls to check a memo table.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Top-down DP preserves natural recursive flow but intercepts calls to check a memo table.
+  - 1 2 2
+  - 1 1 1
+  - 1 2 1
+  answer: 1 2 2
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    1 1 1: memo-mutable-default
+    1 2 1: memo-mutable-default
   is_microcheck: false
-  review_status: approved
-- id: memoization-top-down-3
+  review_status: draft
+- id: memoization-p3
   concept_id: memoization
   kind: mcq
-  stem: When implementing Top-Down DP (Memoization), which error represents the most frequent pitfall?
+  stem: Where should a memoised function check its cache?
   options:
-  - Forgetting to store the result into the memo table before returning.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Forgetting to store the result into the memo table before returning.
-  difficulty: 4
-  distractor_misconceptions: {}
+  - 'Before computing: return the stored value on a hit, otherwise compute and store it'
+  - In a new empty dict created at the start of every call
+  - After computing, with a new cache created in each call
+  answer: 'Before computing: return the stored value on a hit, otherwise compute and store it'
+  difficulty: 3
+  distractor_misconceptions:
+    After computing, with a new cache created in each call: memo-fresh-cache
+    In a new empty dict created at the start of every call: memo-fresh-cache
   is_microcheck: false
-  review_status: approved
-- id: memoization-top-down-mc
+  review_status: draft
+- id: memoization-mc
   concept_id: memoization
   kind: mcq
-  stem: 'Quick Check: True or False — for Top-Down DP (Memoization), Check memo table before computing;
-    store result before returning.'
+  stem: A memoised fib creates `memo = {}` on its first line, inside every call. What happens?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: tabulation-bottom-up-1
-  concept_id: tabulation
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Bottom-Up DP (Tabulation)?
-  options:
-  - Eliminates recursion call stack overhead and allows space optimization.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Eliminates recursion call stack overhead and allows space optimization.
+  - It is fast, but uses more memory
+  - Nothing is reused, so it is as slow as plain recursion
+  - It is fast, because every result is cached
+  answer: Nothing is reused, so it is as slow as plain recursion
   difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: tabulation-bottom-up-2
+  distractor_misconceptions:
+    It is fast, because every result is cached: memo-fresh-cache
+    It is fast, but uses more memory: memo-fresh-cache
+  is_microcheck: true
+  review_status: draft
+- id: tabulation-p1
   concept_id: tabulation
   kind: mcq
-  stem: 'Consider this concrete application of Bottom-Up DP (Tabulation):
-
-
+  stem: |-
     ```python
-
-    dp = [0] * (n + 1); dp[1] = 1; for i in range(2, n + 1): dp[i] = dp[i-1] + dp[i-2]
-
+    n = 5
+    table = [0] * (n + 1)
+    table[1] = 1
+    for i in range(n, 1, -1):
+        table[i] = table[i - 1] + table[i - 2]
+    print(table[n])
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - Bottom-up DP fills a table iteratively starting from base cases up to target state.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Bottom-up DP fills a table iteratively starting from base cases up to target state.
+  - '8'
+  - '5'
+  - '0'
+  answer: '0'
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '5': tab-wrong-order
+    '8': tab-wrong-order
   is_microcheck: false
-  review_status: approved
-- id: tabulation-bottom-up-3
+  review_status: draft
+- id: tabulation-p2
   concept_id: tabulation
   kind: mcq
-  stem: When implementing Bottom-Up DP (Tabulation), which error represents the most frequent pitfall?
+  stem: |-
+    ```python
+    n = 6
+    table = [0] * (n + 1)
+    table[1] = 1
+    for i in range(2, n + 1):
+        table[i] = table[i - 1] + table[i - 2]
+    print(table[n])
+    ```
+    What does this print?
   options:
-  - Iterating in an order where required predecessor states are not yet computed.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Iterating in an order where required predecessor states are not yet computed.
-  difficulty: 4
-  distractor_misconceptions: {}
+  - '0'
+  - '8'
+  - '5'
+  answer: '8'
+  difficulty: 3
+  distractor_misconceptions:
+    '0': tab-wrong-order
+    '5': tab-wrong-order
   is_microcheck: false
-  review_status: approved
-- id: tabulation-bottom-up-mc
+  review_status: draft
+- id: tabulation-p3
   concept_id: tabulation
   kind: mcq
-  stem: 'Quick Check: True or False — for Bottom-Up DP (Tabulation), Eliminates recursion call stack overhead
-    and allows space optimization.'
+  stem: In what order must a tabulation fill its table?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: dp-state-transition-1d-1
-  concept_id: knapsack-01
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of 1D State Transitions?
-  options:
-  - Identify minimum information required to unambiguously describe subproblem state.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Identify minimum information required to unambiguously describe subproblem state.
+  - Always from the largest index down
+  - So that every entry's dependencies are filled before it
+  - 'Any order: the table is complete at the end'
+  answer: So that every entry's dependencies are filled before it
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    'Any order: the table is complete at the end': tab-wrong-order
+    Always from the largest index down: tab-wrong-order
   is_microcheck: false
-  review_status: approved
-- id: dp-state-transition-1d-2
-  concept_id: knapsack-01
+  review_status: draft
+- id: tabulation-mc
+  concept_id: tabulation
   kind: mcq
-  stem: 'Consider this concrete application of 1D State Transitions:
-
-
+  stem: A bottom-up DP reads `dp[i - 1]` when computing `dp[i]`. Which loop is correct?
+  options:
+  - 'Either: order does not matter'
+  - for i in range(n, 0, -1)
+  - for i in range(1, n + 1)
+  answer: for i in range(1, n + 1)
+  difficulty: 3
+  distractor_misconceptions:
+    for i in range(n, 0, -1): tab-wrong-order
+    'Either: order does not matter': tab-wrong-order
+  is_microcheck: true
+  review_status: draft
+- id: dp-state-design-p1
+  concept_id: dp-state-design
+  kind: mcq
+  stem: For counting the ways to climb n stairs taking 1 or 2 steps, which is a good DP state?
+  options:
+  - dp[i] = the answer so far
+  - dp[i] = the best result up to now
+  - dp[i] = number of ways to reach step i
+  answer: dp[i] = number of ways to reach step i
+  difficulty: 4
+  distractor_misconceptions:
+    dp[i] = the answer so far: dps-vague-state
+    dp[i] = the best result up to now: dps-vague-state
+  is_microcheck: false
+  review_status: draft
+- id: dp-state-design-p2
+  concept_id: dp-state-design
+  kind: mcq
+  stem: |-
     ```python
+    def ways(n):
+        dp = [0] * (n + 1)
+        dp[0] = 1
+        for i in range(1, n + 1):
+            dp[i] = dp[i - 1] + (dp[i - 2] if i >= 2 else 0)
+        return dp[n]
 
-    Climbing stairs: dp[i] = dp[i-1] + dp[i-2] with base cases dp[1]=1, dp[2]=2.
-
+    print(ways(5))
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - A recurrence defines dp[i] as a mathematical function of previous states dp[i-1], dp[i-2].
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: A recurrence defines dp[i] as a mathematical function of previous states dp[i-1], dp[i-2].
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: dp-state-transition-1d-3
-  concept_id: knapsack-01
-  kind: mcq
-  stem: When implementing 1D State Transitions, which error represents the most frequent pitfall?
-  options:
-  - Missing base cases causing index out-of-bounds or zero multiplication.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Missing base cases causing index out-of-bounds or zero multiplication.
+  - '8'
+  - '5'
+  - '13'
+  answer: '8'
   difficulty: 4
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '5': dps-vague-state
+    '13': dps-vague-state
   is_microcheck: false
-  review_status: approved
-- id: dp-state-transition-1d-mc
-  concept_id: knapsack-01
+  review_status: draft
+- id: dp-state-design-p3
+  concept_id: dp-state-design
   kind: mcq
-  stem: 'Quick Check: True or False — for 1D State Transitions, Identify minimum information required
-    to unambiguously describe subproblem state.'
+  stem: What should you write down before coding a DP solution?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 2
-  distractor_misconceptions: {}
+  - What dp[i] means in one exact sentence, the transition, base cases and where the answer is
+  - Only the loop bounds; the meaning of dp[i] becomes clear later
+  - That dp[i] holds 'the best so far'
+  answer: What dp[i] means in one exact sentence, the transition, base cases and where the answer is
+  difficulty: 4
+  distractor_misconceptions:
+    Only the loop bounds; the meaning of dp[i] becomes clear later: dps-vague-state
+    That dp[i] holds 'the best so far': dps-vague-state
+  is_microcheck: false
+  review_status: draft
+- id: dp-state-design-mc
+  concept_id: dp-state-design
+  kind: mcq
+  stem: Which DP state definition is precise enough to build a transition from?
+  options:
+  - dp[i] = how good things look at i
+  - dp[i] = length of the longest increasing subsequence ending exactly at index i
+  - dp[i] = the best answer so far
+  answer: dp[i] = length of the longest increasing subsequence ending exactly at index i
+  difficulty: 4
+  distractor_misconceptions:
+    dp[i] = the best answer so far: dps-vague-state
+    dp[i] = how good things look at i: dps-vague-state
   is_microcheck: true
-  review_status: approved
-- id: dp-state-transition-2d-1
-  concept_id: lcs
+  review_status: draft
+- id: knapsack-01-p1
+  concept_id: knapsack-01
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of 2D Grid & Subsequence Transitions?
-  options:
-  - 'LCS: if s1[i-1] == s2[j-1]: dp[i][j] = 1 + dp[i-1][j-1] else: max(dp[i-1][j], dp[i][j-1]).'
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: 'LCS: if s1[i-1] == s2[j-1]: dp[i][j] = 1 + dp[i-1][j-1] else: max(dp[i-1][j], dp[i][j-1]).'
-  difficulty: 4
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: dp-state-transition-2d-2
-  concept_id: lcs
-  kind: mcq
-  stem: 'Consider this concrete application of 2D Grid & Subsequence Transitions:
-
-
+  stem: |-
     ```python
+    def knapsack(items, W, downwards=True):
+        dp = [0] * (W + 1)
+        for weight, value in items:
+            ws = range(W, weight - 1, -1) if downwards else range(weight, W + 1)
+            for w in ws:
+                dp[w] = max(dp[w], dp[w - weight] + value)
+        return dp[W]
 
-    dp[i][w] = max(dp[i-1][w], val[i-1] + dp[i-1][w - wt[i-1]])
-
+    print(knapsack([(2, 3)], 6, downwards=False))
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - 2D DP tracks state via two parameters (e.g., dp[i][j] for string prefixes i and j).
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: 2D DP tracks state via two parameters (e.g., dp[i][j] for string prefixes i and j).
+  - '6'
+  - '9'
+  - '3'
+  answer: '9'
   difficulty: 4
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '3': ks-upward-loop
+    '6': ks-upward-loop
   is_microcheck: false
-  review_status: approved
-- id: dp-state-transition-2d-3
-  concept_id: lcs
+  review_status: draft
+- id: knapsack-01-p2
+  concept_id: knapsack-01
   kind: mcq
-  stem: When implementing 2D Grid & Subsequence Transitions, which error represents the most frequent
-    pitfall?
+  stem: Capacity 6; items (weight 3, value 4), (weight 3, value 4), (weight 4, value 6). What is the best
+    0/1 knapsack value?
   options:
-  - Confusing i and j indices or off-by-one with 1-indexed DP tables.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Confusing i and j indices or off-by-one with 1-indexed DP tables.
-  difficulty: 5
-  distractor_misconceptions: {}
+  - '10'
+  - '6'
+  - '8'
+  answer: '8'
+  difficulty: 4
+  distractor_misconceptions:
+    '6': ks-greedy-by-ratio
+    '10': ks-greedy-by-ratio
   is_microcheck: false
-  review_status: approved
-- id: dp-state-transition-2d-mc
-  concept_id: lcs
+  review_status: draft
+- id: knapsack-01-p3
+  concept_id: knapsack-01
   kind: mcq
-  stem: 'Quick Check: True or False — for 2D Grid & Subsequence Transitions, LCS: if s1[i-1] == s2[j-1]:
-    dp[i][j] = 1 + dp[i-1][j-1] else: max(dp[i-1][j], dp[i][j-1]).'
+  stem: In the one-row 0/1 knapsack, why does the capacity loop run from W down to the item's weight?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 3
-  distractor_misconceptions: {}
+  - So that dp[w - weight] still excludes the current item, using it at most once
+  - The direction does not matter
+  - To try items with the best value/weight ratio first
+  answer: So that dp[w - weight] still excludes the current item, using it at most once
+  difficulty: 4
+  distractor_misconceptions:
+    The direction does not matter: ks-upward-loop
+    To try items with the best value/weight ratio first: ks-greedy-by-ratio
+  is_microcheck: false
+  review_status: draft
+- id: knapsack-01-mc
+  concept_id: knapsack-01
+  kind: mcq
+  stem: Which statement about 0/1 knapsack is correct?
+  options:
+  - Looping capacity upwards in the one-row DP is also correct
+  - Greedy by value/weight ratio can fail; DP over capacity finds the optimum
+  - Greedy by value/weight ratio always finds the optimum
+  answer: Greedy by value/weight ratio can fail; DP over capacity finds the optimum
+  difficulty: 4
+  distractor_misconceptions:
+    Greedy by value/weight ratio always finds the optimum: ks-greedy-by-ratio
+    Looping capacity upwards in the one-row DP is also correct: ks-upward-loop
   is_microcheck: true
-  review_status: approved
+  review_status: draft
+- id: lcs-p1
+  concept_id: lcs
+  kind: mcq
+  stem: What is the length of the longest common subsequence of 'ABCDE' and 'ACE'?
+  options:
+  - '2'
+  - '1'
+  - '3'
+  answer: '3'
+  difficulty: 4
+  distractor_misconceptions:
+    '1': lcs-substring
+    '2': lcs-substring
+  is_microcheck: false
+  review_status: draft
+- id: lcs-p2
+  concept_id: lcs
+  kind: mcq
+  stem: |-
+    ```python
+    def lcs(a, b):
+        m, n = len(a), len(b)
+        dp = [[0] * (n + 1) for _ in range(m + 1)]
+        for i in range(1, m + 1):
+            for j in range(1, n + 1):
+                if a[i - 1] == b[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return dp[m][n]
+
+    print(lcs("AXBYC", "ABC"))
+    ```
+    What does this print?
+  options:
+  - '1'
+  - '3'
+  - '2'
+  answer: '3'
+  difficulty: 4
+  distractor_misconceptions:
+    '1': lcs-substring
+    '2': lcs-substring
+  is_microcheck: false
+  review_status: draft
+- id: lcs-p3
+  concept_id: lcs
+  kind: mcq
+  stem: Which is a common subsequence of 'GRAPH' and 'GAP' but not a common substring?
+  options:
+  - '''GAP'''
+  - '''AP'''
+  - '''G'''
+  answer: '''GAP'''
+  difficulty: 4
+  distractor_misconceptions:
+    '''G''': lcs-substring
+    '''AP''': lcs-substring
+  is_microcheck: false
+  review_status: draft
+- id: lcs-mc
+  concept_id: lcs
+  kind: mcq
+  stem: How does a subsequence differ from a substring?
+  options:
+  - A subsequence keeps the order but its characters need not be adjacent
+  - A subsequence must be contiguous; a substring need not be
+  - 'They are the same: both must be contiguous'
+  answer: A subsequence keeps the order but its characters need not be adjacent
+  difficulty: 4
+  distractor_misconceptions:
+    'They are the same: both must be contiguous': lcs-substring
+    A subsequence must be contiguous; a substring need not be: lcs-substring
+  is_microcheck: true
+  review_status: draft

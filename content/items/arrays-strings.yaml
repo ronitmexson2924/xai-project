@@ -1,392 +1,667 @@
+# Draft items for the arrays-strings cluster. Every item is review_status: draft until Ronit reviews it
+# (S3): set approved or rejected per item. Only approved items are served (GraphSnapshot).
+# Each distractor maps to a misconception of the item's own concept (content/misconceptions.yaml).
 items:
-- id: array-indexing-1
+- id: arrays-indexing-p1
   concept_id: arrays-indexing
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Array Indexing & Bounds?
-  options:
-  - Index arithmetic calculates memory offset in O(1) time.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Index arithmetic calculates memory offset in O(1) time.
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: array-indexing-2
-  concept_id: arrays-indexing
-  kind: mcq
-  stem: 'Consider this concrete application of Array Indexing & Bounds:
-
-
+  stem: |-
     ```python
-
-    arr[0] gets first element; arr[len(arr)-1] gets last.
-
+    a = [10, 20, 30, 40]
+    print(a[1])
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - Arrays store elements sequentially in contiguous memory blocks.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Arrays store elements sequentially in contiguous memory blocks.
+  - '10'
+  - '30'
+  - '20'
+  answer: '20'
   difficulty: 1
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '10': arr-index-starts-at-one
+    '30': arr-index-starts-at-one
   is_microcheck: false
-  review_status: approved
-- id: array-indexing-3
+  review_status: draft
+- id: arrays-indexing-p2
   concept_id: arrays-indexing
   kind: mcq
-  stem: When implementing Array Indexing & Bounds, which error represents the most frequent pitfall?
+  stem: For a list `a` with 5 elements, which expression gives the last element?
   options:
-  - Accessing index len(arr) raises IndexError.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Accessing index len(arr) raises IndexError.
+  - a[4]
+  - a[len(a)]
+  - a[5]
+  answer: a[4]
+  difficulty: 1
+  distractor_misconceptions:
+    a[5]: arr-last-index-is-len
+    a[len(a)]: arr-last-index-is-len
+  is_microcheck: false
+  review_status: draft
+- id: arrays-indexing-p3
+  concept_id: arrays-indexing
+  kind: mcq
+  stem: |-
+    ```python
+    a = [7, 8, 9]
+    try:
+        print(a[len(a)])
+    except IndexError:
+        print("IndexError")
+    ```
+    What does this print?
+  options:
+  - '9'
+  - '8'
+  - IndexError
+  answer: IndexError
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '9': arr-last-index-is-len
+    '8': arr-index-starts-at-one
   is_microcheck: false
-  review_status: approved
-- id: array-indexing-mc
+  review_status: draft
+- id: arrays-indexing-mc
   concept_id: arrays-indexing
   kind: mcq
-  stem: 'Quick Check: True or False — for Array Indexing & Bounds, Index arithmetic calculates memory
-    offset in O(1) time.'
+  stem: In `a = ['x', 'y', 'z']`, what are the valid indices?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
+  - 1, 2 and 3
+  - 0, 1 and 2
+  - 0, 1, 2 and 3
+  answer: 0, 1 and 2
   difficulty: 1
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    1, 2 and 3: arr-index-starts-at-one
+    0, 1, 2 and 3: arr-last-index-is-len
   is_microcheck: true
-  review_status: approved
-- id: two-pointers-technique-1
-  concept_id: two-pointers
+  review_status: draft
+- id: array-traversal-p1
+  concept_id: array-traversal
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Two Pointers Technique?
-  options:
-  - Monotonic sorted order guarantees eliminating impossible candidate spaces.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Monotonic sorted order guarantees eliminating impossible candidate spaces.
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: two-pointers-technique-2
-  concept_id: two-pointers
-  kind: mcq
-  stem: 'Consider this concrete application of Two Pointers Technique:
-
-
+  stem: |-
     ```python
+    def maximum(a):
+        best = 0
+        for x in a:
+            if x > best:
+                best = x
+        return best
 
-    low = 0, high = n - 1; increment low or decrement high based on sum.
-
+    print(maximum([-4, -1, -7]))
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - Two pointers traverse a sequence from both ends towards each other or at varying speeds.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Two pointers traverse a sequence from both ends towards each other or at varying speeds.
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: two-pointers-technique-3
-  concept_id: two-pointers
-  kind: mcq
-  stem: When implementing Two Pointers Technique, which error represents the most frequent pitfall?
-  options:
-  - Moving both pointers simultaneously when only one condition is met.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Moving both pointers simultaneously when only one condition is met.
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: two-pointers-technique-mc
-  concept_id: two-pointers
-  kind: mcq
-  stem: 'Quick Check: True or False — for Two Pointers Technique, Monotonic sorted order guarantees eliminating
-    impossible candidate spaces.'
-  options:
-  - 'True'
-  - 'False'
-  answer: 'True'
+  - '-4'
+  - '0'
+  - '-1'
+  answer: '0'
   difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: sliding-window-1
-  concept_id: sliding-window
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Sliding Window?
-  options:
-  - Reuses computation from overlapping subsegments to avoid O(N^2) recalculations.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Reuses computation from overlapping subsegments to avoid O(N^2) recalculations.
-  difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '-1': trav-max-init-zero
+    '-4': trav-max-init-zero
   is_microcheck: false
-  review_status: approved
-- id: sliding-window-2
-  concept_id: sliding-window
+  review_status: draft
+- id: array-traversal-p2
+  concept_id: array-traversal
   kind: mcq
-  stem: 'Consider this concrete application of Sliding Window:
-
-
+  stem: To find the maximum of a non-empty list `a` in one pass, how should `best` be initialised?
+  options:
+  - best = 1
+  - best = a[0]
+  - best = 0
+  answer: best = a[0]
+  difficulty: 2
+  distractor_misconceptions:
+    best = 0: trav-max-init-zero
+    best = 1: trav-max-init-zero
+  is_microcheck: false
+  review_status: draft
+- id: array-traversal-p3
+  concept_id: array-traversal
+  kind: mcq
+  stem: A one-pass maximum starts with `best = 0`. For which input does it return a wrong answer?
+  options:
+  - '[0, 5, 1]'
+  - '[3, 8, 2]'
+  - '[-3, -8, -2]'
+  answer: '[-3, -8, -2]'
+  difficulty: 2
+  distractor_misconceptions:
+    '[3, 8, 2]': trav-max-init-zero
+    '[0, 5, 1]': trav-max-init-zero
+  is_microcheck: false
+  review_status: draft
+- id: array-traversal-mc
+  concept_id: array-traversal
+  kind: mcq
+  stem: |-
     ```python
-
-    Add arr[right] to sum; while sum > target: subtract arr[left]; left += 1.
-
+    best = 0
+    for t in [-12, -5, -9]:
+        if t > best:
+            best = t
+    print(best)
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - A sliding window maintains a contiguous subsegment by expanding right and shrinking left.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: A sliding window maintains a contiguous subsegment by expanding right and shrinking left.
-  difficulty: 3
-  distractor_misconceptions: {}
+  - '-12'
+  - '0'
+  - '-5'
+  answer: '0'
+  difficulty: 1
+  distractor_misconceptions:
+    '-5': trav-max-init-zero
+    '-12': trav-max-init-zero
+  is_microcheck: true
+  review_status: draft
+- id: dynamic-arrays-p1
+  concept_id: dynamic-arrays
+  kind: mcq
+  stem: What is the cost of `a.insert(0, x)` on a Python list of length n?
+  options:
+  - O(1) amortised
+  - O(1), like append
+  - O(n), because every element shifts one place
+  answer: O(n), because every element shifts one place
+  difficulty: 2
+  distractor_misconceptions:
+    O(1), like append: dyn-every-op-constant
+    O(1) amortised: dyn-every-op-constant
   is_microcheck: false
-  review_status: approved
-- id: sliding-window-3
+  review_status: draft
+- id: dynamic-arrays-p2
+  concept_id: dynamic-arrays
+  kind: mcq
+  stem: What is the total cost of n calls to `a.append(x)` starting from an empty list?
+  options:
+  - O(n log n), because every append copies half the list
+  - 'O(n) in total: O(1) amortised per append'
+  - O(n^2), because every append copies the list
+  answer: 'O(n) in total: O(1) amortised per append'
+  difficulty: 3
+  distractor_misconceptions:
+    O(n^2), because every append copies the list: dyn-append-always-copies
+    O(n log n), because every append copies half the list: dyn-append-always-copies
+  is_microcheck: false
+  review_status: draft
+- id: dynamic-arrays-p3
+  concept_id: dynamic-arrays
+  kind: mcq
+  stem: Why is `append` O(1) amortised even though a resize copies every element?
+  options:
+  - 'It is not: every append copies the whole list, so append is O(n)'
+  - Capacity grows geometrically, so resizes are rare and their cost averages out
+  - Python never copies a list when it grows
+  answer: Capacity grows geometrically, so resizes are rare and their cost averages out
+  difficulty: 3
+  distractor_misconceptions:
+    Python never copies a list when it grows: dyn-every-op-constant
+    'It is not: every append copies the whole list, so append is O(n)': dyn-append-always-copies
+  is_microcheck: false
+  review_status: draft
+- id: dynamic-arrays-mc
+  concept_id: dynamic-arrays
+  kind: mcq
+  stem: Which list operation is O(n) on a Python list of length n?
+  options:
+  - a.pop()
+  - a[3]
+  - a.pop(0)
+  - a.append(x)
+  answer: a.pop(0)
+  difficulty: 2
+  distractor_misconceptions:
+    a.append(x): dyn-append-always-copies
+    a[3]: dyn-every-op-constant
+    a.pop(): dyn-every-op-constant
+  is_microcheck: true
+  review_status: draft
+- id: strings-as-sequences-p1
+  concept_id: strings-as-sequences
+  kind: mcq
+  stem: |-
+    ```python
+    s = "cat"
+    try:
+        s[0] = "b"
+        print(s)
+    except TypeError:
+        print("TypeError")
+    ```
+    What does this print?
+  options:
+  - bat
+  - bcat
+  - TypeError
+  answer: TypeError
+  difficulty: 1
+  distractor_misconceptions:
+    bat: str-mutable
+    bcat: str-mutable
+  is_microcheck: false
+  review_status: draft
+- id: strings-as-sequences-p2
+  concept_id: strings-as-sequences
+  kind: mcq
+  stem: |-
+    ```python
+    s = "code"
+    t = s.upper()
+    print(s, t)
+    ```
+    What does this print?
+  options:
+  - CODE code
+  - CODE CODE
+  - code CODE
+  answer: code CODE
+  difficulty: 2
+  distractor_misconceptions:
+    CODE CODE: str-mutable
+    CODE code: str-mutable
+  is_microcheck: false
+  review_status: draft
+- id: strings-as-sequences-p3
+  concept_id: strings-as-sequences
+  kind: mcq
+  stem: Which line produces the string `'bat'` from `s = 'cat'`?
+  options:
+  - s = 'b' + s[1:]
+  - s.replace_at(0, 'b')
+  - s[0] = 'b'
+  answer: s = 'b' + s[1:]
+  difficulty: 2
+  distractor_misconceptions:
+    s[0] = 'b': str-mutable
+    s.replace_at(0, 'b'): str-mutable
+  is_microcheck: false
+  review_status: draft
+- id: strings-as-sequences-mc
+  concept_id: strings-as-sequences
+  kind: mcq
+  stem: What happens when you run `s = 'hello'` and then `s[0] = 'j'`?
+  options:
+  - 'A new character is inserted: s becomes ''jhello'''
+  - A TypeError, because strings are immutable
+  - s becomes 'jello'
+  answer: A TypeError, because strings are immutable
+  difficulty: 1
+  distractor_misconceptions:
+    s becomes 'jello': str-mutable
+    'A new character is inserted: s becomes ''jhello''': str-mutable
+  is_microcheck: true
+  review_status: draft
+- id: two-pointers-p1
+  concept_id: two-pointers
+  kind: mcq
+  stem: The pair-sum two-pointer method (one pointer at each end, move left if the sum is too small, right
+    if too big) needs which precondition?
+  options:
+  - The array is sorted
+  - 'None: it works on any array'
+  - The array has no duplicates, sorted or not
+  answer: The array is sorted
+  difficulty: 2
+  distractor_misconceptions:
+    'None: it works on any array': tp-works-unsorted
+    The array has no duplicates, sorted or not: tp-works-unsorted
+  is_microcheck: false
+  review_status: draft
+- id: two-pointers-p2
+  concept_id: two-pointers
+  kind: mcq
+  stem: |-
+    ```python
+    def pair_with_sum(a, target):
+        i, j = 0, len(a) - 1
+        while i < j:
+            s = a[i] + a[j]
+            if s == target:
+                return (a[i], a[j])
+            if s < target:
+                i += 1
+            else:
+                j -= 1
+        return None
+
+    print(pair_with_sum([5, 1, 8, 3], 9))
+    ```
+    What does this print?
+  options:
+  - None
+  - (1, 8)
+  - (5, 3)
+  answer: None
+  difficulty: 3
+  distractor_misconceptions:
+    (1, 8): tp-works-unsorted
+    (5, 3): tp-works-unsorted
+  is_microcheck: false
+  review_status: draft
+- id: two-pointers-p3
+  concept_id: two-pointers
+  kind: mcq
+  stem: In the pair-sum scan on a sorted array, why may `i` move right when `a[i] + a[j] < target`?
+  options:
+  - a[j] is the largest remaining value, so no remaining partner can make a[i] reach the target
+  - Because a[i] is always the smallest value, whether or not the array is sorted
+  - Moving i is safe on any array, because every pair is checked eventually
+  answer: a[j] is the largest remaining value, so no remaining partner can make a[i] reach the target
+  difficulty: 3
+  distractor_misconceptions:
+    Moving i is safe on any array, because every pair is checked eventually: tp-works-unsorted
+    Because a[i] is always the smallest value, whether or not the array is sorted: tp-works-unsorted
+  is_microcheck: false
+  review_status: draft
+- id: two-pointers-mc
+  concept_id: two-pointers
+  kind: mcq
+  stem: You need two numbers that sum to a target in an unsorted list. What is a correct first step before
+    using the two-pointer scan?
+  options:
+  - 'Nothing: start the pointers at both ends right away'
+  - Sort the list
+  - Reverse the list
+  answer: Sort the list
+  difficulty: 2
+  distractor_misconceptions:
+    'Nothing: start the pointers at both ends right away': tp-works-unsorted
+    Reverse the list: tp-works-unsorted
+  is_microcheck: true
+  review_status: draft
+- id: sliding-window-p1
   concept_id: sliding-window
   kind: mcq
-  stem: When implementing Sliding Window, which error represents the most frequent pitfall?
+  stem: |-
+    ```python
+    def best(a, k):
+        top = 0
+        for i in range(len(a) - k + 1):
+            top = max(top, sum(a[i:i + k]))
+        return top
+    ```
+    What is the time complexity of best for a list of length n and window size k?
   options:
-  - Resetting window from scratch instead of shrinking the left boundary.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Resetting window from scratch instead of shrinking the left boundary.
-  difficulty: 4
-  distractor_misconceptions: {}
+  - O(n), because it is a sliding window
+  - O(k)
+  - O(n * k)
+  answer: O(n * k)
+  difficulty: 2
+  distractor_misconceptions:
+    O(n), because it is a sliding window: sw-recompute-window
+    O(k): sw-recompute-window
   is_microcheck: false
-  review_status: approved
+  review_status: draft
+- id: sliding-window-p2
+  concept_id: sliding-window
+  kind: mcq
+  stem: When a fixed-size window over `a` slides one step right to end at index `right`, how should the
+    window sum be updated?
+  options:
+  - window = sum(a[:right + 1])
+  - window += a[right] - a[right - k]
+  - window = sum(a[right - k + 1:right + 1])
+  answer: window += a[right] - a[right - k]
+  difficulty: 3
+  distractor_misconceptions:
+    window = sum(a[right - k + 1:right + 1]): sw-recompute-window
+    window = sum(a[:right + 1]): sw-recompute-window
+  is_microcheck: false
+  review_status: draft
+- id: sliding-window-p3
+  concept_id: sliding-window
+  kind: mcq
+  stem: |-
+    ```python
+    def max_window_sum(a, k):
+        window = sum(a[:k])
+        best = window
+        for right in range(k, len(a)):
+            window += a[right] - a[right - k]
+            best = max(best, window)
+        return best
+
+    print(max_window_sum([4, 2, 1, 7, 3], 2))
+    ```
+    What does this print?
+  options:
+  - '13'
+  - '10'
+  - '8'
+  answer: '10'
+  difficulty: 3
+  distractor_misconceptions:
+    '8': sw-recompute-window
+    '13': sw-recompute-window
+  is_microcheck: false
+  review_status: draft
 - id: sliding-window-mc
   concept_id: sliding-window
   kind: mcq
-  stem: 'Quick Check: True or False — for Sliding Window, Reuses computation from overlapping subsegments
-    to avoid O(N^2) recalculations.'
+  stem: Why is a sliding-window sum O(n)?
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: prefix-sums-1
-  concept_id: prefix-sums
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Prefix Sums?
-  options:
-  - Range sum query [L, R] = prefix[R] - prefix[L - 1].
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Range sum query [L, R] = prefix[R] - prefix[L - 1].
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: prefix-sums-2
-  concept_id: prefix-sums
-  kind: mcq
-  stem: 'Consider this concrete application of Prefix Sums:
-
-
-    ```python
-
-    P = [0, 2, 5, 9]; sum(1..2) = P[3] - P[1] = 9 - 2 = 7.
-
-    ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
-  options:
-  - prefix[i] stores the sum of all elements from index 0 up to i.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: prefix[i] stores the sum of all elements from index 0 up to i.
-  difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: prefix-sums-3
-  concept_id: prefix-sums
-  kind: mcq
-  stem: When implementing Prefix Sums, which error represents the most frequent pitfall?
-  options:
-  - Forgetting prefix base value 0, causing off-by-one when L=0.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Forgetting prefix base value 0, causing off-by-one when L=0.
+  - Because the window size k is always small, so recomputing each window is free
+  - Each element is added once when it enters and removed once when it leaves
+  - Because sum() over each window is a fast built-in
+  answer: Each element is added once when it enters and removed once when it leaves
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    Because sum() over each window is a fast built-in: sw-recompute-window
+    Because the window size k is always small, so recomputing each window is free: sw-recompute-window
+  is_microcheck: true
+  review_status: draft
+- id: prefix-sums-p1
+  concept_id: prefix-sums
+  kind: mcq
+  stem: |-
+    ```python
+    a = [2, 5, 1, 4]
+    P = [0]
+    for x in a:
+        P.append(P[-1] + x)
+    print(P)
+    ```
+    What does this print?
+  options:
+  - '[0, 2, 7, 8, 12]'
+  - '[0, 2, 7, 8]'
+  - '[2, 7, 8, 12]'
+  answer: '[0, 2, 7, 8, 12]'
+  difficulty: 2
+  distractor_misconceptions:
+    '[2, 7, 8, 12]': ps-range-off-by-one
+    '[0, 2, 7, 8]': ps-range-off-by-one
   is_microcheck: false
-  review_status: approved
+  review_status: draft
+- id: prefix-sums-p2
+  concept_id: prefix-sums
+  kind: mcq
+  stem: With `P[i] = a[0] + ... + a[i-1]` and `P[0] = 0`, which expression gives the sum of `a[l..r]`
+    inclusive?
+  options:
+  - P[r + 1] - P[l]
+  - P[r] - P[l - 1]
+  - P[r] - P[l]
+  answer: P[r + 1] - P[l]
+  difficulty: 2
+  distractor_misconceptions:
+    P[r] - P[l]: ps-range-off-by-one
+    P[r] - P[l - 1]: ps-range-off-by-one
+  is_microcheck: false
+  review_status: draft
+- id: prefix-sums-p3
+  concept_id: prefix-sums
+  kind: mcq
+  stem: |-
+    ```python
+    a = [3, 1, 4, 1, 5]
+    P = [0]
+    for x in a:
+        P.append(P[-1] + x)
+    l, r = 1, 3
+    print(P[r] - P[l])
+    ```
+    What does this print?
+  options:
+  - '6'
+  - '5'
+  - '10'
+  answer: '5'
+  difficulty: 3
+  distractor_misconceptions:
+    '6': ps-range-off-by-one
+    '10': ps-range-off-by-one
+  is_microcheck: false
+  review_status: draft
 - id: prefix-sums-mc
   concept_id: prefix-sums
   kind: mcq
-  stem: 'Quick Check: True or False — for Prefix Sums, Range sum query [L, R] = prefix[R] - prefix[L -
-    1].'
+  stem: '`P = [0, 3, 4, 8, 9, 14]` is the prefix-sum array of `a = [3, 1, 4, 1, 5]`. What is the sum of
+    `a[1..3]` (inclusive)?'
   options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: string-immutability-1
-  concept_id: strings-as-sequences
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of String Immutability & Manipulation?
-  options:
-  - Repeated string += concatenation in a loop takes O(N^2) time; join takes O(N).
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Repeated string += concatenation in a loop takes O(N^2) time; join takes O(N).
+  - '9'
+  - '6'
+  - '5'
+  answer: '6'
   difficulty: 2
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: string-immutability-2
-  concept_id: strings-as-sequences
+  distractor_misconceptions:
+    '5': ps-range-off-by-one
+    '9': ps-range-off-by-one
+  is_microcheck: true
+  review_status: draft
+- id: hash-maps-p1
+  concept_id: hash-maps
   kind: mcq
-  stem: 'Consider this concrete application of String Immutability & Manipulation:
-
-
+  stem: |-
     ```python
-
-    ''''.join(char_list) is O(N) whereas s += c in a loop is O(N^2).
-
+    d = {}
+    try:
+        d[[1, 2]] = "pair"
+        print("ok")
+    except TypeError:
+        print("TypeError")
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - Immutable strings cannot be modified in place; concatenation copies characters.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: Immutable strings cannot be modified in place; concatenation copies characters.
+  - ok, but the key is stored as the string '[1, 2]'
+  - TypeError
+  - ok
+  answer: TypeError
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    ok: hash-any-key
+    ok, but the key is stored as the string '[1, 2]': hash-any-key
   is_microcheck: false
-  review_status: approved
-- id: string-immutability-3
-  concept_id: strings-as-sequences
+  review_status: draft
+- id: hash-maps-p2
+  concept_id: hash-maps
   kind: mcq
-  stem: When implementing String Immutability & Manipulation, which error represents the most frequent
-    pitfall?
+  stem: Which of these can be used as a dictionary key?
   options:
-  - Assuming s[i] = 'a' modifies the string in place.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Assuming s[i] = 'a' modifies the string in place.
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: string-immutability-mc
-  concept_id: strings-as-sequences
-  kind: mcq
-  stem: 'Quick Check: True or False — for String Immutability & Manipulation, Repeated string += concatenation
-    in a loop takes O(N^2) time; join takes O(N).'
-  options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
-  is_microcheck: true
-  review_status: approved
-- id: in-place-array-modification-1
-  concept_id: array-traversal
-  kind: mcq
-  stem: Which statement correctly characterizes the core invariant of In-Place Array Modification?
-  options:
-  - Maintain write_index <= read_index so unprocessed data is never overwritten.
-  - It operates without bounds and skips checking the termination condition.
-  - It executes in reverse order without updating state.
-  - It treats all elements as mutually independent without relationships.
-  answer: Maintain write_index <= read_index so unprocessed data is never overwritten.
+  - (1, 2)
+  - '{1: 2}'
+  - '[1, 2]'
+  answer: (1, 2)
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '[1, 2]': hash-any-key
+    '{1: 2}': hash-any-key
   is_microcheck: false
-  review_status: approved
-- id: in-place-array-modification-2
-  concept_id: array-traversal
+  review_status: draft
+- id: hash-maps-p3
+  concept_id: hash-maps
   kind: mcq
-  stem: 'Consider this concrete application of In-Place Array Modification:
-
-
+  stem: |-
     ```python
-
-    if arr[read] != val: arr[write] = arr[read]; write += 1.
-
+    d = {}
+    for k in [30, 10, 20]:
+        d[k] = True
+    print(list(d))
     ```
-
-
-    What is the fundamental guarantee demonstrated by this trace?'
+    What does this print?
   options:
-  - In-place modification overwrites valid elements using read and write pointer indices.
-  - It guarantees random O(1) jump access to any uncomputed state.
-  - It eliminates the need for any base state or bounds.
-  - It executes an infinite loop that ignores input constraints.
-  answer: In-place modification overwrites valid elements using read and write pointer indices.
+  - '[30, 20, 10]'
+  - '[10, 20, 30]'
+  - '[30, 10, 20]'
+  answer: '[30, 10, 20]'
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '[10, 20, 30]': hash-ordered-by-key
+    '[30, 20, 10]': hash-ordered-by-key
   is_microcheck: false
-  review_status: approved
-- id: in-place-array-modification-3
-  concept_id: array-traversal
+  review_status: draft
+- id: hash-maps-mc
+  concept_id: hash-maps
   kind: mcq
-  stem: When implementing In-Place Array Modification, which error represents the most frequent pitfall?
+  stem: Which statement about Python dicts is correct?
   options:
-  - Overwriting elements before their values have been inspected.
-  - Using descriptive identifier names for local pointers.
-  - Structuring code inside functions rather than flat scripts.
-  - Checking preconditions before accessing boundary values.
-  answer: Overwriting elements before their values have been inspected.
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: in-place-array-modification-mc
-  concept_id: array-traversal
-  kind: mcq
-  stem: 'Quick Check: True or False — for In-Place Array Modification, Maintain write_index <= read_index
-    so unprocessed data is never overwritten.'
-  options:
-  - 'True'
-  - 'False'
-  answer: 'True'
-  difficulty: 1
-  distractor_misconceptions: {}
+  - Any value, including a list, can be a key
+  - Keys must be hashable, and lookup is O(1) on average
+  - Keys are kept in sorted order
+  answer: Keys must be hashable, and lookup is O(1) on average
+  difficulty: 2
+  distractor_misconceptions:
+    Any value, including a list, can be a key: hash-any-key
+    Keys are kept in sorted order: hash-ordered-by-key
   is_microcheck: true
-  review_status: approved
+  review_status: draft
+- id: hash-collisions-p1
+  concept_id: hash-collisions
+  kind: mcq
+  stem: In a hash table that uses chaining, all n keys hash to the same slot. What does a lookup cost?
+  options:
+  - 'O(1): hash lookups are always constant'
+  - O(n)
+  - O(1), because the slot is found directly
+  answer: O(n)
+  difficulty: 3
+  distractor_misconceptions:
+    'O(1): hash lookups are always constant': coll-always-constant
+    O(1), because the slot is found directly: coll-always-constant
+  is_microcheck: false
+  review_status: draft
+- id: hash-collisions-p2
+  concept_id: hash-collisions
+  kind: mcq
+  stem: With table_size = 8 and slot(key) = key % 8, which pair of keys collides?
+  options:
+  - 3 and 11
+  - 3 and 4
+  - 3 and 8
+  answer: 3 and 11
+  difficulty: 3
+  distractor_misconceptions:
+    3 and 4: coll-always-constant
+    3 and 8: coll-always-constant
+  is_microcheck: false
+  review_status: draft
+- id: hash-collisions-p3
+  concept_id: hash-collisions
+  kind: mcq
+  stem: What does the O(1) average lookup time of a hash map depend on?
+  options:
+  - A good hash function and a low load factor
+  - Only on the table being stored in an array
+  - 'Nothing: lookups are O(1) in every case'
+  answer: A good hash function and a low load factor
+  difficulty: 3
+  distractor_misconceptions:
+    'Nothing: lookups are O(1) in every case': coll-always-constant
+    Only on the table being stored in an array: coll-always-constant
+  is_microcheck: false
+  review_status: draft
+- id: hash-collisions-mc
+  concept_id: hash-collisions
+  kind: mcq
+  stem: What is the worst-case time of a single hash-map lookup with n keys?
+  options:
+  - O(1)
+  - O(1), because collisions never slow it down
+  - O(n)
+  answer: O(n)
+  difficulty: 3
+  distractor_misconceptions:
+    O(1): coll-always-constant
+    O(1), because collisions never slow it down: coll-always-constant
+  is_microcheck: true
+  review_status: draft

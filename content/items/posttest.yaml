@@ -1,212 +1,275 @@
+# Draft items for the posttest test (parallel forms: pretest-NN and posttest-NN test the same concept). Every item is review_status: draft until Ronit reviews it
+# (S3): set approved or rejected per item. Only approved items are served (GraphSnapshot).
+# Each distractor maps to a misconception of the item's own concept (content/misconceptions.yaml).
 items:
 - id: posttest-01
   concept_id: loops
   kind: mcq
-  stem: '[Post-Assessment 1/15] Which invariant holds during the execution of Loops & Iteration?'
+  stem: |-
+    ```python
+    total = 0
+    for i in range(2, 6):
+        total += i
+    print(total)
+    ```
+    What does this print?
   options:
-  - A loop runs code repeatedly while a termination condition holds.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: A loop runs code repeatedly while a termination condition holds.
+  - '20'
+  - '18'
+  - '14'
+  answer: '14'
   difficulty: 1
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '20': loops-off-by-one
+    '18': loops-off-by-one
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: posttest-02
-  concept_id: loops
+  concept_id: functions
   kind: mcq
-  stem: '[Post-Assessment 2/15] Which invariant holds during the execution of Nested Loops?'
+  stem: |-
+    ```python
+    def triple(n):
+        print(n * 3)
+
+    y = triple(2)
+    print(y)
+    ```
+    What is the second line printed?
   options:
-  - An inner loop executes its full cycle for every single step of the outer loop.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: An inner loop executes its full cycle for every single step of the outer loop.
-  difficulty: 2
-  distractor_misconceptions: {}
+  - None
+  - '2'
+  - '6'
+  answer: None
+  difficulty: 1
+  distractor_misconceptions:
+    '6': func-print-is-return
+    '2': func-print-is-return
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: posttest-03
   concept_id: big-o-notation
   kind: mcq
-  stem: '[Post-Assessment 3/15] Which invariant holds during the execution of Time Complexity Basics?'
+  stem: A function does `2n + 90` steps on an input of size n. What is its Big-O?
   options:
-  - Big-O characterizes the upper bound of operational steps as input N scales.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: Big-O characterizes the upper bound of operational steps as input N scales.
+  - O(n), so it always takes n seconds
+  - O(n)
+  - O(2n + 90)
+  answer: O(n)
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    O(2n + 90): bigo-keeps-constants
+    O(n), so it always takes n seconds: bigo-measures-seconds
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: posttest-04
   concept_id: arrays-indexing
   kind: mcq
-  stem: '[Post-Assessment 4/15] Which invariant holds during the execution of Array Indexing & Bounds?'
+  stem: For `b = [6, 1, 8, 5]`, what is `b[3]`?
   options:
-  - Arrays store elements sequentially in contiguous memory blocks.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: Arrays store elements sequentially in contiguous memory blocks.
+  - IndexError
+  - '8'
+  - '5'
+  answer: '5'
   difficulty: 1
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '8': arr-index-starts-at-one
+    IndexError: arr-last-index-is-len
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: posttest-05
-  concept_id: two-pointers
+  concept_id: hash-maps
   kind: mcq
-  stem: '[Post-Assessment 5/15] Which invariant holds during the execution of Two Pointers Technique?'
+  stem: Which of these values is allowed as a key in a Python dict?
   options:
-  - Two pointers traverse a sequence from both ends towards each other or at varying speeds.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: Two pointers traverse a sequence from both ends towards each other or at varying speeds.
+  - (3, 4)
+  - '{3: 4}'
+  - '[3, 4]'
+  answer: (3, 4)
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '[3, 4]': hash-any-key
+    '{3: 4}': hash-any-key
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: posttest-06
-  concept_id: sliding-window
+  concept_id: references
   kind: mcq
-  stem: '[Post-Assessment 6/15] Which invariant holds during the execution of Sliding Window?'
+  stem: |-
+    ```python
+    x = ["p"]
+    y = x
+    y.append("q")
+    print(x, y)
+    ```
+    What does this print?
   options:
-  - A sliding window maintains a contiguous subsegment by expanding right and shrinking left.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: A sliding window maintains a contiguous subsegment by expanding right and shrinking left.
-  difficulty: 3
-  distractor_misconceptions: {}
+  - '[''p''] [''q'']'
+  - '[''p'', ''q''] [''p'', ''q'']'
+  - '[''p''] [''p'', ''q'']'
+  answer: '[''p'', ''q''] [''p'', ''q'']'
+  difficulty: 2
+  distractor_misconceptions:
+    '[''p''] [''p'', ''q'']': ref-assignment-copies
+    '[''p''] [''q'']': ref-assignment-copies
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: posttest-07
-  concept_id: singly-linked-list
+  concept_id: stack
   kind: mcq
-  stem: '[Post-Assessment 7/15] Which invariant holds during the execution of Singly Linked List Nodes?'
+  stem: You push 'x', 'y', 'z' onto an empty stack and pop twice. What comes out, in order?
   options:
-  - A linked list node stores data and a pointer reference to the subsequent node.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: A linked list node stores data and a pointer reference to the subsequent node.
+  - x, y
+  - z, y
+  - y, x
+  answer: z, y
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    x, y: stack-fifo
+    y, x: stack-fifo
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: posttest-08
-  concept_id: singly-linked-list
+  concept_id: queue
   kind: mcq
-  stem: '[Post-Assessment 8/15] Which invariant holds during the execution of Linked List Traversal?'
+  stem: You enqueue 'x', 'y', 'z' into an empty queue and dequeue once. What comes out?
   options:
-  - Traversal steps from current = current.next until current is None.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: Traversal steps from current = current.next until current is None.
+  - x
+  - y
+  - z
+  answer: x
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    z: queue-lifo
+    y: queue-lifo
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: posttest-09
-  concept_id: fast-slow-pointers
-  kind: mcq
-  stem: '[Post-Assessment 9/15] Which invariant holds during the execution of Fast & Slow Pointers (Floyd''s
-    Cycle)?'
-  options:
-  - Slow advances 1 step while fast advances 2 steps per iteration.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: Slow advances 1 step while fast advances 2 steps per iteration.
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: posttest-10
   concept_id: recursion-base-case
   kind: mcq
-  stem: '[Post-Assessment 10/15] Which invariant holds during the execution of Recursion: Base Case?'
+  stem: |-
+    ```python
+    def summ(n):
+        if n == 0:
+            return 1
+        return n + summ(n - 1)
+
+    print(summ(3))
+    ```
+    What does this print?
   options:
-  - A base case is a direct input condition answered without further recursive calls.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: A base case is a direct input condition answered without further recursive calls.
+  - '3'
+  - '6'
+  - '7'
+  answer: '7'
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '6': rbc-base-case-wrong-value
+    '3': rbc-base-case-wrong-value
   is_microcheck: false
-  review_status: approved
-- id: posttest-11
+  review_status: draft
+- id: posttest-10
   concept_id: call-stack
   kind: mcq
-  stem: '[Post-Assessment 11/15] Which invariant holds during the execution of Recursive Call Stack?'
+  stem: |-
+    ```python
+    out = []
+    def g(n):
+        if n == 0:
+            return
+        g(n - 1)
+        out.append(n * 10)
+
+    g(3)
+    print(out)
+    ```
+    What does this print?
   options:
-  - Each call pushes an activation record with local variables onto the call stack.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: Each call pushes an activation record with local variables onto the call stack.
+  - '[]'
+  - '[30, 30, 30]'
+  - '[10, 20, 30]'
+  answer: '[10, 20, 30]'
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '[]': cs-code-after-call-skipped
+    '[30, 30, 30]': cs-shared-locals
   is_microcheck: false
-  review_status: approved
+  review_status: draft
+- id: posttest-11
+  concept_id: binary-search
+  kind: mcq
+  stem: About how many comparisons does binary search need on a sorted list of 4,000 elements, in the
+    worst case?
+  options:
+  - About 12
+  - About 12, even if the list is unsorted
+  - About 2,000
+  answer: About 12
+  difficulty: 2
+  distractor_misconceptions:
+    About 2,000: bs-linear-time
+    About 12, even if the list is unsorted: bs-unsorted-ok
+  is_microcheck: false
+  review_status: draft
 - id: posttest-12
-  concept_id: linear-search
+  concept_id: merge-sort
   kind: mcq
-  stem: '[Post-Assessment 12/15] Which invariant holds during the execution of Linear Search?'
+  stem: 'Merging the sorted lists [1, 4, 5, 7] and [2, 3]: the main loop stops once [2, 3] is used up.
+    What must still be added?'
   options:
-  - Linear search checks every element sequentially until target is found or list ends.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: Linear search checks every element sequentially until target is found or list ends.
-  difficulty: 1
-  distractor_misconceptions: {}
+  - Nothing
+  - Nothing, and the merge used O(1) extra memory
+  - '[4, 5, 7]'
+  answer: '[4, 5, 7]'
+  difficulty: 3
+  distractor_misconceptions:
+    Nothing: ms-forget-leftovers
+    Nothing, and the merge used O(1) extra memory: ms-in-place-free
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: posttest-13
-  concept_id: binary-search-boundaries
+  concept_id: binary-search-tree
   kind: mcq
-  stem: '[Post-Assessment 13/15] Which invariant holds during the execution of Binary Search Bounds?'
+  stem: Root 50 has right child 70; 70 has left child 40. Is this a valid BST?
   options:
-  - Binary search maintains low and high pointers enclosing the search space.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: Binary search maintains low and high pointers enclosing the search space.
-  difficulty: 2
-  distractor_misconceptions: {}
+  - 'Yes: 40 < 70, so each node is ordered with its children'
+  - Yes, and search is O(log n)
+  - 'No: 40 is in 50''s right subtree'
+  answer: 'No: 40 is in 50''s right subtree'
+  difficulty: 3
+  distractor_misconceptions:
+    'Yes: 40 < 70, so each node is ordered with its children': bst-local-check
+    Yes, and search is O(log n): bst-always-logn
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: posttest-14
-  concept_id: tree-dfs-traversals
+  concept_id: graph-bfs
   kind: mcq
-  stem: '[Post-Assessment 14/15] Which invariant holds during the execution of Binary Tree: Preorder Traversal?'
+  stem: Edges s-b (weight 1), b-t (weight 3), s-t (weight 7). Which path to t does BFS from s find first?
   options:
-  - Preorder processes the current node before traversing left and right subtrees.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: Preorder processes the current node before traversing left and right subtrees.
-  difficulty: 2
-  distractor_misconceptions: {}
+  - s-b-t, the cheapest path
+  - s-t, the path with fewest edges
+  - s-b-t, because BFS minimises total weight
+  answer: s-t, the path with fewest edges
+  difficulty: 3
+  distractor_misconceptions:
+    s-b-t, the cheapest path: bfs-weighted-shortest
+    s-b-t, because BFS minimises total weight: bfs-weighted-shortest
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: posttest-15
-  concept_id: graph-representation
+  concept_id: memoization
   kind: mcq
-  stem: '[Post-Assessment 15/15] Which invariant holds during the execution of Graph Adjacency List?'
+  stem: A memoised function starts each call with `seen = dict()` and stores results in it. What is the
+    effect?
   options:
-  - Adjacency list maps each vertex to a list of adjacent neighbor vertices.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It executes without any state transition or condition check.
-  answer: Adjacency list maps each vertex to a list of adjacent neighbor vertices.
-  difficulty: 2
-  distractor_misconceptions: {}
+  - Results are reused, but only within one level
+  - Every result is reused
+  - Nothing is reused; it is as slow as plain recursion
+  answer: Nothing is reused; it is as slow as plain recursion
+  difficulty: 3
+  distractor_misconceptions:
+    Every result is reused: memo-fresh-cache
+    Results are reused, but only within one level: memo-fresh-cache
   is_microcheck: false
-  review_status: approved
+  review_status: draft

@@ -1,211 +1,274 @@
+# Draft items for the pretest test (parallel forms: pretest-NN and posttest-NN test the same concept). Every item is review_status: draft until Ronit reviews it
+# (S3): set approved or rejected per item. Only approved items are served (GraphSnapshot).
+# Each distractor maps to a misconception of the item's own concept (content/misconceptions.yaml).
 items:
 - id: pretest-01
   concept_id: loops
   kind: mcq
-  stem: '[Pre-Assessment 1/15] What is the primary guarantee of Loops & Iteration?'
+  stem: |-
+    ```python
+    total = 0
+    for i in range(1, 5):
+        total += i
+    print(total)
+    ```
+    What does this print?
   options:
-  - Every loop needs a condition that eventually changes state to terminate.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Every loop needs a condition that eventually changes state to terminate.
+  - '10'
+  - '15'
+  - '14'
+  answer: '10'
   difficulty: 1
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '15': loops-off-by-one
+    '14': loops-off-by-one
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: pretest-02
-  concept_id: loops
+  concept_id: functions
   kind: mcq
-  stem: '[Pre-Assessment 2/15] What is the primary guarantee of Nested Loops?'
+  stem: |-
+    ```python
+    def half(n):
+        print(n // 2)
+
+    x = half(10)
+    print(x)
+    ```
+    What is the second line printed?
   options:
-  - 'Total iterations multiply: outer iterations * inner iterations.'
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: 'Total iterations multiply: outer iterations * inner iterations.'
-  difficulty: 2
-  distractor_misconceptions: {}
+  - '5'
+  - None
+  - '10'
+  answer: None
+  difficulty: 1
+  distractor_misconceptions:
+    '5': func-print-is-return
+    '10': func-print-is-return
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: pretest-03
   concept_id: big-o-notation
   kind: mcq
-  stem: '[Pre-Assessment 3/15] What is the primary guarantee of Time Complexity Basics?'
+  stem: A function does `5n + 40` steps on an input of size n. What is its Big-O?
   options:
-  - Ignore constant multipliers and lower-order terms as N approaches infinity.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Ignore constant multipliers and lower-order terms as N approaches infinity.
+  - O(5n + 40)
+  - O(n)
+  - O(n), so it always takes n seconds
+  answer: O(n)
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    O(5n + 40): bigo-keeps-constants
+    O(n), so it always takes n seconds: bigo-measures-seconds
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: pretest-04
   concept_id: arrays-indexing
   kind: mcq
-  stem: '[Pre-Assessment 4/15] What is the primary guarantee of Array Indexing & Bounds?'
+  stem: For `a = [4, 9, 2, 7]`, what is `a[3]`?
   options:
-  - Index arithmetic calculates memory offset in O(1) time.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Index arithmetic calculates memory offset in O(1) time.
+  - '2'
+  - '7'
+  - IndexError
+  answer: '7'
   difficulty: 1
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '2': arr-index-starts-at-one
+    IndexError: arr-last-index-is-len
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: pretest-05
-  concept_id: two-pointers
+  concept_id: hash-maps
   kind: mcq
-  stem: '[Pre-Assessment 5/15] What is the primary guarantee of Two Pointers Technique?'
+  stem: Which of these can be a key in a Python dict?
   options:
-  - Monotonic sorted order guarantees eliminating impossible candidate spaces.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Monotonic sorted order guarantees eliminating impossible candidate spaces.
+  - '''abc'''
+  - '[''a'', ''b'', ''c'']'
+  - '{''a'': 1}'
+  answer: '''abc'''
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '[''a'', ''b'', ''c'']': hash-any-key
+    '{''a'': 1}': hash-any-key
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: pretest-06
-  concept_id: sliding-window
+  concept_id: references
   kind: mcq
-  stem: '[Pre-Assessment 6/15] What is the primary guarantee of Sliding Window?'
+  stem: |-
+    ```python
+    a = [1]
+    b = a
+    b.append(2)
+    print(a, b)
+    ```
+    What does this print?
   options:
-  - Reuses computation from overlapping subsegments to avoid O(N^2) recalculations.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Reuses computation from overlapping subsegments to avoid O(N^2) recalculations.
-  difficulty: 3
-  distractor_misconceptions: {}
+  - '[1] [2]'
+  - '[1] [1, 2]'
+  - '[1, 2] [1, 2]'
+  answer: '[1, 2] [1, 2]'
+  difficulty: 2
+  distractor_misconceptions:
+    '[1] [1, 2]': ref-assignment-copies
+    '[1] [2]': ref-assignment-copies
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: pretest-07
-  concept_id: singly-linked-list
+  concept_id: stack
   kind: mcq
-  stem: '[Pre-Assessment 7/15] What is the primary guarantee of Singly Linked List Nodes?'
+  stem: You push 4, 5, 6 onto an empty stack and pop twice. What comes out, in order?
   options:
-  - Nodes are scattered non-contiguously across memory connected by reference pointers.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Nodes are scattered non-contiguously across memory connected by reference pointers.
+  - 5, 4
+  - 6, 5
+  - 4, 5
+  answer: 6, 5
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    4, 5: stack-fifo
+    5, 4: stack-fifo
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: pretest-08
-  concept_id: singly-linked-list
+  concept_id: queue
   kind: mcq
-  stem: '[Pre-Assessment 8/15] What is the primary guarantee of Linked List Traversal?'
+  stem: You enqueue 4, 5, 6 into an empty queue and dequeue once. What comes out?
   options:
-  - Always verify current is not None before dereferencing current.next.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Always verify current is not None before dereferencing current.next.
+  - '4'
+  - '6'
+  - '5'
+  answer: '4'
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '6': queue-lifo
+    '5': queue-lifo
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: pretest-09
-  concept_id: fast-slow-pointers
-  kind: mcq
-  stem: '[Pre-Assessment 9/15] What is the primary guarantee of Fast & Slow Pointers (Floyd''s Cycle)?'
-  options:
-  - In a cyclic list, the relative distance between fast and slow decreases by 1 each step.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: In a cyclic list, the relative distance between fast and slow decreases by 1 each step.
-  difficulty: 3
-  distractor_misconceptions: {}
-  is_microcheck: false
-  review_status: approved
-- id: pretest-10
   concept_id: recursion-base-case
   kind: mcq
-  stem: '[Pre-Assessment 10/15] What is the primary guarantee of Recursion: Base Case?'
+  stem: |-
+    ```python
+    def prod(n):
+        if n == 1:
+            return 0
+        return n * prod(n - 1)
+
+    print(prod(3))
+    ```
+    What does this print?
   options:
-  - Each recursive step must strictly reduce the problem size towards a base case.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Each recursive step must strictly reduce the problem size towards a base case.
+  - '6'
+  - '3'
+  - '0'
+  answer: '0'
   difficulty: 2
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '6': rbc-base-case-wrong-value
+    '3': rbc-base-case-wrong-value
   is_microcheck: false
-  review_status: approved
-- id: pretest-11
+  review_status: draft
+- id: pretest-10
   concept_id: call-stack
   kind: mcq
-  stem: '[Pre-Assessment 11/15] What is the primary guarantee of Recursive Call Stack?'
+  stem: |-
+    ```python
+    out = []
+    def f(n):
+        if n == 0:
+            return
+        f(n - 1)
+        out.append(n)
+
+    f(3)
+    print(out)
+    ```
+    What does this print?
   options:
-  - Max stack depth is bounded by recursion depth, requiring O(D) memory.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Max stack depth is bounded by recursion depth, requiring O(D) memory.
+  - '[]'
+  - '[3, 3, 3]'
+  - '[1, 2, 3]'
+  answer: '[1, 2, 3]'
   difficulty: 3
-  distractor_misconceptions: {}
+  distractor_misconceptions:
+    '[]': cs-code-after-call-skipped
+    '[3, 3, 3]': cs-shared-locals
   is_microcheck: false
-  review_status: approved
+  review_status: draft
+- id: pretest-11
+  concept_id: binary-search
+  kind: mcq
+  stem: About how many comparisons does binary search need on a sorted list of 1,000 elements, in the
+    worst case?
+  options:
+  - About 500
+  - About 10
+  - About 10, even if the list is unsorted
+  answer: About 10
+  difficulty: 2
+  distractor_misconceptions:
+    About 500: bs-linear-time
+    About 10, even if the list is unsorted: bs-unsorted-ok
+  is_microcheck: false
+  review_status: draft
 - id: pretest-12
-  concept_id: linear-search
+  concept_id: merge-sort
   kind: mcq
-  stem: '[Pre-Assessment 12/15] What is the primary guarantee of Linear Search?'
+  stem: 'Merging the sorted lists [2, 6] and [1, 3, 8, 9]: the main loop stops once [2, 6] is used up.
+    What must still be added?'
   options:
-  - Works on unsorted collections in O(N) worst-case time.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Works on unsorted collections in O(N) worst-case time.
-  difficulty: 1
-  distractor_misconceptions: {}
+  - Nothing
+  - '[8, 9]'
+  - Nothing, and the merge used O(1) extra memory
+  answer: '[8, 9]'
+  difficulty: 3
+  distractor_misconceptions:
+    Nothing: ms-forget-leftovers
+    Nothing, and the merge used O(1) extra memory: ms-in-place-free
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: pretest-13
-  concept_id: binary-search-boundaries
+  concept_id: binary-search-tree
   kind: mcq
-  stem: '[Pre-Assessment 13/15] What is the primary guarantee of Binary Search Bounds?'
+  stem: Root 20 has left child 10; 10 has right child 25. Is this a valid BST?
   options:
-  - Update low = mid + 1 or high = mid - 1 to guarantee progress each iteration.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Update low = mid + 1 or high = mid - 1 to guarantee progress each iteration.
-  difficulty: 2
-  distractor_misconceptions: {}
+  - Yes, and search is O(log n)
+  - 'Yes: 25 > 10, so each node is ordered with its children'
+  - 'No: 25 is in 20''s left subtree'
+  answer: 'No: 25 is in 20''s left subtree'
+  difficulty: 3
+  distractor_misconceptions:
+    'Yes: 25 > 10, so each node is ordered with its children': bst-local-check
+    Yes, and search is O(log n): bst-always-logn
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: pretest-14
-  concept_id: tree-dfs-traversals
+  concept_id: graph-bfs
   kind: mcq
-  stem: '[Pre-Assessment 14/15] What is the primary guarantee of Binary Tree: Preorder Traversal?'
+  stem: Edges s-a (weight 2), a-t (weight 2), s-t (weight 9). Which path to t does BFS from s find first?
   options:
-  - Useful for serializing or cloning tree hierarchies.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Useful for serializing or cloning tree hierarchies.
-  difficulty: 2
-  distractor_misconceptions: {}
+  - s-a-t, the cheapest path
+  - s-t, the path with fewest edges
+  - s-a-t, because BFS minimises total weight
+  answer: s-t, the path with fewest edges
+  difficulty: 3
+  distractor_misconceptions:
+    s-a-t, the cheapest path: bfs-weighted-shortest
+    s-a-t, because BFS minimises total weight: bfs-weighted-shortest
   is_microcheck: false
-  review_status: approved
+  review_status: draft
 - id: pretest-15
-  concept_id: graph-representation
+  concept_id: memoization
   kind: mcq
-  stem: '[Pre-Assessment 15/15] What is the primary guarantee of Graph Adjacency List?'
+  stem: A memoised function creates `cache = {}` as its first line, inside every call. What is the effect?
   options:
-  - Space complexity is O(V + E), optimal for sparse graphs compared to O(V^2) matrix.
-  - It eliminates all resource constraints and halts in zero steps.
-  - It reverses all pointers unconditionally without bounds.
-  - It mutates globals outside the local scope arbitrarily.
-  answer: Space complexity is O(V + E), optimal for sparse graphs compared to O(V^2) matrix.
-  difficulty: 2
-  distractor_misconceptions: {}
+  - Results are reused, but only within one level
+  - Nothing is reused; it is as slow as plain recursion
+  - Every result is reused
+  answer: Nothing is reused; it is as slow as plain recursion
+  difficulty: 3
+  distractor_misconceptions:
+    Every result is reused: memo-fresh-cache
+    Results are reused, but only within one level: memo-fresh-cache
   is_microcheck: false
-  review_status: approved
+  review_status: draft
