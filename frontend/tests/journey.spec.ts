@@ -12,11 +12,15 @@ import {
 } from "./helpers";
 
 test.describe("a learner's whole study, in the browser", () => {
-  test("register → consent → questionnaire → pre-test → learn with XAI → dashboard → post-test", async ({
+  test("landing → sign up → consent → questionnaire → dashboard → pre-test → learn with XAI → post-test", async ({
     page,
     request,
   }) => {
     const email = uniqueEmail("journey");
+    await page.goto("/");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await page.getByRole("link", { name: "Get started" }).click();
+    await expect(page).toHaveURL(/\/signup/);
     await register(page, email, "Journey Learner");
     await consent(page);
 
@@ -26,7 +30,8 @@ test.describe("a learner's whole study, in the browser", () => {
     }
 
     await answerQuestionnaire(page);
-    await page.getByRole("link", { name: /Take the pre-test/ }).click();
+    await expect(page.getByRole("heading", { name: /Good (morning|afternoon|evening), Journey/ })).toBeVisible();
+    await page.getByRole("link", { name: /Start the pre-test/ }).click();
     await expect(page).toHaveURL(/\/tests\/pretest/);
     await expect(page.getByText(/questions\. Answer what you can/)).toBeVisible();
     await page.locator('input[type="radio"]').first().check();
@@ -77,21 +82,26 @@ test.describe("a learner's whole study, in the browser", () => {
     await expect(page.getByTestId("trait-card")).toBeVisible();
     await expect(page.getByTestId("belief-abstraction_preference")).toBeVisible();
 
-    // post-test, then the study path shows everything done except learning
+    // post-test, then the tests page shows both submitted
     await page.goto("/tests/posttest");
     await page.locator('input[type="radio"]').first().check();
     await page.getByRole("button", { name: "Submit" }).click();
     await page.getByRole("button", { name: "Submit anyway" }).click();
     await expect(page.getByTestId("test-done")).toBeVisible();
-    await page.goto("/");
-    await expect(page.getByTestId("study-steps")).toContainText("Post-test");
+    await page.goto("/tests");
+    await expect(page.getByText("Submitted")).toHaveCount(2);
 
-    // logging out revokes the token on the server too
+    // a returning learner goes straight to the dashboard, with no questionnaire
     const oldToken = await token(page);
-    await page.getByRole("button", { name: "Log out" }).click();
-    await expect(page).toHaveURL(/\/login/);
+    await page.getByTestId("nav-user").click();
+    await page.getByRole("menuitem", { name: "Log out" }).click();
+    await expect(page).toHaveURL(/:\d+\/$/);
+    // logging out revokes the token on the server too
     const me = await request.get(`${API}/auth/me`, { headers: { Authorization: `Bearer ${oldToken}` } });
     expect(me.status()).toBe(401);
+    await login(page, email);
+    await expect(page).toHaveURL(/\/dashboard/);
+    await expect(page.getByTestId("next-step")).toContainText("Continue learning");
   });
 
   test("an admin sees measured metrics and can export pseudonymised data", async ({ page }) => {

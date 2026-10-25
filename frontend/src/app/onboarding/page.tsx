@@ -241,9 +241,9 @@ function Questions({ onDone }: { onDone: () => void }) {
   return (
     <motion.section {...panel} aria-labelledby="q-title" className="flex flex-1 flex-col">
       <div className="flex items-center justify-between text-sm text-muted">
-        <span id="q-title">
+        <h1 id="q-title" className="font-normal">
           {item ? `Question ${index + 1} of ${total}` : "Loading questions…"}
-        </span>
+        </h1>
         <span className="hidden sm:inline">Press 1–5 to answer, ← to go back</span>
       </div>
       <Progress value={total ? answered / total : 0} label="Questionnaire progress" className="mt-3" />
@@ -273,6 +273,7 @@ function Questions({ onDone }: { onDone: () => void }) {
                       )}
                     >
                       <span
+                        aria-hidden
                         className={cn(
                           "flex h-7 w-7 flex-none items-center justify-center rounded-md border text-xs font-semibold tabular-nums transition-colors",
                           selected ? "border-accent bg-accent text-accent-fg" : "border-line text-subtle group-hover:text-fg"

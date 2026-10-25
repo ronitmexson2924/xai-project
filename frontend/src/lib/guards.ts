@@ -14,7 +14,7 @@ type Need = "learner" | "onboarding" | "admin";
  */
 export function useLearnerGuard(options: { need?: Need; requireAdmin?: boolean; requireConsent?: boolean } = {}) {
   const need: Need = options.requireAdmin ? "admin" : options.requireConsent === false ? "onboarding" : (options.need ?? "learner");
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, signedOut } = useAuth();
   const router = useRouter();
 
   const allowed =
@@ -23,9 +23,9 @@ export function useLearnerGuard(options: { need?: Need; requireAdmin?: boolean; 
 
   useEffect(() => {
     if (isLoading) return;
-    if (!user) router.replace("/login");
+    if (!user) router.replace(signedOut ? "/" : "/login");
     else if (!allowed) router.replace(homeFor(user));
-  }, [user, isLoading, allowed, router]);
+  }, [user, isLoading, signedOut, allowed, router]);
 
   return !isLoading && allowed;
 }

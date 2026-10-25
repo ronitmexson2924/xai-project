@@ -15,6 +15,8 @@ import {
 interface AuthContextType {
   user: UserResponse | null;
   isLoading: boolean;
+  /** true after the user logged out or withdrew on purpose (pages then go to the landing page, not login) */
+  signedOut: boolean;
   login: (data: LoginRequest) => Promise<UserResponse>;
   register: (data: RegisterRequest) => Promise<UserResponse>;
   giveConsent: () => Promise<void>;
@@ -29,6 +31,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [signedOut, setSignedOut] = useState(false);
 
   const refreshUser = useCallback(async () => {
     const saved = getStoredToken();
@@ -59,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (data: LoginRequest) => {
     const res = await api.auth.login(data);
+    setSignedOut(false);
     setStoredToken(res.token);
     setUser(res.user);
     return res.user;
@@ -66,6 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (data: RegisterRequest) => {
     const res = await api.auth.register(data);
+    setSignedOut(false);
     setStoredToken(res.token);
     setUser(res.user);
     return res.user;
@@ -85,18 +90,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // already invalid or offline: forgetting it locally is enough
     }
     setStoredToken(null);
+    setSignedOut(true);
     setUser(null);
   };
 
   const withdraw = async () => {
     await api.auth.deleteMe();
     setStoredToken(null);
+    setSignedOut(true);
     setUser(null);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, register, giveConsent, markOnboarded, logout, withdraw, refreshUser }}
+      value={{ user, isLoading, signedOut, login, register, giveConsent, markOnboarded, logout, withdraw, refreshUser }}
     >
       {children}
     </AuthContext.Provider>
