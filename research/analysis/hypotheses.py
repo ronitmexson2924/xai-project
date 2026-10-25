@@ -5,6 +5,7 @@ the tests can use them directly. Confidence intervals are learner-level (cluster
 learner-clustered GEE, because answers from the same learner are not independent.
 """
 
+import dataclasses
 import warnings
 
 import numpy as np
@@ -27,6 +28,38 @@ H1_FEATURES = [
     "followup_signed",
 ]
 EPS = 1e-4
+MIN_PRACTICE = 5  # preregistration.md §4: fewer practice answers -> excluded from H1, H2, H4
+
+
+# --- exclusions --------------------------------------------------------------------------------
+
+
+def practice_mask(attempts: pd.DataFrame) -> pd.Series:
+    return attempts.test_phase.isna() & ~attempts.is_microcheck.astype(bool)
+
+
+def exclude_sparse(frames: Frames, min_practice: int = MIN_PRACTICE) -> tuple[Frames, list[str]]:
+    """The pre-registered exclusion: drop learners with fewer than `min_practice` practice
+    answers from every frame. Returns the reduced frames and the excluded learners."""
+    attempts = frames.attempts
+    counts = (
+        attempts[practice_mask(attempts)].groupby("learner").size()
+        if not attempts.empty
+        else pd.Series(dtype=int)
+    )
+    keep = {str(lr) for lr, n in counts.items() if n >= min_practice}
+    excluded = sorted(set(frames.learners.learner) - keep)
+
+    def only_kept(df: pd.DataFrame) -> pd.DataFrame:
+        if df.empty or "learner" not in df.columns:
+            return df
+        return df[df.learner.isin(keep)].reset_index(drop=True)
+
+    reduced = dataclasses.replace(
+        frames,
+        **{f.name: only_kept(getattr(frames, f.name)) for f in dataclasses.fields(frames)},
+    )
+    return reduced, excluded
 
 
 # --- metrics -----------------------------------------------------------------------------------
@@ -69,23 +102,44 @@ def cluster_bootstrap(
 
 def h1_dataset(frames: Frames) -> pd.DataFrame:
     """Practice attempts that have an earlier explanation (with feedback) on the same concept;
-    features come from the most recent such explanation."""
+    features come from the most recent such explanation.
+
+    An explanation counts only once its feedback summary was final (`feedback_at`, when the
+    summary was applied), not from when the explanation was shown: otherwise a summary written
+    after the answer (dwell, clarity, follow-up result) would leak future data into H1."""
     attempts = frames.attempts
-    practice = attempts[
-        attempts.test_phase.isna() & ~attempts.is_microcheck & attempts.p_hat.notna()
-    ].copy()
+    if attempts.empty or frames.explanations.empty:
+        return pd.DataFrame()
+    practice = attempts[practice_mask(attempts) & attempts.p_hat.notna()].copy()
     expl = frames.explanations[frames.explanations.has_feedback].copy()
+    if "feedback_at" not in expl.columns:
+        return pd.DataFrame()  # no record of when feedback became final: nothing is safe to use
+    expl = expl[expl.feedback_at.notna()]
     if practice.empty or expl.empty:
         return pd.DataFrame()
-    practice = practice.sort_values("created_at")
-    expl = expl.rename(columns={"explanation_id": "prior_explanation_id"}).sort_values("created_at")
+    expl["available_at"] = pd.to_datetime(
+        np.maximum(
+            pd.to_datetime(expl.created_at, utc=True), pd.to_datetime(expl.feedback_at, utc=True)
+        ),
+        utc=True,
+    )
+    practice["created_at"] = pd.to_datetime(practice.created_at, utc=True)
+    practice = practice.sort_values(["created_at", "learner"], kind="stable")
+    expl = (
+        expl.rename(
+            columns={"explanation_id": "prior_explanation_id", "created_at": "explained_at"}
+        )
+        .drop(columns=["feedback_at"])
+        .sort_values("available_at")
+    )
     merged = pd.merge_asof(
         practice,
         expl,
-        on="created_at",
+        left_on="created_at",
+        right_on="available_at",
         by=["learner", "concept_id"],
         direction="backward",
-        allow_exact_matches=False,  # the explanation must come strictly before the answer
+        allow_exact_matches=False,  # the feedback must be final strictly before the answer
     )
     merged = merged[merged.prior_explanation_id.notna()].copy()
     p = merged.p_hat.astype(float).clip(EPS, 1 - EPS)
@@ -117,7 +171,7 @@ def h1(frames: Frames, folds: int = 5, seed: int = 0, n_boot: int = 1000) -> dic
     if data.empty or data.learner.nunique() < folds:
         return {"available": False, "n": len(data)}
     rng = np.random.default_rng(seed)
-    learners = data.learner.unique()
+    learners = np.sort(data.learner.unique())  # fold assignment must not depend on row order
     fold_of = dict(zip(rng.permutation(learners), np.arange(len(learners)) % folds, strict=True))
     data["fold"] = data.learner.map(fold_of)
     base_pred = np.zeros(len(data))
