@@ -1,0 +1,478 @@
+items:
+- id: overlapping-subproblems-1
+  concept_id: overlapping-subproblems
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Overlapping
+    Subproblems?
+  options:
+  - Caching answers transforms exponential O(2^N) calls into polynomial O(N) operations.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Caching answers transforms exponential O(2^N) calls into polynomial O(N)
+    operations.
+  difficulty: 3
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: ovl-dc-is-dp
+    It executes in reverse order without updating state.: ovl-dc-is-dp
+    It treats all elements as mutually independent without relationships.: ovl-dc-is-dp
+  is_microcheck: false
+  review_status: approved
+- id: overlapping-subproblems-2
+  concept_id: overlapping-subproblems
+  kind: mcq
+  stem: 'Consider this concrete application of Overlapping Subproblems:
+
+
+    ```python
+
+    In fib(5), fib(3) is computed twice independently without memoization.
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - A problem exhibits overlapping subproblems if a recursive solution revisits identical
+    states.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: A problem exhibits overlapping subproblems if a recursive solution revisits
+    identical states.
+  difficulty: 3
+  distractor_misconceptions:
+    It guarantees random O(1) jump access to any uncomputed state.: ovl-dc-is-dp
+    It eliminates the need for any base state or bounds.: ovl-dc-is-dp
+    It executes an infinite loop that ignores input constraints.: ovl-dc-is-dp
+  is_microcheck: false
+  review_status: approved
+- id: overlapping-subproblems-3
+  concept_id: overlapping-subproblems
+  kind: mcq
+  stem: When implementing Overlapping Subproblems, which error represents the most
+    frequent pitfall?
+  options:
+  - Using DP when subproblems do not overlap (e.g. merge sort sub-arrays are distinct).
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Using DP when subproblems do not overlap (e.g. merge sort sub-arrays are
+    distinct).
+  difficulty: 4
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: ovl-dc-is-dp
+    Structuring code inside functions rather than flat scripts.: ovl-dc-is-dp
+    Checking preconditions before accessing boundary values.: ovl-dc-is-dp
+  is_microcheck: false
+  review_status: approved
+- id: overlapping-subproblems-mc
+  concept_id: overlapping-subproblems
+  kind: mcq
+  stem: 'Quick Check: True or False — for Overlapping Subproblems, Caching answers
+    transforms exponential O(2^N) calls into polynomial O(N) operations.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions:
+    'False': ovl-dc-is-dp
+  is_microcheck: true
+  review_status: approved
+- id: optimal-substructure-1
+  concept_id: dp-state-design
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Optimal Substructure?
+  options:
+  - Shortest path from A to C via B requires optimal shortest path from A to B and
+    B to C.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Shortest path from A to C via B requires optimal shortest path from A to
+    B and B to C.
+  difficulty: 3
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: dps-vague-state
+    It executes in reverse order without updating state.: dps-vague-state
+    It treats all elements as mutually independent without relationships.: dps-vague-state
+  is_microcheck: false
+  review_status: approved
+- id: optimal-substructure-2
+  concept_id: dp-state-design
+  kind: mcq
+  stem: 'Consider this concrete application of Optimal Substructure:
+
+
+    ```python
+
+    dist(A, C) = min_B(dist(A, B) + dist(B, C)).
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Optimal substructure means an optimal solution contains optimal subproblem solutions.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Optimal substructure means an optimal solution contains optimal subproblem
+    solutions.
+  difficulty: 3
+  distractor_misconceptions:
+    It guarantees random O(1) jump access to any uncomputed state.: dps-vague-state
+    It eliminates the need for any base state or bounds.: dps-vague-state
+    It executes an infinite loop that ignores input constraints.: dps-vague-state
+  is_microcheck: false
+  review_status: approved
+- id: optimal-substructure-3
+  concept_id: dp-state-design
+  kind: mcq
+  stem: When implementing Optimal Substructure, which error represents the most frequent
+    pitfall?
+  options:
+  - Assuming longest simple path exhibits optimal substructure.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Assuming longest simple path exhibits optimal substructure.
+  difficulty: 4
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: dps-vague-state
+    Structuring code inside functions rather than flat scripts.: dps-vague-state
+    Checking preconditions before accessing boundary values.: dps-vague-state
+  is_microcheck: false
+  review_status: approved
+- id: optimal-substructure-mc
+  concept_id: dp-state-design
+  kind: mcq
+  stem: 'Quick Check: True or False — for Optimal Substructure, Shortest path from
+    A to C via B requires optimal shortest path from A to B and B to C.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions:
+    'False': dps-vague-state
+  is_microcheck: true
+  review_status: approved
+- id: memoization-top-down-1
+  concept_id: memoization
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Top-Down DP
+    (Memoization)?
+  options:
+  - Check memo table before computing; store result before returning.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Check memo table before computing; store result before returning.
+  difficulty: 3
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: memo-fresh-cache
+    It executes in reverse order without updating state.: memo-mutable-default
+    It treats all elements as mutually independent without relationships.: memo-fresh-cache
+  is_microcheck: false
+  review_status: approved
+- id: memoization-top-down-2
+  concept_id: memoization
+  kind: mcq
+  stem: 'Consider this concrete application of Top-Down DP (Memoization):
+
+
+    ```python
+
+    if n in memo: return memo[n]; memo[n] = solve(n-1) + solve(n-2); return memo[n]
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Top-down DP preserves natural recursive flow but intercepts calls to check a memo
+    table.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Top-down DP preserves natural recursive flow but intercepts calls to check
+    a memo table.
+  difficulty: 3
+  distractor_misconceptions:
+    It guarantees random O(1) jump access to any uncomputed state.: memo-fresh-cache
+    It eliminates the need for any base state or bounds.: memo-mutable-default
+    It executes an infinite loop that ignores input constraints.: memo-fresh-cache
+  is_microcheck: false
+  review_status: approved
+- id: memoization-top-down-3
+  concept_id: memoization
+  kind: mcq
+  stem: When implementing Top-Down DP (Memoization), which error represents the most
+    frequent pitfall?
+  options:
+  - Forgetting to store the result into the memo table before returning.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Forgetting to store the result into the memo table before returning.
+  difficulty: 4
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: memo-fresh-cache
+    Structuring code inside functions rather than flat scripts.: memo-mutable-default
+    Checking preconditions before accessing boundary values.: memo-fresh-cache
+  is_microcheck: false
+  review_status: approved
+- id: memoization-top-down-mc
+  concept_id: memoization
+  kind: mcq
+  stem: 'Quick Check: True or False — for Top-Down DP (Memoization), Check memo table
+    before computing; store result before returning.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions:
+    'False': memo-fresh-cache
+  is_microcheck: true
+  review_status: approved
+- id: tabulation-bottom-up-1
+  concept_id: tabulation
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Bottom-Up DP
+    (Tabulation)?
+  options:
+  - Eliminates recursion call stack overhead and allows space optimization.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Eliminates recursion call stack overhead and allows space optimization.
+  difficulty: 3
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: tab-wrong-order
+    It executes in reverse order without updating state.: tab-wrong-order
+    It treats all elements as mutually independent without relationships.: tab-wrong-order
+  is_microcheck: false
+  review_status: approved
+- id: tabulation-bottom-up-2
+  concept_id: tabulation
+  kind: mcq
+  stem: 'Consider this concrete application of Bottom-Up DP (Tabulation):
+
+
+    ```python
+
+    dp = [0] * (n + 1); dp[1] = 1; for i in range(2, n + 1): dp[i] = dp[i-1] + dp[i-2]
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Bottom-up DP fills a table iteratively starting from base cases up to target state.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Bottom-up DP fills a table iteratively starting from base cases up to target
+    state.
+  difficulty: 3
+  distractor_misconceptions:
+    It guarantees random O(1) jump access to any uncomputed state.: tab-wrong-order
+    It eliminates the need for any base state or bounds.: tab-wrong-order
+    It executes an infinite loop that ignores input constraints.: tab-wrong-order
+  is_microcheck: false
+  review_status: approved
+- id: tabulation-bottom-up-3
+  concept_id: tabulation
+  kind: mcq
+  stem: When implementing Bottom-Up DP (Tabulation), which error represents the most
+    frequent pitfall?
+  options:
+  - Iterating in an order where required predecessor states are not yet computed.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Iterating in an order where required predecessor states are not yet computed.
+  difficulty: 4
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: tab-wrong-order
+    Structuring code inside functions rather than flat scripts.: tab-wrong-order
+    Checking preconditions before accessing boundary values.: tab-wrong-order
+  is_microcheck: false
+  review_status: approved
+- id: tabulation-bottom-up-mc
+  concept_id: tabulation
+  kind: mcq
+  stem: 'Quick Check: True or False — for Bottom-Up DP (Tabulation), Eliminates recursion
+    call stack overhead and allows space optimization.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions:
+    'False': tab-wrong-order
+  is_microcheck: true
+  review_status: approved
+- id: dp-state-transition-1d-1
+  concept_id: knapsack-01
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of 1D State Transitions?
+  options:
+  - Identify minimum information required to unambiguously describe subproblem state.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Identify minimum information required to unambiguously describe subproblem
+    state.
+  difficulty: 3
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: ks-upward-loop
+    It executes in reverse order without updating state.: ks-greedy-by-ratio
+    It treats all elements as mutually independent without relationships.: ks-upward-loop
+  is_microcheck: false
+  review_status: approved
+- id: dp-state-transition-1d-2
+  concept_id: knapsack-01
+  kind: mcq
+  stem: 'Consider this concrete application of 1D State Transitions:
+
+
+    ```python
+
+    Climbing stairs: dp[i] = dp[i-1] + dp[i-2] with base cases dp[1]=1, dp[2]=2.
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - A recurrence defines dp[i] as a mathematical function of previous states dp[i-1],
+    dp[i-2].
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: A recurrence defines dp[i] as a mathematical function of previous states
+    dp[i-1], dp[i-2].
+  difficulty: 3
+  distractor_misconceptions:
+    It guarantees random O(1) jump access to any uncomputed state.: ks-upward-loop
+    It eliminates the need for any base state or bounds.: ks-greedy-by-ratio
+    It executes an infinite loop that ignores input constraints.: ks-upward-loop
+  is_microcheck: false
+  review_status: approved
+- id: dp-state-transition-1d-3
+  concept_id: knapsack-01
+  kind: mcq
+  stem: When implementing 1D State Transitions, which error represents the most frequent
+    pitfall?
+  options:
+  - Missing base cases causing index out-of-bounds or zero multiplication.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Missing base cases causing index out-of-bounds or zero multiplication.
+  difficulty: 4
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: ks-upward-loop
+    Structuring code inside functions rather than flat scripts.: ks-greedy-by-ratio
+    Checking preconditions before accessing boundary values.: ks-upward-loop
+  is_microcheck: false
+  review_status: approved
+- id: dp-state-transition-1d-mc
+  concept_id: knapsack-01
+  kind: mcq
+  stem: 'Quick Check: True or False — for 1D State Transitions, Identify minimum information
+    required to unambiguously describe subproblem state.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions:
+    'False': ks-upward-loop
+  is_microcheck: true
+  review_status: approved
+- id: dp-state-transition-2d-1
+  concept_id: lcs
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of 2D Grid & Subsequence
+    Transitions?
+  options:
+  - 'LCS: if s1[i-1] == s2[j-1]: dp[i][j] = 1 + dp[i-1][j-1] else: max(dp[i-1][j],
+    dp[i][j-1]).'
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: 'LCS: if s1[i-1] == s2[j-1]: dp[i][j] = 1 + dp[i-1][j-1] else: max(dp[i-1][j],
+    dp[i][j-1]).'
+  difficulty: 4
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: lcs-substring
+    It executes in reverse order without updating state.: lcs-substring
+    It treats all elements as mutually independent without relationships.: lcs-substring
+  is_microcheck: false
+  review_status: approved
+- id: dp-state-transition-2d-2
+  concept_id: lcs
+  kind: mcq
+  stem: 'Consider this concrete application of 2D Grid & Subsequence Transitions:
+
+
+    ```python
+
+    dp[i][w] = max(dp[i-1][w], val[i-1] + dp[i-1][w - wt[i-1]])
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - 2D DP tracks state via two parameters (e.g., dp[i][j] for string prefixes i and
+    j).
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: 2D DP tracks state via two parameters (e.g., dp[i][j] for string prefixes
+    i and j).
+  difficulty: 4
+  distractor_misconceptions:
+    It guarantees random O(1) jump access to any uncomputed state.: lcs-substring
+    It eliminates the need for any base state or bounds.: lcs-substring
+    It executes an infinite loop that ignores input constraints.: lcs-substring
+  is_microcheck: false
+  review_status: approved
+- id: dp-state-transition-2d-3
+  concept_id: lcs
+  kind: mcq
+  stem: When implementing 2D Grid & Subsequence Transitions, which error represents
+    the most frequent pitfall?
+  options:
+  - Confusing i and j indices or off-by-one with 1-indexed DP tables.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Confusing i and j indices or off-by-one with 1-indexed DP tables.
+  difficulty: 5
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: lcs-substring
+    Structuring code inside functions rather than flat scripts.: lcs-substring
+    Checking preconditions before accessing boundary values.: lcs-substring
+  is_microcheck: false
+  review_status: approved
+- id: dp-state-transition-2d-mc
+  concept_id: lcs
+  kind: mcq
+  stem: 'Quick Check: True or False — for 2D Grid & Subsequence Transitions, LCS:
+    if s1[i-1] == s2[j-1]: dp[i][j] = 1 + dp[i-1][j-1] else: max(dp[i-1][j], dp[i][j-1]).'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 3
+  distractor_misconceptions:
+    'False': lcs-substring
+  is_microcheck: true
+  review_status: approved

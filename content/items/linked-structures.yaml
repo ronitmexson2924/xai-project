@@ -1,0 +1,471 @@
+items:
+- id: singly-linked-list-node-1
+  concept_id: references
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Singly Linked
+    List Nodes?
+  options:
+  - Nodes are scattered non-contiguously across memory connected by reference pointers.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Nodes are scattered non-contiguously across memory connected by reference
+    pointers.
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: ref-assignment-copies
+    It executes in reverse order without updating state.: ref-is-vs-equals
+    It treats all elements as mutually independent without relationships.: ref-param-rebind-changes-caller
+  is_microcheck: false
+  review_status: approved
+- id: singly-linked-list-node-2
+  concept_id: references
+  kind: mcq
+  stem: 'Consider this concrete application of Singly Linked List Nodes:
+
+
+    ```python
+
+    class Node: val, next = None. head = Node(1); head.next = Node(2)
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - A linked list node stores data and a pointer reference to the subsequent node.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: A linked list node stores data and a pointer reference to the subsequent
+    node.
+  difficulty: 2
+  distractor_misconceptions:
+    It guarantees random O(1) jump access to any uncomputed state.: ref-assignment-copies
+    It eliminates the need for any base state or bounds.: ref-is-vs-equals
+    It executes an infinite loop that ignores input constraints.: ref-param-rebind-changes-caller
+  is_microcheck: false
+  review_status: approved
+- id: singly-linked-list-node-3
+  concept_id: references
+  kind: mcq
+  stem: When implementing Singly Linked List Nodes, which error represents the most
+    frequent pitfall?
+  options:
+  - Assuming node.next is a node instead of checking if it is None.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Assuming node.next is a node instead of checking if it is None.
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: ref-assignment-copies
+    Structuring code inside functions rather than flat scripts.: ref-is-vs-equals
+    Checking preconditions before accessing boundary values.: ref-param-rebind-changes-caller
+  is_microcheck: false
+  review_status: approved
+- id: singly-linked-list-node-mc
+  concept_id: references
+  kind: mcq
+  stem: 'Quick Check: True or False — for Singly Linked List Nodes, Nodes are scattered
+    non-contiguously across memory connected by reference pointers.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': ref-assignment-copies
+  is_microcheck: true
+  review_status: approved
+- id: linked-list-traversal-1
+  concept_id: singly-linked-list
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Linked List
+    Traversal?
+  options:
+  - Always verify current is not None before dereferencing current.next.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Always verify current is not None before dereferencing current.next.
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: sll-random-access
+    It executes in reverse order without updating state.: sll-skip-last-node
+    It treats all elements as mutually independent without relationships.: sll-random-access
+  is_microcheck: false
+  review_status: approved
+- id: linked-list-traversal-2
+  concept_id: singly-linked-list
+  kind: mcq
+  stem: 'Consider this concrete application of Linked List Traversal:
+
+
+    ```python
+
+    curr = head; while curr: print(curr.val); curr = curr.next
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Traversal steps from current = current.next until current is None.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Traversal steps from current = current.next until current is None.
+  difficulty: 2
+  distractor_misconceptions:
+    It guarantees random O(1) jump access to any uncomputed state.: sll-random-access
+    It eliminates the need for any base state or bounds.: sll-skip-last-node
+    It executes an infinite loop that ignores input constraints.: sll-random-access
+  is_microcheck: false
+  review_status: approved
+- id: linked-list-traversal-3
+  concept_id: singly-linked-list
+  kind: mcq
+  stem: When implementing Linked List Traversal, which error represents the most frequent
+    pitfall?
+  options:
+  - 'AttributeError: ''NoneType'' object has no attribute ''next''.'
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: 'AttributeError: ''NoneType'' object has no attribute ''next''.'
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: sll-random-access
+    Structuring code inside functions rather than flat scripts.: sll-skip-last-node
+    Checking preconditions before accessing boundary values.: sll-random-access
+  is_microcheck: false
+  review_status: approved
+- id: linked-list-traversal-mc
+  concept_id: singly-linked-list
+  kind: mcq
+  stem: 'Quick Check: True or False — for Linked List Traversal, Always verify current
+    is not None before dereferencing current.next.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': sll-random-access
+  is_microcheck: true
+  review_status: approved
+- id: linked-list-insertion-1
+  concept_id: linked-list-insert-delete
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Linked List
+    Insertion?
+  options:
+  - 'Wiring order matters: link new node to successor first to avoid losing chain.'
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: 'Wiring order matters: link new node to successor first to avoid losing
+    chain.'
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: lli-wrong-update-order
+    It executes in reverse order without updating state.: lli-insert-is-free
+    It treats all elements as mutually independent without relationships.: lli-wrong-update-order
+  is_microcheck: false
+  review_status: approved
+- id: linked-list-insertion-2
+  concept_id: linked-list-insert-delete
+  kind: mcq
+  stem: 'Consider this concrete application of Linked List Insertion:
+
+
+    ```python
+
+    new_node.next = curr.next; curr.next = new_node
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Insertion updates new_node.next = prev.next, then prev.next = new_node.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Insertion updates new_node.next = prev.next, then prev.next = new_node.
+  difficulty: 2
+  distractor_misconceptions:
+    It guarantees random O(1) jump access to any uncomputed state.: lli-wrong-update-order
+    It eliminates the need for any base state or bounds.: lli-insert-is-free
+    It executes an infinite loop that ignores input constraints.: lli-wrong-update-order
+  is_microcheck: false
+  review_status: approved
+- id: linked-list-insertion-3
+  concept_id: linked-list-insert-delete
+  kind: mcq
+  stem: When implementing Linked List Insertion, which error represents the most frequent
+    pitfall?
+  options:
+  - Overwriting curr.next before linking new_node.next orphans the rest of the list.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Overwriting curr.next before linking new_node.next orphans the rest of the
+    list.
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: lli-wrong-update-order
+    Structuring code inside functions rather than flat scripts.: lli-insert-is-free
+    Checking preconditions before accessing boundary values.: lli-wrong-update-order
+  is_microcheck: false
+  review_status: approved
+- id: linked-list-insertion-mc
+  concept_id: linked-list-insert-delete
+  kind: mcq
+  stem: 'Quick Check: True or False — for Linked List Insertion, Wiring order matters:
+    link new node to successor first to avoid losing chain.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': lli-wrong-update-order
+  is_microcheck: true
+  review_status: approved
+- id: linked-list-deletion-1
+  concept_id: linked-list-reversal
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Linked List
+    Deletion?
+  options:
+  - Use a dummy pre-head node to handle edge cases like deleting the head node.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Use a dummy pre-head node to handle edge cases like deleting the head node.
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: rev-lose-rest
+    It executes in reverse order without updating state.: rev-return-old-head
+    It treats all elements as mutually independent without relationships.: rev-lose-rest
+  is_microcheck: false
+  review_status: approved
+- id: linked-list-deletion-2
+  concept_id: linked-list-reversal
+  kind: mcq
+  stem: 'Consider this concrete application of Linked List Deletion:
+
+
+    ```python
+
+    dummy.next = head; prev = dummy; while curr: if curr.val == val: prev.next = curr.next
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Deletion bypasses a node via prev.next = target.next.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Deletion bypasses a node via prev.next = target.next.
+  difficulty: 2
+  distractor_misconceptions:
+    It guarantees random O(1) jump access to any uncomputed state.: rev-lose-rest
+    It eliminates the need for any base state or bounds.: rev-return-old-head
+    It executes an infinite loop that ignores input constraints.: rev-lose-rest
+  is_microcheck: false
+  review_status: approved
+- id: linked-list-deletion-3
+  concept_id: linked-list-reversal
+  kind: mcq
+  stem: When implementing Linked List Deletion, which error represents the most frequent
+    pitfall?
+  options:
+  - Losing the new head pointer when deleting head.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Losing the new head pointer when deleting head.
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: rev-lose-rest
+    Structuring code inside functions rather than flat scripts.: rev-return-old-head
+    Checking preconditions before accessing boundary values.: rev-lose-rest
+  is_microcheck: false
+  review_status: approved
+- id: linked-list-deletion-mc
+  concept_id: linked-list-reversal
+  kind: mcq
+  stem: 'Quick Check: True or False — for Linked List Deletion, Use a dummy pre-head
+    node to handle edge cases like deleting the head node.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': rev-lose-rest
+  is_microcheck: true
+  review_status: approved
+- id: fast-slow-pointers-1
+  concept_id: fast-slow-pointers
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Fast & Slow
+    Pointers (Floyd's Cycle)?
+  options:
+  - In a cyclic list, the relative distance between fast and slow decreases by 1 each
+    step.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: In a cyclic list, the relative distance between fast and slow decreases
+    by 1 each step.
+  difficulty: 3
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: fs-check-only-next
+    It executes in reverse order without updating state.: fs-check-only-next
+    It treats all elements as mutually independent without relationships.: fs-check-only-next
+  is_microcheck: false
+  review_status: approved
+- id: fast-slow-pointers-2
+  concept_id: fast-slow-pointers
+  kind: mcq
+  stem: 'Consider this concrete application of Fast & Slow Pointers (Floyd''s Cycle):
+
+
+    ```python
+
+    while fast and fast.next: slow = slow.next; fast = fast.next.next; if slow ==
+    fast: cycle()
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Slow advances 1 step while fast advances 2 steps per iteration.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Slow advances 1 step while fast advances 2 steps per iteration.
+  difficulty: 3
+  distractor_misconceptions:
+    It guarantees random O(1) jump access to any uncomputed state.: fs-check-only-next
+    It eliminates the need for any base state or bounds.: fs-check-only-next
+    It executes an infinite loop that ignores input constraints.: fs-check-only-next
+  is_microcheck: false
+  review_status: approved
+- id: fast-slow-pointers-3
+  concept_id: fast-slow-pointers
+  kind: mcq
+  stem: When implementing Fast & Slow Pointers (Floyd's Cycle), which error represents
+    the most frequent pitfall?
+  options:
+  - Failing to check fast.next before accessing fast.next.next.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Failing to check fast.next before accessing fast.next.next.
+  difficulty: 4
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: fs-check-only-next
+    Structuring code inside functions rather than flat scripts.: fs-check-only-next
+    Checking preconditions before accessing boundary values.: fs-check-only-next
+  is_microcheck: false
+  review_status: approved
+- id: fast-slow-pointers-mc
+  concept_id: fast-slow-pointers
+  kind: mcq
+  stem: 'Quick Check: True or False — for Fast & Slow Pointers (Floyd''s Cycle), In
+    a cyclic list, the relative distance between fast and slow decreases by 1 each
+    step.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions:
+    'False': fs-check-only-next
+  is_microcheck: true
+  review_status: approved
+- id: doubly-linked-list-1
+  concept_id: doubly-linked-list
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Doubly Linked
+    Lists?
+  options:
+  - Allows O(1) removal given a direct reference to the target node.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Allows O(1) removal given a direct reference to the target node.
+  difficulty: 3
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: dll-one-direction-only
+    It executes in reverse order without updating state.: dll-one-direction-only
+    It treats all elements as mutually independent without relationships.: dll-one-direction-only
+  is_microcheck: false
+  review_status: approved
+- id: doubly-linked-list-2
+  concept_id: doubly-linked-list
+  kind: mcq
+  stem: 'Consider this concrete application of Doubly Linked Lists:
+
+
+    ```python
+
+    node.prev.next = node.next; node.next.prev = node.prev
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Nodes store pointers to both predecessor (prev) and successor (next).
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Nodes store pointers to both predecessor (prev) and successor (next).
+  difficulty: 3
+  distractor_misconceptions:
+    It guarantees random O(1) jump access to any uncomputed state.: dll-one-direction-only
+    It eliminates the need for any base state or bounds.: dll-one-direction-only
+    It executes an infinite loop that ignores input constraints.: dll-one-direction-only
+  is_microcheck: false
+  review_status: approved
+- id: doubly-linked-list-3
+  concept_id: doubly-linked-list
+  kind: mcq
+  stem: When implementing Doubly Linked Lists, which error represents the most frequent
+    pitfall?
+  options:
+  - Forgetting to update backward prev pointer on adjacent nodes.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Forgetting to update backward prev pointer on adjacent nodes.
+  difficulty: 4
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: dll-one-direction-only
+    Structuring code inside functions rather than flat scripts.: dll-one-direction-only
+    Checking preconditions before accessing boundary values.: dll-one-direction-only
+  is_microcheck: false
+  review_status: approved
+- id: doubly-linked-list-mc
+  concept_id: doubly-linked-list
+  kind: mcq
+  stem: 'Quick Check: True or False — for Doubly Linked Lists, Allows O(1) removal
+    given a direct reference to the target node.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions:
+    'False': dll-one-direction-only
+  is_microcheck: true
+  review_status: approved

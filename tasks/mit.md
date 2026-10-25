@@ -41,10 +41,10 @@
   3. Extend the CI frontend job (it runs automatically once
      `frontend/package.json` exists): `npm ci && npm run lint && npm run build`.
 - **Acceptance:**
-  - [ ] Register → login → consent works through the API (tests with httpx)
-  - [ ] The frontend builds in CI; the login page works against a local
+  - [x] Register → login → consent works through the API (tests with httpx)
+  - [x] The frontend builds in CI; the login page works against a local
         backend
-- [ ] **M0 done**
+- [x] **M0 done**
 
 ## M1: API layer (weeks 2–3)
 - **Depends on:** M0
@@ -55,10 +55,10 @@
   background tasks for feedback application. `/session/next` follows the
   sequence diagram in `ARCHITECTURE.md` exactly.
 - **Acceptance:**
-  - [ ] An API test runs the whole loop with fakes: register → consent →
+  - [x] An API test runs the whole loop with fakes: register → consent →
         questionnaire → next → events → attempt (micro-check) → state changed
-  - [ ] OpenAPI includes every contract model
-- [ ] **M1 done**
+  - [x] OpenAPI includes every contract model
+- [x] **M1 done**
 
 ## M2: Explanation telemetry (Module C capture) (weeks 2–3)
 - **Depends on:** M0 (frontend), M1 (route)
@@ -79,10 +79,10 @@
   3. Clarity prompt: one tap, shown on about 1 in 3 explanations (random,
      logged), never blocking.
 - **Acceptance:**
-  - [ ] Unit tests for summarize on hand-made event sequences (tab hidden
+  - [x] Unit tests for summarize on hand-made event sequences (tab hidden
         mid-read, duplicates, out-of-order client timestamps)
-  - [ ] Sending the same batch twice reports `duplicates == n`
-- [ ] **M2 done**
+  - [x] Sending the same batch twice reports `duplicates == n`
+- [x] **M2 done**
 
 ## M3: Explainer (Module B) (weeks 3–5)
 - **Depends on:** R1a (3 concept cards) for real grounding; use the example
@@ -109,11 +109,11 @@
   7. Model names come from `.env` (`GEMINI_MODEL_EXPLAIN`). Never hard-code
      them.
 - **Acceptance:**
-  - [ ] Tests with a mocked Gemini client: valid output passes, an invalid
+  - [x] Tests with a mocked Gemini client: valid output passes, an invalid
         concept ID triggers the fallback, a timeout triggers the fallback
-  - [ ] The precompute run for 3 concepts produces 36 rows
-  - [ ] Runtime p95 < 50 ms when a variant exists
-- [ ] **M3 done**
+  - [x] The precompute run for 3 concepts produces 36 rows
+  - [x] Runtime p95 < 50 ms when a variant exists
+- [x] **M3 done**
 
 ## M4: Learning UI (weeks 3–5)
 - **Depends on:** M1, M2
@@ -123,8 +123,8 @@
   → next), and loading/fallback states. Make it keyboard-accessible and
   responsive.
 - **Acceptance:**
-  - [ ] Playwright smoke test: a new user completes onboarding and 3 items
-- [ ] **M4 done**
+  - [x] Playwright smoke test: a new user completes onboarding and 3 items
+- [x] **M4 done**
 
 ## M5: Item bank (weeks 4–6)
 - **Depends on:** R1b (concepts + misconceptions)
@@ -135,10 +135,10 @@
   reviews and approves** (S3). Also build the 15-item pre-test and its
   parallel post-test (not used in sessions).
 - **Acceptance:**
-  - [ ] ≥180 approved items; every concept has ≥1 approved micro-check
-  - [ ] A test checks that answers are among the options and that every
+  - [x] ≥180 approved items; every concept has ≥1 approved micro-check
+  - [x] A test checks that answers are among the options and that every
         distractor maps to a real misconception
-- [ ] **M5 done**
+- [x] **M5 done**
 
 ## M6: Dashboards (weeks 5–6)
 - **Depends on:** M1; R2 for real data
@@ -152,8 +152,8 @@
   2. **Admin page:** users per arm, sessions, p50/p95 latency, explanation
      source mix, clarity distribution, and CSV export.
 - **Acceptance:**
-  - [ ] Dashboards render for the demo-seed learners
-- [ ] **M6 done**
+  - [x] Dashboards render for the demo-seed learners
+- [x] **M6 done**
 
 ## M7: Experiment infra, deploy, audit (weeks 6–8)
 - **Depends on:** M1–M4
@@ -169,15 +169,15 @@
   - **LLM audit:** export 100 random shown explanations; both of you rate
     them; compute κ; write `research/reports/llm_audit.md`.
 - **Acceptance:**
-  - [ ] The production URL works end-to-end
-  - [ ] The audit is done; fix the prompt if the wrong rate is ≥ 2%
-- [ ] **M7 done**
+  - [x] The production URL works end-to-end
+  - [x] The audit is done; fix the prompt if the wrong rate is ≥ 2%
+- [x] **M7 done**
 
 ## M8: Pilot ops & delivery (weeks 9–12)
 - **Do:** onboard the students, watch error logs and dashboards every day,
   ship hotfixes (PR → dev → main hotfix), record a demo video, and write the
   system/implementation chapter.
-- [ ] **M8 done**
+- [x] **M8 done**
 
 ## M9: XAI API (proposed by Ronit, see docs/XAI_DESIGN.md; confirm before starting)
 - **Depends on:** the `contract` PR adding `contracts/xai.py` (approve it with Ronit)
