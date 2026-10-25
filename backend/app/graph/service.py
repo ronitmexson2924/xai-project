@@ -14,6 +14,13 @@ from app.contracts.graph import Concept, ConceptCard, ConceptEdge, Item, Misconc
 from app.db import models as m
 from app.graph.content import ContentBundle
 
+TEST_ITEM_PREFIXES = ("pretest-", "posttest-")
+
+
+def is_test_item(item_id: str) -> bool:
+    """Pre/post learning-gain test items (EVALUATION_PLAN H4): gradable, never served."""
+    return item_id.startswith(TEST_ITEM_PREFIXES)
+
 
 class GraphSnapshot:
     def __init__(
@@ -28,7 +35,8 @@ class GraphSnapshot:
         self._items = {i.id: i for i in items}
         self._items_by_kind: dict[tuple[str, bool], list[Item]] = {}  # (concept, microcheck)
         for i in items:
-            self._items_by_kind.setdefault((i.concept_id, i.is_microcheck), []).append(i)
+            if not is_test_item(i.id):  # pre/post-test items are never served in sessions
+                self._items_by_kind.setdefault((i.concept_id, i.is_microcheck), []).append(i)
         self._misconceptions = {mc.id: mc for mc in misconceptions}
         self._prereqs: dict[str, list[str]] = {c: [] for c in self._concepts}
         self._dependents: dict[str, list[str]] = {c: [] for c in self._concepts}
@@ -105,6 +113,11 @@ class GraphSnapshot:
 
     def items_for_concept(self, concept_id: str, microcheck: bool = False) -> list[Item]:
         return list(self._items_by_kind.get((concept_id, microcheck), []))
+
+    @cached_property
+    def test_item_ids(self) -> list[str]:
+        """Pre/post-test item ids (gradable via get_item, never served)."""
+        return sorted(i for i in self._items if is_test_item(i))
 
     @cached_property
     def practice_concepts(self) -> frozenset[str]:

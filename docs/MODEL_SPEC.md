@@ -236,5 +236,12 @@ item id.
   - Compare against a logistic-regression baseline on the same features.
 - **Drift:** residuals `r_t = o_t − p̂_t`. CUSUM `S_t = max(0, S_{t−1} − r_t −
   k)` with `k = 0.1`; alert when `S_t > h = 1.0` *(tune)*.
-- **Backtest metric:** for each real failure (score < 0.7), how many tasks
-  *earlier* the alert fired, plus precision and recall of the alerts.
+- **Backtest metric** (as implemented in `research/backtest/early_warning.py`, R8):
+  - A struggle run is two wrong answers in a row on one concept, the equivalent of
+    Phase-1's "score < 0.7".
+  - An alarm warns early if it switched on within the 5 answers up to and including the
+    run's *first* wrong answer, i.e. before performance visibly dropped.
+  - Report recall, precision, median lead and alarm rate, against a naive
+    "last answer wrong" baseline.
+  - In the resonance score, P is approximated by the latest clarity rating on the concept
+    (0.5 if none), because the per-step bandit fit is not logged.

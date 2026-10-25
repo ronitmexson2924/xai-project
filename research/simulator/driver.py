@@ -131,6 +131,8 @@ def _run_learner(
     )
     explainer = FakeExplainer(graph)  # duck-typed: only needs get_concept()
     model.init_from_questionnaire(user_id, answers)
+    test_rng = np.random.default_rng([cfg.seed, ARMS.index(arm), index, 7])  # separate stream
+    _take_test(model, graph, learner, user_id, "pretest", clock[0], test_rng, rcfg)
     best_fit = max(learner.fit(s) for s in ALL_STYLES)
 
     records = []
@@ -190,19 +192,24 @@ def _run_learner(
                 )
             )
             pop.practice(learner, concept_id, rng, rcfg)
-        model.apply_explanation_feedback(
-            ExplanationFeedbackSummary(
-                explanation_id=explanation.id,
-                user_id=user_id,
-                concept_ids=[concept_id],
-                style=style,
-                style_source=source,
-                effective_dwell_ms=2000 if dismissed else int(rng.integers(10_000, 60_000)),
-                clarity_rating=clarity,
-                followup_correct=followup,
-                dismissed_quickly=dismissed,
+        summary = ExplanationFeedbackSummary(
+            explanation_id=explanation.id,
+            user_id=user_id,
+            concept_ids=[concept_id],
+            style=style,
+            style_source=source,
+            effective_dwell_ms=2000 if dismissed else int(rng.integers(10_000, 60_000)),
+            clarity_rating=clarity,
+            followup_correct=followup,
+            dismissed_quickly=dismissed,
+        )
+        # what Mit's telemetry stores (explanation_feedback), so analyses see production-like logs
+        session.add(
+            m.ExplanationFeedbackRow(
+                explanation_id=explanation.id, summary=summary.model_dump(mode="json")
             )
         )
+        model.apply_explanation_feedback(summary)
 
         item = graph.get_item(rec.item_id)
         clock[0] += STEP_TIME / 2
@@ -248,5 +255,25 @@ def _run_learner(
         ):
             clock[0] += SESSION_BREAK
             steps_in_session = 0
+    _take_test(model, graph, learner, user_id, "posttest", clock[0], test_rng, rcfg)
     final = {t: e.mean for t, e in model.get_state(user_id).traits.traits.items()}
     return records, final
+
+
+def _take_test(model, graph, learner, user_id, phase, at, rng, rcfg) -> None:
+    """Answer every pre/post-test item from the learner's current true knowledge."""
+    for item_id in sorted(i for i in graph.test_item_ids if i.startswith(f"{phase}-")):
+        item = graph.get_item(item_id)
+        response, correct = pop.answer(learner, item, rng, rcfg)
+        model.record_test_attempt(
+            AttemptRecord(
+                id=uuid.uuid4(),
+                user_id=user_id,
+                item_id=item_id,
+                concept_id=item.concept_id,
+                response=response,
+                correct=correct,
+                latency_ms=15_000,
+                created_at=at,
+            )
+        )

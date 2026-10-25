@@ -16,4 +16,7 @@ items:
     review_status: draft   # draft -> approved (by the reviewer) | rejected
 ```
 
-`pretest.yaml` and `posttest.yaml` hold the 15-item parallel tests. They are never served in sessions.
+`pretest.yaml` and `posttest.yaml` hold the 15-item parallel tests. Their item IDs **must** start with
+`pretest-` / `posttest-`: the graph never serves those items in sessions, and the analysis (R8)
+recognises them by the prefix. Store answers with `LearnerModel.record_test_attempt(...)`, never
+`apply_attempt`, so tests measure learning without changing the learner model.

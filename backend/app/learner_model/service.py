@@ -27,7 +27,7 @@ from app.contracts.learner import (
     TraitName,
 )
 from app.db import models as m
-from app.graph.service import GraphSnapshot
+from app.graph.service import GraphSnapshot, is_test_item
 from app.learner_model import bkt, updates
 from app.learner_model.bandit import BanditPosterior
 from app.learner_model.traits import PRIOR_VARIANCE, neutral_traits
@@ -196,6 +196,8 @@ class LearnerModel:
         if (done := self._already_applied("attempt", source_id)) is not None:
             return done
         arm = self._arm(attempt.user_id)  # also rejects unknown or deleted users
+        if is_test_item(attempt.item_id):
+            raise ValueError("pre/post-test answers go through record_test_attempt()")
         try:
             item = self.graph.get_item(attempt.item_id)
         except KeyError:
@@ -288,6 +290,26 @@ class LearnerModel:
             notes=notes,
         )
         return self._record(delta)
+
+    def record_test_attempt(self, attempt: AttemptRecord) -> None:
+        """Store a pre/post-test answer (EVALUATION_PLAN H4) without updating any learner state:
+        tests measure learning, they must not drive the model. Idempotent on attempt.id."""
+        if not is_test_item(attempt.item_id):
+            raise ValueError(f"{attempt.item_id} is not a pre/post-test item")
+        self._arm(attempt.user_id)  # rejects unknown or deleted users
+        if self.session.get(m.AttemptRow, attempt.id) is None:
+            self.session.add(
+                m.AttemptRow(
+                    id=attempt.id,
+                    user_id=attempt.user_id,
+                    item_id=attempt.item_id,
+                    response=attempt.response,
+                    correct=attempt.correct,
+                    latency_ms=attempt.latency_ms,
+                    created_at=attempt.created_at,
+                )
+            )
+            self.session.flush()
 
     def _update_affect_after_attempt(
         self, attempt: AttemptRecord, streak: int, previous: Row | None
