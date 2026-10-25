@@ -64,7 +64,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Record learner informed consent */
+        /** Record informed consent */
         post: operations["consent_api_v1_auth_consent_post"];
         delete?: never;
         options?: never;
@@ -99,7 +99,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Soft delete current user account */
+        /** Delete the current user's account */
         delete: operations["delete_me_api_v1_me_delete"];
         options?: never;
         head?: never;
@@ -113,10 +113,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get psychometric intake questionnaire items */
+        /** Get the questionnaire items (id and text only) */
         get: operations["get_questionnaire_api_v1_onboarding_questionnaire_get"];
         put?: never;
-        /** Submit intake questionnaire answers to initialize trait state */
+        /** Submit questionnaire answers (once) to initialise the learner's traits */
         post: operations["submit_questionnaire_api_v1_onboarding_questionnaire_post"];
         delete?: never;
         options?: never;
@@ -133,7 +133,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Get the next learning recommendation, explanation, and micro-check */
+        /** Get the next recommendation, its explanation and the item to answer */
         post: operations["next_step_api_v1_session_next_post"];
         delete?: never;
         options?: never;
@@ -150,7 +150,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Submit an answer to a question or micro-check */
+        /** Submit an answer */
         post: operations["record_attempt_api_v1_attempts_post"];
         delete?: never;
         options?: never;
@@ -165,7 +165,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Fetch explanation details by ID */
+        /** Fetch an explanation */
         get: operations["get_explanation_api_v1_explanations__explanation_id__get"];
         put?: never;
         post?: never;
@@ -184,7 +184,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Record batched interaction events for an explanation */
+        /** Record interaction events for an explanation (idempotent per idempotency_key) */
         post: operations["record_events_api_v1_explanations__explanation_id__events_post"];
         delete?: never;
         options?: never;
@@ -201,8 +201,59 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Finalize explanation interaction when dismissed without micro-check */
+        /** Finish an explanation that had no micro-check answer, applying its feedback */
         post: operations["close_explanation_api_v1_explanations__explanation_id__close_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recommendations/{recommendation_id}/why": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Why this? */
+        get: operations["why_api_v1_recommendations__recommendation_id__why_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/items/{item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fetch an item served to you */
+        get: operations["get_item_api_v1_items__item_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tests/{phase}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The pre- or post-test items (answer each once through POST /attempts) */
+        get: operations["get_test_api_v1_tests__phase__get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -216,7 +267,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get unified learner state for open learner model dashboard */
+        /** The learner's current state */
         get: operations["get_learner_state_api_v1_learners_me_state_get"];
         put?: never;
         post?: never;
@@ -233,8 +284,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get chronological state update history ('Why we think this') */
+        /** What changed the learner model, newest first */
         get: operations["get_learner_history_api_v1_learners_me_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learners/me/explain": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Why the system believes what it does about a concept or trait (XAI E4) */
+        get: operations["explain_belief_api_v1_learners_me_explain_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -250,7 +318,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get entire concept DAG and prerequisite edges */
+        /** The concept graph and its prerequisites */
         get: operations["get_graph_api_v1_graph_get"];
         put?: never;
         post?: never;
@@ -267,7 +335,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get operational metrics across study arms and latency budgets */
+        /** Operational metrics */
         get: operations["get_metrics_api_v1_admin_metrics_get"];
         put?: never;
         post?: never;
@@ -284,7 +352,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Export research data tables as pseudonymized CSV */
+        /** Pseudonymised CSV export of one table */
         get: operations["export_csv_api_v1_admin_export_csv_get"];
         put?: never;
         post?: never;
@@ -302,6 +370,8 @@ export interface components {
         AdminMetricsResponse: {
             /** Total Users */
             total_users: number;
+            /** Consented Users */
+            consented_users: number;
             /** Arm Distribution */
             arm_distribution: {
                 [key: string]: number;
@@ -311,9 +381,19 @@ export interface components {
             /** Total Explanations */
             total_explanations: number;
             /** P50 Latency Ms */
-            p50_latency_ms: number;
+            p50_latency_ms: number | null;
             /** P95 Latency Ms */
-            p95_latency_ms: number;
+            p95_latency_ms: number | null;
+            /** Source Mix */
+            source_mix: {
+                [key: string]: number;
+            };
+            /** Clarity Distribution */
+            clarity_distribution: {
+                [key: string]: number;
+            };
+            /** Avg Dwell Ms */
+            avg_dwell_ms: number | null;
         };
         /** AffectiveState */
         AffectiveState: {
@@ -357,21 +437,63 @@ export interface components {
             explanation_id?: string | null;
         };
         /**
-         * AttemptResult
-         * @description Response of POST /attempts.
+         * AttemptResultOut
+         * @description AttemptResult plus what the answer changed, in plain language (XAI E5).
          */
-        AttemptResult: {
+        AttemptResultOut: {
             /** Correct */
             correct: boolean;
             /** Correct Answer */
             correct_answer?: string | null;
             delta: components["schemas"]["StateDelta"];
+            change?: components["schemas"]["ChangeNotice"] | null;
+            feedback_change?: components["schemas"]["ChangeNotice"] | null;
         };
         /** AuthResponse */
         AuthResponse: {
             /** Token */
             token: string;
             user: components["schemas"]["UserResponse"];
+        };
+        /**
+         * BeliefExplanation
+         * @description E4: why the system believes something about the learner (open learner model).
+         */
+        BeliefExplanation: {
+            /** Subject */
+            subject: string;
+            /** Label */
+            label: string;
+            /** Value */
+            value: number;
+            /**
+             * Confidence
+             * @enum {string}
+             */
+            confidence: "tentative" | "moderate" | "confident";
+            /** Summary */
+            summary: string;
+            /**
+             * Top Evidence
+             * @default []
+             */
+            top_evidence: string[];
+        };
+        /**
+         * ChangeNotice
+         * @description E5: what one update (answer, explanation feedback, questionnaire) changed.
+         */
+        ChangeNotice: {
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "attempt" | "explanation_feedback" | "questionnaire";
+            /**
+             * Messages
+             * @default []
+             */
+            messages: string[];
         };
         /** Concept */
         Concept: {
@@ -448,12 +570,33 @@ export interface components {
              */
             consent_at: string;
         };
+        /**
+         * Counterfactual
+         * @description E2: what would change the decision. Only produced if re-running the planner on the
+         *     changed situation really gives a different recommendation.
+         */
+        Counterfactual: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "mastery_at_least" | "misconception_cleared" | "suspicion_below" | "placement_complete" | "review_done";
+            /** Concept Id */
+            concept_id: string;
+            /** Target Value */
+            target_value?: number | null;
+            /** Steps Needed */
+            steps_needed?: number | null;
+            /** Condition */
+            condition: string;
+            /** Outcome */
+            outcome: string;
+            /** Outcome Concept Id */
+            outcome_concept_id: string;
+        };
         /** EventBatchIn */
         EventBatchIn: {
-            /**
-             * Events
-             * @description Batched explanation interaction events
-             */
+            /** Events */
             events: components["schemas"]["ExplanationEventIn"][];
         };
         /** EventBatchResponse */
@@ -518,7 +661,7 @@ export interface components {
              * Type
              * @enum {string}
              */
-            type: "shown" | "expanded" | "collapsed" | "replayed" | "hidden" | "visible" | "clarity_rated" | "followup_answered" | "dismissed";
+            type: "shown" | "expanded" | "collapsed" | "replayed" | "hidden" | "visible" | "clarity_rated" | "followup_answered" | "dismissed" | "why_opened" | "why_rated";
             /**
              * Client Ts
              * Format: date-time
@@ -668,30 +811,46 @@ export interface components {
         QuestionnaireAnswersIn: {
             /**
              * Answers
-             * @description Map of questionnaire item ID to likert rating (1 to 5)
+             * @description Questionnaire item id -> Likert rating (1 to 5)
              */
             answers: {
                 [key: string]: number;
             };
         };
-        /** QuestionnaireItem */
-        QuestionnaireItem: {
+        /**
+         * QuestionnaireItemOut
+         * @description What a learner sees of an item: never its trait, scoring direction or source.
+         */
+        QuestionnaireItemOut: {
             /** Id */
             id: string;
-            /** Trait */
-            trait: string;
             /** Text */
             text: string;
+        };
+        /**
+         * Rationale
+         * @description E1 + E2 for one recommendation, built from the planner's decision trace.
+         */
+        Rationale: {
             /**
-             * Reverse Scored
-             * @default false
+             * Recommendation Id
+             * Format: uuid
              */
-            reverse_scored: boolean;
+            recommendation_id: string;
+            rule: components["schemas"]["ReasonCode"];
+            /** Summary */
+            summary: string;
+            /** Evidence */
+            evidence: components["schemas"]["ReasonEvidence"][];
+            /** Threshold */
+            threshold?: number | null;
+            /** Alternative */
+            alternative?: string | null;
             /**
-             * Source
-             * @default
+             * Counterfactuals
+             * @default []
              */
-            source: string;
+            counterfactuals: components["schemas"]["Counterfactual"][];
         };
         /**
          * ReasonCode
@@ -741,6 +900,14 @@ export interface components {
             policy_version: string;
         };
         /**
+         * RecommendationWhy
+         * @description Response of GET /recommendations/{id}/why.
+         */
+        RecommendationWhy: {
+            rationale: components["schemas"]["Rationale"];
+            style?: components["schemas"]["StyleRationale"] | null;
+        };
+        /**
          * StateDelta
          * @description What one update changed; stored in `state_updates` for audit and 'why we think this'.
          */
@@ -787,11 +954,6 @@ export interface components {
         StateUpdateView: {
             /** Id */
             id: number;
-            /**
-             * User Id
-             * Format: uuid
-             */
-            user_id: string;
             /** Source */
             source: string;
             /** Source Id */
@@ -829,6 +991,26 @@ export interface components {
              */
             include_diagram: boolean;
         };
+        /**
+         * StyleRationale
+         * @description E3: why the explanation is written the way it is.
+         */
+        StyleRationale: {
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "generic" | "trait_mapped" | "thompson" | "exploration";
+            /** Summary */
+            summary: string;
+            /** P Best */
+            p_best?: number | null;
+            /**
+             * Confidence
+             * @enum {string}
+             */
+            confidence: "tentative" | "moderate" | "confident";
+        };
         /** TraitEstimate */
         TraitEstimate: {
             /** Mean */
@@ -858,10 +1040,7 @@ export interface components {
              * Format: email
              */
             email: string;
-            /**
-             * Password
-             * @description Minimum 6 characters
-             */
+            /** Password */
             password: string;
             /** Display Name */
             display_name: string;
@@ -892,6 +1071,16 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /**
+             * Is Admin
+             * @default false
+             */
+            is_admin: boolean;
+            /**
+             * Questionnaire Done
+             * @default false
+             */
+            questionnaire_done: boolean;
         };
         /** ValidationError */
         ValidationError: {
@@ -1076,7 +1265,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["QuestionnaireItem"][];
+                    "application/json": components["schemas"]["QuestionnaireItemOut"][];
                 };
             };
         };
@@ -1153,7 +1342,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AttemptResult"];
+                    "application/json": components["schemas"]["AttemptResultOut"];
                 };
             };
             /** @description Validation Error */
@@ -1264,6 +1453,99 @@ export interface operations {
             };
         };
     };
+    why_api_v1_recommendations__recommendation_id__why_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recommendation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecommendationWhy"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_item_api_v1_items__item_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_test_api_v1_tests__phase__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                phase: "pretest" | "posttest";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_learner_state_api_v1_learners_me_state_get: {
         parameters: {
             query?: never;
@@ -1286,7 +1568,9 @@ export interface operations {
     };
     get_learner_history_api_v1_learners_me_history_get: {
         parameters: {
-            query?: never;
+            query?: {
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1300,6 +1584,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StateUpdateView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    explain_belief_api_v1_learners_me_explain_get: {
+        parameters: {
+            query: {
+                subject: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BeliefExplanation"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1347,8 +1671,7 @@ export interface operations {
     export_csv_api_v1_admin_export_csv_get: {
         parameters: {
             query?: {
-                /** @description Table to export (users, attempts, assignments) */
-                table?: string;
+                table?: "users" | "attempts" | "explanations" | "feedback";
             };
             header?: never;
             path?: never;

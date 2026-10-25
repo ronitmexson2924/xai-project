@@ -179,6 +179,18 @@ export function ItemCard({
             </button>
           );
         })}
+        {item.options.length === 0 && (
+          <input
+            type="text"
+            aria-label="Your answer"
+            maxLength={500}
+            disabled={disabled || isSubmitting}
+            value={selectedOption ?? ""}
+            onChange={(e) => setSelectedOption(e.target.value || null)}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 font-mono text-sm text-slate-100 focus:border-indigo-500 focus:outline-none"
+            placeholder="Type your answer"
+          />
+        )}
       </div>
 
       {/* Submission CTA */}

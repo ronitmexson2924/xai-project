@@ -42,14 +42,6 @@ export default function ConsentPage() {
     );
   }
 
-  const armDescription = {
-    generic: "Standard benchmark track with uniform concept explanations.",
-    static_personalized:
-      "Personalized track configured from initial intake preferences.",
-    closed_loop:
-      "Dynamic adaptive track continuously calibrated by your interaction feedback.",
-  }[user.arm];
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       <div className="w-full max-w-2xl space-y-6">
@@ -83,17 +75,13 @@ export default function ConsentPage() {
               (DSA) pedagogical explanations to optimize understanding and concept mastery.
             </p>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 space-y-2">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Assigned Study Track
-              </h4>
-              <div className="flex items-center gap-2">
-                <span className="inline-block px-2.5 py-0.5 rounded-md text-xs font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  {user.arm}
-                </span>
-                <span className="text-xs text-slate-400">{armDescription}</span>
-              </div>
-            </div>
+            {/* TODO(S4): replace this text with the wording approved by the ethics review before
+                the pilot. Participants are not told their arm, so the comparison stays blind. */}
+            <p>
+              Everyone uses the same practice questions. You will be assigned at random to one of
+              three versions of how explanations are chosen; which version you have is not shown
+              during the study.
+            </p>
 
             <h3 className="text-base font-semibold text-white pt-2">Data Collection & Telemetry</h3>
             <ul className="list-disc pl-5 space-y-1.5 text-slate-400">

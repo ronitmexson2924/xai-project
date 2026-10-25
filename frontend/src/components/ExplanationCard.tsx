@@ -1,18 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
-import { Explanation } from "@/lib/api";
-import { useExplanationTelemetry } from "@/lib/useExplanationTelemetry";
+import { Concept, Explanation } from "@/lib/api";
+import { Telemetry } from "@/lib/useExplanationTelemetry";
 import { ClarityPrompt } from "./ClarityPrompt";
+import { Markdown } from "./Markdown";
 
 interface ExplanationCardProps {
   explanation: Explanation;
+  telemetry: Telemetry; // owned by the page, so it can flush before closing the explanation
+  concept?: Concept | null; // its card is what "expand" shows (grounded, D6)
   onDismiss?: () => void;
   showTelemetryDebug?: boolean;
 }
 
 export function ExplanationCard({
   explanation,
+  telemetry,
+  concept = null,
   onDismiss,
   showTelemetryDebug = false,
 }: ExplanationCardProps) {
@@ -27,7 +32,7 @@ export function ExplanationCard({
     trackReplayed,
     trackClarityRated,
     trackDismissed,
-  } = useExplanationTelemetry(explanation.id);
+  } = telemetry;
 
   const toggleExpand = () => {
     if (!expanded) {
@@ -66,10 +71,7 @@ export function ExplanationCard({
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse" />
           <h3 className="text-sm font-semibold text-white">
-            Concept Explanation:{" "}
-            <span className="font-mono text-indigo-300">
-              {explanation.concept_ids.join(", ")}
-            </span>
+            {concept?.name ?? explanation.concept_ids.join(", ")}
           </h3>
         </div>
 
@@ -83,28 +85,32 @@ export function ExplanationCard({
           <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
             {explanation.style.depth}
           </span>
-          <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            src:{explanation.source}
-          </span>
         </div>
       </div>
 
       {/* Explanation Body */}
-      <div className="text-sm text-slate-200 leading-relaxed space-y-3 font-normal whitespace-pre-line">
-        {explanation.body_markdown}
+      <div className="text-sm text-slate-200 leading-relaxed space-y-3 font-normal">
+        <Markdown text={explanation.body_markdown} />
       </div>
 
       {/* Expandable Worked Example or Deep Dive */}
       {expanded && (
         <div className="p-4 rounded-xl bg-slate-950/70 border border-indigo-500/20 space-y-2 text-xs text-slate-300 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="font-semibold text-indigo-300 flex items-center gap-1.5">
-            <span>🔍 Deep Invariant Detail</span>
+            <span>🔍 More on this concept</span>
           </div>
-          <p className="leading-relaxed">
-            In recursive and graph algorithms, the base case or termination invariant guarantees
-            well-founded induction: every step strictly reduces distance to the base case, preventing
-            cyclic infinite branches.
-          </p>
+          {concept ? (
+            <div className="space-y-2 leading-relaxed">
+              <p><strong className="text-slate-100">Key idea:</strong> {concept.card.key_idea}</p>
+              <div>
+                <strong className="text-slate-100">Worked example:</strong>
+                <Markdown text={concept.card.worked_example} />
+              </div>
+              <p><strong className="text-slate-100">Common pitfall:</strong> {concept.card.pitfall}</p>
+            </div>
+          ) : (
+            <p className="leading-relaxed">No further detail for this concept.</p>
+          )}
         </div>
       )}
 

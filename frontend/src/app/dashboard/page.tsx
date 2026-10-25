@@ -14,11 +14,9 @@ import {
   ConceptEdge,
   LearnerState,
   StateUpdateView,
-  UserResponse,
 } from "@/lib/api";
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<UserResponse | null>(null);
   const [learnerState, setLearnerState] = useState<LearnerState | null>(null);
   const [history, setHistory] = useState<StateUpdateView[]>([]);
   const [concepts, setConcepts] = useState<Concept[]>([]);
@@ -36,8 +34,7 @@ export default function DashboardPage() {
         setLoading(true);
         setError(null);
 
-        const [u, state, hist, graphData] = await Promise.all([
-          api.auth.me().catch(() => null),
+        const [state, hist, graphData] = await Promise.all([
           api.learners.getState().catch((err) => {
             console.error("Failed to load learner state", err);
             return null;
@@ -53,7 +50,6 @@ export default function DashboardPage() {
         ]);
 
         if (mounted) {
-          setUser(u);
           setLearnerState(state);
           setHistory(hist);
           setConcepts(graphData.concepts);
@@ -95,11 +91,6 @@ export default function DashboardPage() {
               <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 Open Learner Model
               </span>
-              {user && (
-                <span className="text-xs font-mono text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/20">
-                  Arm: {user.arm}
-                </span>
-              )}
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               Knowledge Graph &amp; Trait Model

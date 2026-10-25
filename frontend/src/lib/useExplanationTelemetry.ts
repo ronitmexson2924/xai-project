@@ -11,7 +11,9 @@ export type TelemetryEventType =
   | "hidden"
   | "visible"
   | "clarity_rated"
-  | "dismissed";
+  | "dismissed"
+  | "why_opened"
+  | "why_rated";
 
 export interface TelemetryEvent {
   idempotency_key: string;
@@ -203,18 +205,27 @@ export function useExplanationTelemetry(
 
     document.addEventListener("visibilitychange", onDocVisibilityChange);
 
-    // Send on pagehide via navigator.sendBeacon
+    // Send what is left when the page goes away
     const onPageHide = () => {
       if (isVisibleRef.current) {
         recordEvent("hidden");
       }
-      if (queueRef.current.length > 0 && typeof navigator !== "undefined" && navigator.sendBeacon) {
-        const url = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/explanations/${explanationId}/events`;
-        const blob = new Blob(
-          [JSON.stringify({ events: queueRef.current })],
-          { type: "application/json" }
-        );
-        navigator.sendBeacon(url, blob);
+      // sendBeacon cannot carry the Authorization header, so use a keepalive fetch, which
+      // survives the page closing; anything it misses stays queued in localStorage
+      if (queueRef.current.length > 0 && typeof fetch !== "undefined") {
+        const token = localStorage.getItem("pcg_token");
+        void fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/explanations/${explanationId}/events`,
+          {
+            method: "POST",
+            keepalive: true,
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({ events: queueRef.current }),
+          }
+        ).catch(() => undefined);
       }
     };
 
@@ -244,3 +255,4 @@ export function useExplanationTelemetry(
     flush: flushQueue,
   };
 }
+export type Telemetry = ReturnType<typeof useExplanationTelemetry>;

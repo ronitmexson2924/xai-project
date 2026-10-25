@@ -16,7 +16,7 @@ const LIKERT_OPTIONS = [
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, refreshUser } = useAuth();
 
   const [items, setItems] = useState<QuestionnaireItem[]>([]);
   const [answers, setAnswers] = useState<Record<string, number>>({});
@@ -110,6 +110,7 @@ export default function OnboardingPage() {
     setSubmitting(true);
     try {
       await api.onboarding.submitQuestionnaire(answers);
+      await refreshUser(); // questionnaire_done is now true, which the session page checks
       setStep("diagnostic_intro");
     } catch (err) {
       if (err instanceof ApiException) {
@@ -134,7 +135,7 @@ export default function OnboardingPage() {
   }
 
   // Diagnostic Intro View
-  if (step === "diagnostic_intro") {
+  if (step === "diagnostic_intro" || user?.questionnaire_done) {  // it is taken once
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100">
         <div className="w-full max-w-xl space-y-6">
@@ -148,29 +149,29 @@ export default function OnboardingPage() {
                 Questionnaire Complete
               </span>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
-                Next: Diagnostic Calibration
+                Next: a short starting quiz
               </h1>
               <p className="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
-                Your psychometric intake profile has been registered. Before starting customized
-                remediation, we will present 3 baseline diagnostic items.
+                Your answers are saved. A short quiz shows where you are starting from; then
+                practice begins with a few questions across the course to find your level.
               </p>
             </div>
 
             <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-left space-y-2 text-xs text-slate-400">
               <div className="font-semibold text-slate-200">How this works:</div>
               <ul className="list-disc pl-4 space-y-1">
-                <li>3 quick questions covering loops, recursion, and search bounds.</li>
-                <li>There is no penalty for incorrect answers—this only sets your starting baseline.</li>
-                <li>After each item, you will see a grounded explanation tailored to your learning track.</li>
+                <li>The starting quiz has 15 questions and gives no feedback.</li>
+                <li>Wrong answers have no penalty: they only tell the system where to begin.</li>
+                <li>In practice, each question is followed by an explanation and a quick check.</li>
               </ul>
             </div>
 
             <div className="pt-2">
               <Link
-                href="/session"
+                href="/pretest"
                 className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-6 shadow-lg shadow-indigo-600/30 transition-all text-sm"
               >
-                Start Diagnostic Session →
+                Start the quiz →
               </Link>
             </div>
           </div>
@@ -224,7 +225,7 @@ export default function OnboardingPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
-                  Trait: {currentItem.trait.replace(/_/g, " ")}
+                  How much do you agree?
                 </span>
                 <span className="text-[11px] text-slate-500 hidden sm:inline">
                   (Press <kbd className="px-1 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">1-5</kbd> to select)

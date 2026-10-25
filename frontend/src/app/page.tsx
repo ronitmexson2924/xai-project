@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
+import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
 export default function Home() {
@@ -16,15 +17,8 @@ export default function Home() {
     }
     setDeleting(true);
     try {
-      const token = localStorage.getItem("pcg_token");
-      await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/me`,
-        {
-          method: "DELETE",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      );
-      logout();
+      await api.auth.deleteMe();
+      logout();  // only once the server confirmed the deletion
     } finally {
       setDeleting(false);
       setDeleteConfirm(false);
@@ -55,9 +49,6 @@ export default function Home() {
               <div className="flex items-center gap-3">
                 <span className="text-xs text-slate-300 hidden md:inline">
                   {user.display_name}
-                </span>
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                  {user.arm}
                 </span>
                 <button
                   type="button"
@@ -116,7 +107,7 @@ export default function Home() {
               ) : (
                 <div className="flex flex-wrap items-center gap-3">
                   <Link
-                    href="/session"
+                    href={user.questionnaire_done ? "/session" : "/onboarding"}
                     className="rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2"
                   >
                     <span>Adaptive Session</span>
@@ -130,11 +121,19 @@ export default function Home() {
                     <span>→</span>
                   </Link>
                   <Link
-                    href="/admin"
+                    href="/posttest"
                     className="rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-3 text-sm font-medium border border-slate-700 transition-all"
                   >
-                    Admin Analytics
+                    Final quiz
                   </Link>
+                  {user.is_admin && (
+                    <Link
+                      href="/admin"
+                      className="rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-3 text-sm font-medium border border-slate-700 transition-all"
+                    >
+                      Admin Analytics
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
@@ -166,13 +165,6 @@ export default function Home() {
                 <span className="text-xs text-slate-500 block truncate">{user.email}</span>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-950/50 border border-slate-800">
-                <span className="text-xs text-slate-400 block mb-1">Study Track</span>
-                <span className="font-mono font-bold text-indigo-400 text-sm block">
-                  {user.arm}
-                </span>
-                <span className="text-xs text-slate-500 block">Balanced allocation</span>
-              </div>
 
               <div className="p-3.5 rounded-xl bg-slate-950/50 border border-slate-800">
                 <span className="text-xs text-slate-400 block mb-1">Consent Date</span>

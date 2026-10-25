@@ -60,21 +60,10 @@ export default function AdminPage() {
   const armDist = metrics?.arm_distribution || {};
   const totalUsers = metrics?.total_users || 0;
 
-  const sourceMix = (metrics as { source_mix?: Record<string, number> })?.source_mix || {
-    template: 14,
-    precomputed: 28,
-    llm: 8,
-  };
+  const sourceMix: Record<string, number> = metrics?.source_mix ?? {};
   const totalSources = Object.values(sourceMix).reduce((a, b) => a + b, 0) || 1;
 
-  const clarityDist = (metrics as { clarity_distribution?: Record<number, number> })
-    ?.clarity_distribution || {
-    1: 1,
-    2: 3,
-    3: 12,
-    4: 24,
-    5: 35,
-  };
+  const clarityDist: Record<number, number> = metrics?.clarity_distribution ?? {};
   const totalRatings = Object.values(clarityDist).reduce((a, b) => a + b, 0) || 1;
 
   return (
@@ -143,12 +132,10 @@ export default function AdminPage() {
               <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-5 backdrop-blur-md">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-medium text-slate-400">p50 Latency</span>
-                  <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                    PASS (&lt;100ms)
-                  </span>
+                  <LatencyBadge value={metrics?.p50_latency_ms ?? null} />
                 </div>
                 <div className="text-3xl font-black text-cyan-300 font-mono mt-1">
-                  {metrics?.p50_latency_ms.toFixed(1)} <span className="text-sm font-normal">ms</span>
+                  {metrics?.p50_latency_ms != null ? metrics.p50_latency_ms.toFixed(1) : "—"} <span className="text-sm font-normal">ms</span>
                 </div>
                 <div className="text-[10px] text-slate-500 mt-1">Median recommendation latency</div>
               </div>
@@ -156,12 +143,10 @@ export default function AdminPage() {
               <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-5 backdrop-blur-md">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-medium text-slate-400">p95 Latency</span>
-                  <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                    PASS (&lt;100ms)
-                  </span>
+                  <LatencyBadge value={metrics?.p95_latency_ms ?? null} />
                 </div>
                 <div className="text-3xl font-black text-indigo-300 font-mono mt-1">
-                  {metrics?.p95_latency_ms.toFixed(1)} <span className="text-sm font-normal">ms</span>
+                  {metrics?.p95_latency_ms != null ? metrics.p95_latency_ms.toFixed(1) : "—"} <span className="text-sm font-normal">ms</span>
                 </div>
                 <div className="text-[10px] text-slate-500 mt-1">Tail latency constraint (D5)</div>
               </div>
@@ -320,7 +305,7 @@ export default function AdminPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                 {[
                   {
                     table: "users",
@@ -328,9 +313,14 @@ export default function AdminPage() {
                     desc: "Pseudonymized user IDs, signup timestamp, consent status, and assigned arm.",
                   },
                   {
-                    table: "assignments",
-                    title: "Assignments Table",
-                    desc: "Online experiment randomisation events and assignment timestamps.",
+                    table: "explanations",
+                    title: "Explanations Table",
+                    desc: "Explanations shown: concept, source (precomputed, LLM, template), style source and latency.",
+                  },
+                  {
+                    table: "feedback",
+                    title: "Feedback Table",
+                    desc: "Per-explanation feedback: visible dwell, clarity rating, micro-check result, quick dismissal.",
                   },
                   {
                     table: "attempts",
@@ -369,5 +359,28 @@ export default function AdminPage() {
         )}
       </main>
     </div>
+  );
+}
+
+// explainer latency budget: p95 under 50 ms when a precomputed variant exists (tasks/mit.md M3)
+function LatencyBadge({ value }: { value: number | null }) {
+  if (value == null) {
+    return (
+      <span className="text-[10px] font-semibold text-slate-400 bg-slate-500/10 px-1.5 py-0.5 rounded border border-slate-500/20">
+        no data yet
+      </span>
+    );
+  }
+  const ok = value < 50;
+  return (
+    <span
+      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
+        ok
+          ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+          : "text-amber-400 bg-amber-500/10 border-amber-500/20"
+      }`}
+    >
+      {ok ? "within budget (<50 ms)" : "over budget (50 ms)"}
+    </span>
   );
 }

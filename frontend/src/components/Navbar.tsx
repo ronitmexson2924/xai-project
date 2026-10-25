@@ -6,17 +6,10 @@ import React, { useEffect, useState } from "react";
 
 import { api, setStoredToken, UserResponse } from "@/lib/api";
 
-const DEMO_PERSONAS = [
-  { label: "Ada Lovelace (Novice)", email: "novice@example.com", badge: "Novice" },
-  { label: "Alan Turing (Intermediate)", email: "intermediate@example.com", badge: "Intermediate" },
-  { label: "Grace Hopper (Advanced)", email: "advanced@example.com", badge: "Advanced" },
-];
-
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<UserResponse | null>(null);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -32,22 +25,6 @@ export default function Navbar() {
       mounted = false;
     };
   }, []);
-
-  const handleSwitchPersona = async (email: string) => {
-    setLoading(true);
-    try {
-      const res = await api.auth.login({ email, password: "Demo1234!" });
-      setStoredToken(res.token);
-      setUser(res.user);
-      router.refresh();
-      // Reload current page to re-fetch all state with new token
-      window.location.reload();
-    } catch (err) {
-      console.error("Failed to switch persona", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -101,6 +78,7 @@ export default function Navbar() {
               Open Learner Model
               <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
             </Link>
+            {user?.is_admin && (
             <Link
               href="/admin"
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
@@ -111,46 +89,17 @@ export default function Navbar() {
             >
               Admin & Research
             </Link>
+            )}
           </nav>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Demo Persona Switcher */}
-          <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-xl px-2 py-1">
-            <span className="text-[11px] text-slate-400 font-medium hidden sm:inline pl-1">
-              Demo Persona:
-            </span>
-            <div className="flex items-center gap-1">
-              {DEMO_PERSONAS.map((p) => {
-                const isActive = user?.email === p.email;
-                return (
-                  <button
-                    key={p.email}
-                    onClick={() => handleSwitchPersona(p.email)}
-                    disabled={loading || isActive}
-                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-md transition-all ${
-                      isActive
-                        ? "bg-indigo-500 text-white shadow-xs"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                    } ${loading ? "opacity-50 cursor-wait" : ""}`}
-                    title={`Switch to ${p.label}`}
-                  >
-                    {p.badge}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Current User Badge & Logout */}
           {user ? (
             <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
               <div className="hidden lg:flex flex-col text-right">
                 <span className="text-xs font-semibold text-slate-200 leading-tight">
                   {user.display_name}
-                </span>
-                <span className="text-[10px] font-mono text-emerald-400 leading-tight">
-                  arm: {user.arm}
                 </span>
               </div>
               <button

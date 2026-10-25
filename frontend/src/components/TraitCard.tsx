@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import type { LearnerState } from "@/lib/api";
+import { BeliefExplanation } from "./BeliefExplanation";
 
 interface TraitCardProps {
   traits: LearnerState["traits"];
@@ -88,6 +89,7 @@ function getConfidenceLabel(variance: number) {
 }
 
 export default function TraitCard({ traits }: TraitCardProps) {
+  const [open, setOpen] = useState<string | null>(null);
   if (!traits || !traits.traits) return null;
 
   return (
@@ -149,6 +151,15 @@ export default function TraitCard({ traits }: TraitCardProps) {
                 <div className="text-[10px] text-slate-400 leading-normal italic">
                   💡 {desc.pedagogicalImpact}
                 </div>
+                <button
+                  type="button"
+                  aria-expanded={open === traitName}
+                  onClick={() => setOpen(open === traitName ? null : traitName)}
+                  className="text-[11px] font-semibold text-indigo-300 hover:text-indigo-200"
+                >
+                  {open === traitName ? "Hide" : "Why we think this"}
+                </button>
+                {open === traitName && <BeliefExplanation subject={traitName} />}
               </div>
             </div>
           );

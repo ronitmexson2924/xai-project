@@ -76,6 +76,11 @@ export type GraphResponse =
   paths["/api/v1/graph"]["get"]["responses"]["200"]["content"]["application/json"];
 export type Concept = GraphResponse["concepts"][number];
 export type ConceptEdge = GraphResponse["edges"][number];
+export type RecommendationWhy =
+  paths["/api/v1/recommendations/{recommendation_id}/why"]["get"]["responses"]["200"]["content"]["application/json"];
+export type BeliefExplanation =
+  paths["/api/v1/learners/me/explain"]["get"]["responses"]["200"]["content"]["application/json"];
+export type ChangeNotice = NonNullable<AttemptResult["change"]>;
 export type AdminMetricsResponse =
   paths["/api/v1/admin/metrics"]["get"]["responses"]["200"]["content"]["application/json"];
 
@@ -197,7 +202,7 @@ export const api = {
 
   explanations: {
     get: (id: string) =>
-      request<Explanation>(`/api/v1/explanations/${id}`, {
+      request<Explanation>(`/api/v1/explanations/${encodeURIComponent(id)}`, {
         method: "GET",
       }),
 
@@ -214,7 +219,27 @@ export const api = {
       }),
   },
 
+  recommendations: {
+    why: (id: string) =>
+      request<RecommendationWhy>(`/api/v1/recommendations/${encodeURIComponent(id)}/why`, {
+        method: "GET",
+      }),
+  },
+
+  items: {
+    get: (id: string) =>
+      request<PublicItem>(`/api/v1/items/${encodeURIComponent(id)}`, { method: "GET" }),
+    test: (phase: "pretest" | "posttest") =>
+      request<PublicItem[]>(`/api/v1/tests/${phase}`, { method: "GET" }),
+  },
+
   learners: {
+    explain: (subject: string) =>
+      request<BeliefExplanation>(
+        `/api/v1/learners/me/explain?subject=${encodeURIComponent(subject)}`,
+        { method: "GET" }
+      ),
+
     getState: () =>
       request<LearnerState>("/api/v1/learners/me/state", {
         method: "GET",
@@ -241,7 +266,7 @@ export const api = {
 
     downloadCsv: async (table: string) => {
       const token = getStoredToken();
-      const res = await fetch(`${API_BASE_URL}/api/v1/admin/export.csv?table=${table}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/admin/export.csv?table=${encodeURIComponent(table)}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error(`Export failed with status ${res.status}`);

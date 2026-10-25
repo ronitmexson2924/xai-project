@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React from "react";
 import type { Concept, LearnerState } from "@/lib/api";
+import { BeliefExplanation } from "./BeliefExplanation";
 
 interface ConceptDetailModalProps {
   concept: Concept | null;
@@ -19,7 +20,8 @@ export default function ConceptDetailModal({
 
   const masteryData = learnerState?.mastery?.[concept.id];
   const pMastery = masteryData?.p_mastery ?? 0.2;
-  const uncertainty = (masteryData as { uncertainty?: number } | undefined)?.uncertainty ?? 0.25;
+  // BKT gives no variance; the spread of a Bernoulli belief is a simple, honest proxy
+  const uncertainty = Math.sqrt(pMastery * (1 - pMastery));
   const attempts = masteryData?.n_attempts ?? 0;
   const misconceptions = masteryData?.misconception_ids ?? [];
 
@@ -56,6 +58,10 @@ export default function ConceptDetailModal({
           {concept.name}
         </h2>
         <p className="text-xs sm:text-sm text-slate-300 mb-6">{concept.description}</p>
+
+        <div className="mb-6">
+          <BeliefExplanation subject={concept.id} />
+        </div>
 
         {/* Open Learner Model Stats Row */}
         <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 mb-6 text-center">
