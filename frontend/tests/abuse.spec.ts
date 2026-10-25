@@ -136,6 +136,19 @@ test.describe("what a curious or hostile user tries in the browser", () => {
     for (const body of responses) expect(body).not.toContain('"answer"');
   });
 
+  test("a dropped connection while the app loads does not log the user out", async ({ page }) => {
+    await register(page, uniqueEmail("dropped"));
+    await consent(page);
+    await answerQuestionnaire(page);
+    // e.g. leaving a page while it checks who is signed in, or a flaky network
+    await page.route("**/api/v1/auth/me", (route) => route.abort(), { times: 1 });
+    await page.reload();
+    expect(await token(page)).not.toBe("");
+    await page.goto("/dashboard");
+    await expect(page).toHaveURL(/\/dashboard/);
+    await expect(page.getByTestId("next-step")).toBeVisible();
+  });
+
   test("withdrawing deletes access for good", async ({ page }) => {
     const email = uniqueEmail("withdraw");
     await register(page, email);

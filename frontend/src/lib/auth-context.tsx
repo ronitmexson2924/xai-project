@@ -43,7 +43,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setUser(await api.auth.me(saved));
     } catch {
-      setStoredToken(null);
+      // a 401 has already cleared the stored token (api.ts); any other failure (offline, or the
+      // request cancelled by leaving the page) must not log the user out
       setUser(null);
     } finally {
       setIsLoading(false);
