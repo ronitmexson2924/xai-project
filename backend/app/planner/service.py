@@ -22,7 +22,7 @@ from app.db import models as m
 from app.graph.service import GraphSnapshot
 from app.learner_model import bkt
 from app.learner_model.service import Activity, LearnerModel
-from app.planner.style import select_style
+from app.planner.style import EPSILON_MIN, select_style
 
 POLICY_VERSION = "planner-v1"
 
@@ -49,12 +49,14 @@ class Planner:
         learner_model: LearnerModel,
         seed: int = 0,
         now: Callable[[], datetime] = lambda: datetime.now(UTC),
+        epsilon: float = EPSILON_MIN,
     ) -> None:
         self.session = session
         self.graph = graph
         self.learner_model = learner_model
         self.seed = seed
         self.now = now
+        self.epsilon = epsilon
         self._practice_concepts = {
             c for c in graph.concept_ids if graph.items_for_concept(c, microcheck=False)
         }
@@ -118,6 +120,7 @@ class Planner:
             posterior=self.learner_model.bandit_posterior(state.user_id),
             card_has_diagram=self.graph.get_concept(concept_id).card.diagram is not None,
             rng=rng,
+            epsilon=self.epsilon,
         )
 
     # --- rules (each returns (kind, concept_id, reasons) or None) --------------------------------

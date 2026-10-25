@@ -50,11 +50,21 @@ class Activity:
 
 class LearnerModel:
     def __init__(
-        self, session: Session, graph: GraphSnapshot, params: bkt.BKTParams = bkt.DEFAULT_PARAMS
+        self,
+        session: Session,
+        graph: GraphSnapshot,
+        params: bkt.BKTParams = bkt.DEFAULT_PARAMS,
+        questionnaire_variance: float = PRIOR_VARIANCE,
+        behaviour_alpha: float = 0.0,
     ) -> None:
         self.session = session
         self.graph = graph
         self.params = params
+        # trust in the questionnaire: variance of each questionnaire-based trait prior
+        self.questionnaire_variance = questionnaire_variance
+        # Behavioural-trait EWMA rate. Off by default: R6 showed uncalibrated proxies make
+        # persistence/self-efficacy worse than the questionnaire alone (MODEL_SPEC §2.3).
+        self.behaviour_alpha = behaviour_alpha
 
     # --- reads -----------------------------------------------------------------------------------
 
@@ -229,7 +239,7 @@ class LearnerModel:
 
         self._update_affect_after_attempt(attempt, row.streak, previous)
         trait_changes: dict[TraitName, tuple[float, float]] = {}
-        if self._arm(attempt.user_id) == "closed_loop":
+        if self._arm(attempt.user_id) == "closed_loop" and self.behaviour_alpha > 0:
             proxies: dict[TraitName, float | None] = {
                 "persistence": None
                 if previous is None
@@ -246,7 +256,7 @@ class LearnerModel:
                 ) -> tuple[LearnerTraits, BanditPosterior]:
                     new = dict(traits.traits)
                     for trait, proxy in proxies.items():
-                        new[trait] = updates.ewma_trait(new[trait], proxy)
+                        new[trait] = updates.ewma_trait(new[trait], proxy, self.behaviour_alpha)
                     return LearnerTraits(traits=new, version=traits.version), posterior
 
                 trait_changes = self._update_traits(attempt.user_id, apply_proxies)
@@ -323,7 +333,9 @@ class LearnerModel:
 
         priors = dict(before.traits)
         for trait, trait_score in scores.items():
-            priors[trait] = TraitEstimate(mean=trait_score.mean, variance=PRIOR_VARIANCE)
+            priors[trait] = TraitEstimate(
+                mean=trait_score.mean, variance=self.questionnaire_variance
+            )
         posterior = BanditPosterior.from_trait_priors(priors)
         traits = LearnerTraits(traits={**priors, **posterior.reported_traits()})
         self._save_traits(user_id, traits, posterior, expected=before.version)

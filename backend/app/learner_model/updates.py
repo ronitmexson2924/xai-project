@@ -17,7 +17,7 @@ FATIGUE_FULL_MINUTES = 40
 FATIGUE_DROP, FATIGUE_DROP_BONUS = 0.3, 0.2
 SESSION_GAP = timedelta(minutes=30)
 # behavioural traits (§2.3)
-BEHAVIOUR_ALPHA = 0.05
+BEHAVIOUR_ALPHA = 0.05  # rate to use once proxies are calibrated; LearnerModel defaults to off
 MIN_TRAIT_VARIANCE = 0.005
 
 
@@ -81,9 +81,11 @@ def self_efficacy_proxy(confidence: int | None, correct: bool) -> float | None:
     return clamp(conf - abs(conf - float(correct)))
 
 
-def ewma_trait(estimate: TraitEstimate, proxy: float) -> TraitEstimate:
+def ewma_trait(
+    estimate: TraitEstimate, proxy: float, alpha: float = BEHAVIOUR_ALPHA
+) -> TraitEstimate:
     return TraitEstimate(
-        mean=clamp(ewma(estimate.mean, proxy, BEHAVIOUR_ALPHA)),
-        variance=max(MIN_TRAIT_VARIANCE, estimate.variance * (1 - BEHAVIOUR_ALPHA)),
+        mean=clamp(ewma(estimate.mean, proxy, alpha)),
+        variance=max(MIN_TRAIT_VARIANCE, estimate.variance * (1 - alpha)),
         n_observations=estimate.n_observations + 1,
     )

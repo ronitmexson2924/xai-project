@@ -130,6 +130,18 @@ tone=neutral, include_diagram=card has diagram`, with
 Only in the `closed_loop` arm; the other arms keep their questionnaire
 values.
 
+> **Off by default since R6** (`LearnerModel(behaviour_alpha=0.0)`). The R6
+> simulation (`research/reports/simulation.md` §5) shows that the EWMA makes
+> persistence and self-efficacy estimates *worse* than the questionnaire
+> alone. It pulls each trait toward its raw proxy, but nothing guarantees
+> `E[proxy | trait] = trait`; for example, most learners keep going after a
+> wrong answer whatever their persistence. To re-enable it, first calibrate
+> each proxy on pilot data (R8): regress the per-learner proxy rate on the
+> questionnaire score (`proxy ≈ a + b·trait`), then run the EWMA on the
+> implied trait `(proxy − a)/b` at rate α = 0.05.
+
+The proxies, kept for when calibration exists:
+
 - `persistence`: after a wrong answer, the next attempt gives proxy 1 if it
   comes within the same session (gap ≤ 30 min) and 0 if the session ended
   there. Sessions are detected by a gap, so "quit within 60 s" (v0) is

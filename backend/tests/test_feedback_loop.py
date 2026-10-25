@@ -125,11 +125,15 @@ def test_feedback_without_signal_only_touches_engagement(
     assert model.get_state(user_id).affect.engagement == pytest.approx(0.4)
 
 
-def test_behavioural_traits_update_only_in_closed_loop(
+def test_behavioural_traits_update_only_in_closed_loop_when_enabled(
     seeded: Session, graph: GraphSnapshot
 ) -> None:
-    model = LearnerModel(seeded, graph)
-    for arm, should_change in (("closed_loop", True), ("generic", False)):
+    for alpha, arm, should_change in (
+        (0.05, "closed_loop", True),
+        (0.05, "generic", False),
+        (0.0, "closed_loop", False),  # the default: off until the proxies are calibrated
+    ):
+        model = LearnerModel(seeded, graph, behaviour_alpha=alpha)
         user_id = make_user(seeded, arm=arm)
         model.apply_attempt(attempt(user_id, "t-loops-mcq", "loops", "2", False, T0))
         delta = model.apply_attempt(
