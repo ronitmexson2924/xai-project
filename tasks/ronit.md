@@ -68,7 +68,8 @@
   - [x] Seeding is idempotent (running it twice gives the same database)
 - [ ] **R1a first 3 concepts** · [ ] **R1b all concepts** · [x] **R1c GraphService**
   - _Agent drafted all 63 concepts + 97 misconceptions; every worked example is executed by
-    `tests/test_content.py`. R1a/R1b get ticked once Ronit has reviewed the cards (then Mit cross-reviews, S3)._
+    `tests/test_content.py`. R1a/R1b get ticked once Ronit has reviewed the cards (then Mit cross-reviews, S3).
+    **Start with `content/REVIEW.md`**: a checklist plus the points the agent itself would question._
 
 ## R2: Mastery model (BKT) (weeks 2–3)
 - **Depends on:** R0

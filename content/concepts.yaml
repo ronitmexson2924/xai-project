@@ -423,7 +423,7 @@ concepts:
     cluster: linked-structures
     difficulty: 2
     description: Last-in, first-out collection.
-    prerequisites: [dynamic-arrays]
+    prerequisites: [arrays-indexing]
     card:
       definition: "A stack is a collection where the last element pushed is the first one popped (LIFO); push and pop both happen at the top."
       key_idea: "With a Python list, append and pop at the end are O(1) amortised; stacks fit problems that need the most recent unfinished item."
@@ -445,7 +445,7 @@ concepts:
     cluster: linked-structures
     difficulty: 2
     description: First-in, first-out collection.
-    prerequisites: [dynamic-arrays]
+    prerequisites: [arrays-indexing]
     card:
       definition: "A queue is a collection where elements leave in the order they arrived (FIFO): enqueue at the back, dequeue at the front."
       key_idea: "Use collections.deque: append and popleft are O(1). list.pop(0) is O(n) because every remaining element shifts."
@@ -1146,7 +1146,7 @@ concepts:
     cluster: dp
     difficulty: 3
     description: Recognising when recursion recomputes the same work.
-    prerequisites: [recursion-tracing, recurrence-relations]
+    prerequisites: [recursion-tracing]
     card:
       definition: "A problem has overlapping subproblems when a recursive solution solves the same smaller instance many times, as fib(n) does."
       key_idea: "When the number of distinct subproblems is small but the call tree is huge, storing each answer once turns exponential time into roughly (number of subproblems) x (work per subproblem)."

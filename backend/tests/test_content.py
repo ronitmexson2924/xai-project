@@ -57,3 +57,9 @@ def test_validator_reports_cycles_and_missing_misconceptions() -> None:
     errors = validate(bad)
     assert any(e.startswith("prerequisite cycle") for e in errors)
     assert sum("needs at least" in e for e in errors) == 3
+
+
+def test_prerequisites_are_never_harder_than_their_dependents(bundle: ContentBundle) -> None:
+    difficulty = {c.id: c.difficulty for c in bundle.concepts}
+    inverted = [(e.src, e.dst) for e in bundle.edges if difficulty[e.src] > difficulty[e.dst]]
+    assert inverted == []
