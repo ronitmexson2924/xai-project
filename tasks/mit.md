@@ -79,10 +79,10 @@
   3. Clarity prompt: one tap, shown on about 1 in 3 explanations (random,
      logged), never blocking.
 - **Acceptance:**
-  - [ ] Unit tests for summarize on hand-made event sequences (tab hidden
+  - [x] Unit tests for summarize on hand-made event sequences (tab hidden
         mid-read, duplicates, out-of-order client timestamps)
-  - [ ] Sending the same batch twice reports `duplicates == n`
-- [ ] **M2 done**
+  - [x] Sending the same batch twice reports `duplicates == n`
+- [x] **M2 done**
 
 ## M3: Explainer (Module B) (weeks 3–5)
 - **Depends on:** R1a (3 concept cards) for real grounding; use the example

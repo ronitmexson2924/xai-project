@@ -12,7 +12,6 @@ from fastapi import Depends
 
 from app.contracts.fakes import (
     FakeExplainer,
-    FakeFeedbackAnalyzer,
     FakeGraph,
     FakeLearnerModel,
     FakePlanner,
@@ -24,13 +23,14 @@ from app.contracts.services import (
     LearnerModelService,
     PlannerService,
 )
+from app.telemetry import TelemetryFeedbackAnalyzer
 
-# Singletons for development and testing with fakes
+# Singletons for development and testing: real TelemetryFeedbackAnalyzer (M2), fakes for others
 _graph_service: GraphService = FakeGraph()
 _learner_model_service: LearnerModelService = FakeLearnerModel()
 _planner_service: PlannerService = FakePlanner(FakeGraph())
 _explainer_service: ExplainerService = FakeExplainer(FakeGraph())
-_feedback_analyzer: FeedbackAnalyzer = FakeFeedbackAnalyzer()
+_feedback_analyzer: FeedbackAnalyzer = TelemetryFeedbackAnalyzer()
 
 
 def get_graph_service() -> GraphService:
@@ -54,7 +54,7 @@ def get_feedback_analyzer() -> FeedbackAnalyzer:
 
 
 def reset_services() -> None:
-    """Reset fakes between tests to ensure test isolation."""
+    """Reset service instances between tests to ensure test isolation."""
     global _graph_service, _learner_model_service, _planner_service
     global _explainer_service, _feedback_analyzer
 
@@ -63,7 +63,7 @@ def reset_services() -> None:
     _learner_model_service = FakeLearnerModel()
     _planner_service = FakePlanner(graph)
     _explainer_service = FakeExplainer(graph)
-    _feedback_analyzer = FakeFeedbackAnalyzer()
+    _feedback_analyzer = TelemetryFeedbackAnalyzer()
 
 
 # Typed Dependency Shortcuts for Route Handlers
