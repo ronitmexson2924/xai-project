@@ -86,8 +86,10 @@ def _test_items() -> list[ItemSpec]:
 
 @pytest.fixture(scope="session")
 def bundle() -> ContentBundle:
+    """The real concept graph with the fixture items only, so tests don't depend on the item bank
+    (content/items/, Mit). test_content.py validates the real bank."""
     content = load_content(CONTENT_DIR)
-    content.items = [*content.items, *_test_items()]
+    content.items = _test_items()
     return content
 
 

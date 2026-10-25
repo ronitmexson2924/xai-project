@@ -5,6 +5,7 @@ import io
 from pathlib import Path
 
 import pytest
+import yaml
 
 from app.contracts.graph import ConceptCard
 from app.graph.content import ConceptSpec, ContentBundle, load_content, validate
@@ -20,6 +21,16 @@ def bundle() -> ContentBundle:
 def test_content_is_valid(bundle: ContentBundle) -> None:
     assert validate(bundle) == []
     assert 50 <= len(bundle.concepts) <= 80
+
+
+@pytest.mark.parametrize("phase", ["pretest", "posttest"])
+def test_test_items_use_their_prefix(phase: str) -> None:
+    """Sessions skip, and the analysis (R8) finds, pre/post-test items only by this prefix."""
+    path = CONTENT_DIR / "items" / f"{phase}.yaml"
+    if not path.exists():
+        pytest.skip(f"no {path.name} yet")
+    ids = [item["id"] for item in yaml.safe_load(path.read_text())["items"]]
+    assert ids and all(i.startswith(f"{phase}-") for i in ids), ids
 
 
 def test_every_card_is_complete(bundle: ContentBundle) -> None:
