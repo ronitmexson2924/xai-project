@@ -144,20 +144,44 @@ tone=neutral, include_diagram=card has diagram`, with
 
 ## 5. Planner rules (R4), in priority order
 
-1. **Diagnostic:** fewer than 8 attempts in total → items from root and
-   mid-depth concepts. Reason `DIAGNOSTIC`.
-2. **Misconception:** any concept with `misconception_ids` or
-   `misconception_suspicion ≥ 0.5` → remediate it. Reason
-   `MISCONCEPTION_DETECTED` or `MISCONCEPTION_SUSPECTED`.
-3. **Prerequisite gap:** the last 2 attempts on concept c were wrong and
-   some prerequisite p has `L_p < 0.6` → remediate the weakest p. Reason
-   `PREREQ_GAP`.
-4. **Frontier:** among concepts whose prerequisites all have `L ≥ 0.85` and
-   whose own `L < 0.95`, pick the lowest `L`. Reason `READY_FOR_NEXT`.
-5. **Review:** a mastered concept not practised in the last 2 sessions →
-   `REVIEW_DUE`.
+Code: `backend/app/planner/service.py`. Only concepts with approved practice
+items are candidates. Every decision carries `ReasonEvidence`.
 
-Item difficulty: target an item with `p̂_correct ≈ 0.7`.
+1. **Diagnostic:** fewer than 8 attempts in total → an unattempted concept at
+   a target depth that sweeps the graph (fractions 0, .25, .5, .75, .1, .35,
+   .6, .85 of the maximum depth). Ties are broken by a seeded RNG. Reason
+   `DIAGNOSTIC`.
+2. **Misconception:** any concept with `misconception_ids` or
+   `misconception_suspicion ≥ 0.5` → remediate the weakest such concept.
+   Reason `MISCONCEPTION_DETECTED` (one per flag, detail = description) or
+   `MISCONCEPTION_SUSPECTED`.
+3. **Prerequisite gap:** the last 2 attempts on concept c were wrong
+   (`streak ≤ −2`) and some prerequisite p has `L_p < 0.6` → remediate the
+   weakest p. The most recently practised struggling concept is checked first.
+   Reason `PREREQ_GAP` (detail names c).
+4. **Review turn:** when a review is due, every 6th step
+   (`total_attempts % 6 == 5`) is a review (rule 6).
+5. **Frontier:** concepts whose prerequisites all have `L ≥ 0.85` and whose
+   own `L < 0.95`.
+   - If any of them is in progress (attempted), continue the weakest one
+     (`practice_item`).
+   - Otherwise advance to the first one in topological order (`advance`).
+   - Reason `READY_FOR_NEXT`.
+6. **Review:** a mastered concept (`L ≥ 0.95`) not practised for 48 h → the
+   stalest one. Reason `REVIEW_DUE`.
+7. **Fallback:** the weakest concept with items, as a review.
+
+**Item choice:** among the concept's practice items not in the learner's last
+10 attempts (or all of them, if every item is recent), minimise
+`|p̂_correct − 0.7| + 0.05·|difficulty − (1 + round(4L))|`. Ties go to the
+item id.
+
+> *Changed in R4 (from v0):*
+> - Frontier: v0 picked the lowest-L frontier concept. Unattempted concepts
+>   have low priors, so the learner was always pulled to something new
+>   before finishing the current concept.
+> - Review: v0 only reviewed once the frontier was empty, which with ~60
+>   concepts almost never happens.
 
 ## 6. Research only (R8): resonance and drift
 

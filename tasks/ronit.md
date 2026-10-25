@@ -114,10 +114,12 @@
   item selection targeting `p̂_correct ≈ 0.7`. Set the `policy_version`
   string.
 - **Acceptance:**
-  - [ ] One scenario test for each rule (diagnostic, misconception, prereq
+  - [x] One scenario test for each rule (diagnostic, misconception, prereq
         gap, frontier, review)
-  - [ ] Deterministic given the same state and seed
-- [ ] **R4 done**
+  - [x] Deterministic given the same state and seed
+- [x] **R4 done**
+  - _Streaks and recent items come from `LearnerModel.activity()` (not in the contract).
+    Frontier and review rules refined; see MODEL_SPEC §5 "Changed in R4"._
 
 ## R5: Style choice + explanation-feedback updates (core novelty) (weeks 5–6)
 - **Depends on:** R2, R3

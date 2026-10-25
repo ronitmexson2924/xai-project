@@ -4,6 +4,8 @@ Methods flush but never commit: the caller (an API request, the simulator) owns 
 Every apply_* call is idempotent on (source, source_id) via the state_updates table.
 """
 
+from dataclasses import dataclass
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -29,8 +31,19 @@ from app.learner_model.bandit import BanditPosterior
 from app.learner_model.traits import PRIOR_VARIANCE, neutral_traits
 from app.psychometrics.questionnaire import QuestionnaireItem, score
 
+RECENT_ITEMS = 10  # how many recent items the planner avoids repeating
+
 MISCONCEPTION_CLEAR_STREAK = 2  # consecutive correct attempts that clear a misconception flag
 DEFAULT_ARM: ExperimentArm = "generic"  # used only if a user somehow has no assignment
+
+
+@dataclass(frozen=True)
+class Activity:
+    """Per-learner activity the planner needs beyond LearnerState (not part of the contract)."""
+
+    streaks: dict[str, int]  # concept -> >0 consecutive correct, <0 consecutive wrong
+    last_practiced: dict[str, datetime]
+    recent_items: list[str]  # most recent first
 
 
 class LearnerModel:
@@ -89,6 +102,26 @@ class LearnerModel:
             traits=traits,
             affect=affect,
             total_attempts=sum(c.n_attempts for c in mastery.values()),
+        )
+
+    def activity(self, user_id: UUID) -> Activity:
+        rows = self.session.execute(
+            select(
+                m.LearnerConceptStateRow.concept_id,
+                m.LearnerConceptStateRow.streak,
+                m.LearnerConceptStateRow.updated_at,
+            ).where(m.LearnerConceptStateRow.user_id == user_id)
+        ).all()
+        recent = self.session.scalars(
+            select(m.AttemptRow.item_id)
+            .where(m.AttemptRow.user_id == user_id)
+            .order_by(m.AttemptRow.created_at.desc())
+            .limit(RECENT_ITEMS)
+        ).all()
+        return Activity(
+            streaks={r.concept_id: r.streak for r in rows},
+            last_practiced={r.concept_id: r.updated_at for r in rows},
+            recent_items=list(recent),
         )
 
     def effective_mastery(self, state: LearnerState) -> dict[str, float]:
