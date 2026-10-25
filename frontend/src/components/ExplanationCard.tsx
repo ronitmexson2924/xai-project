@@ -1,11 +1,15 @@
 "use client";
 
+import { AnimatePresence, motion } from "motion/react";
 import React, { useRef, useState } from "react";
 import type { Concept, Explanation } from "@/lib/api";
 import { useExplanationTelemetry } from "@/lib/useExplanationTelemetry";
 import { ClarityPrompt } from "./ClarityPrompt";
 import { Markdown } from "./Markdown";
 import { WhyThisPanel } from "./WhyThisPanel";
+import { Badge } from "./ui/Badge";
+import { Button } from "./ui/Button";
+import { ease } from "./ui/motion";
 
 interface ExplanationCardProps {
   explanation: Explanation;
@@ -36,78 +40,84 @@ export function ExplanationCard({ explanation, concept, onDismiss }: Explanation
   };
 
   const style = explanation.style;
+  const tags = [
+    style.example_first ? "Example first" : "Rule first",
+    style.length === "short" ? "Short" : style.length === "long" ? "In depth" : "Medium length",
+    style.depth === "why" ? "Why it works" : "How it works",
+  ];
   return (
-    <div
+    <motion.div
       ref={ref}
       data-testid="explanation-card"
-      className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 sm:p-6 shadow-xl space-y-4"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease }}
+      className="space-y-5 rounded-2xl border border-line bg-surface p-5 shadow-card sm:p-7"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
-        <h3 className="text-sm font-semibold text-white">
-          {concept?.name ?? explanation.concept_ids.join(", ")}
-        </h3>
-        <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-          <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-            {style.example_first ? "example first" : "rule first"}
-          </span>
-          <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-            {style.length}
-          </span>
-          <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-            {style.depth === "why" ? "why it works" : "how it works"}
-          </span>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-accent">Explanation</p>
+          <h2 className="mt-1 text-lg font-semibold tracking-tight text-fg">
+            {concept?.name ?? explanation.concept_ids.join(", ")}
+          </h2>
+        </div>
+        <div className="flex flex-wrap gap-1.5" aria-label="How this explanation is written">
+          {tags.map((t) => (
+            <Badge key={t}>{t}</Badge>
+          ))}
         </div>
       </div>
 
-      <div ref={bodyRef} className="text-sm text-slate-200 leading-relaxed">
+      <div ref={bodyRef} className="scroll-mt-24 text-[15px] leading-7 text-fg">
         <Markdown text={explanation.body_markdown} />
       </div>
 
-      {expanded && concept && (
-        <div className="p-4 rounded-xl bg-slate-950/70 border border-indigo-500/20 space-y-3 text-xs text-slate-300">
-          <div className="font-semibold text-indigo-300">Worked example</div>
-          <Markdown text={"```python\n" + concept.card.worked_example + "\n```"} />
-          <div className="font-semibold text-indigo-300">Common pitfall</div>
-          <Markdown text={concept.card.pitfall} />
-        </div>
-      )}
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          {concept && (
-            <button
-              type="button"
-              onClick={toggleExpand}
-              aria-expanded={expanded}
-              className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
-            >
-              {expanded ? "Hide worked example ▲" : "Show worked example ▼"}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={readAgain}
-            className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
+      <AnimatePresence initial={false}>
+        {expanded && concept && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease }}
+            className="overflow-hidden"
           >
+            <div className="space-y-3 rounded-xl border border-line bg-surface-2/60 p-4 text-sm text-muted">
+              <p className="text-xs font-semibold uppercase tracking-wide text-subtle">Worked example</p>
+              <Markdown text={"```python\n" + concept.card.worked_example + "\n```"} />
+              <p className="text-xs font-semibold uppercase tracking-wide text-subtle">Common pitfall</p>
+              <Markdown text={concept.card.pitfall} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {concept && (
+            <Button size="sm" variant="secondary" onClick={toggleExpand} aria-expanded={expanded}>
+              {expanded ? "Hide worked example" : "Show worked example"}
+            </Button>
+          )}
+          <Button size="sm" variant="ghost" onClick={readAgain}>
             Read again
-          </button>
+          </Button>
         </div>
         {onDismiss && (
-          <button
-            type="button"
+          <Button
+            size="sm"
+            variant="ghost"
             onClick={() => {
               trackDismissed();
               onDismiss();
             }}
-            className="text-xs text-slate-400 hover:text-white px-2 py-1"
           >
             Dismiss
-          </button>
+          </Button>
         )}
       </div>
 
       <ClarityPrompt explanationId={explanation.id} onRate={trackClarityRated} />
       <WhyThisPanel recommendationId={explanation.recommendation_id} recordEvent={recordEvent} />
-    </div>
+    </motion.div>
   );
 }

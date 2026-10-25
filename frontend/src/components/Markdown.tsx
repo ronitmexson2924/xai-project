@@ -17,7 +17,7 @@ export function Markdown({ text, className = "" }: { text: string; className?: s
       blocks.push(
         <pre
           key={`code-${i}`}
-          className="my-3 p-3.5 rounded-xl bg-slate-950 font-mono text-xs text-indigo-200 border border-slate-800 overflow-x-auto"
+          className="my-3 overflow-x-auto rounded-xl border border-line bg-surface-2 p-4 font-mono text-[13px] leading-relaxed text-fg"
         >
           <code>{code}</code>
         </pre>
@@ -49,7 +49,7 @@ export function Markdown({ text, className = "" }: { text: string; className?: s
         const heading = line.match(/^(#{1,4})\s+(.*)$/);
         if (heading) {
           blocks.push(
-            <p key={`h-${i}-${j}-${k}`} className="font-semibold text-white pt-1">
+            <p key={`h-${i}-${j}-${k}`} className="pt-1 font-semibold text-fg">
               {inline(heading[2])}
             </p>
           );
@@ -67,14 +67,14 @@ function inline(text: string): React.ReactNode[] {
   return text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g).map((piece, i) => {
     if (piece.startsWith("`") && piece.endsWith("`") && piece.length > 2) {
       return (
-        <code key={i} className="px-1 py-0.5 rounded bg-slate-800 font-mono text-[0.85em] text-indigo-200">
+        <code key={i} className="rounded-md border border-line bg-surface-2 px-1.5 py-0.5 font-mono text-[0.85em] text-fg">
           {piece.slice(1, -1)}
         </code>
       );
     }
     if (piece.startsWith("**") && piece.endsWith("**") && piece.length > 4) {
       return (
-        <strong key={i} className="text-white">
+        <strong key={i} className="font-semibold text-fg">
           {piece.slice(2, -2)}
         </strong>
       );

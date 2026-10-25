@@ -27,13 +27,14 @@ export default function OnboardingPage() {
   const ready = useLearnerGuard({ need: "onboarding" });
   const { user, giveConsent, markOnboarded, logout } = useAuth();
   const router = useRouter();
-  const [step, setStep] = useState<Step | null>(null);
+  const [chosen, setStep] = useState<Step | null>(null);
+  // finished users who land here go to the dashboard; "done" is only shown right after finishing
+  const finished = Boolean(user?.onboarded && user.consent_at) && chosen === null;
+  const step: Step | null = chosen ?? (user && !finished ? (user.consent_at ? "questions" : "consent") : null);
 
   useEffect(() => {
-    if (!ready || !user || step) return;
-    if (user.onboarded && user.consent_at) router.replace("/dashboard");
-    else setStep(user.consent_at ? "questions" : "consent");
-  }, [ready, user, step, router]);
+    if (ready && finished) router.replace("/dashboard");
+  }, [ready, finished, router]);
 
   if (!ready || !step) return <PageLoading />;
 
