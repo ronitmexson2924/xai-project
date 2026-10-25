@@ -17,6 +17,7 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.auth.deps import DbDep
+from app.config import settings
 from app.explainer import GroundedExplainerService
 from app.graph.service import GraphSnapshot
 from app.learner_model.service import LearnerModel
@@ -33,14 +34,14 @@ def _load(session: Session) -> GraphSnapshot:
     global _graph, _explainer
     with _lock:
         if _graph is None:
-            graph = GraphSnapshot.from_db(session)
+            graph = GraphSnapshot.from_db(session, include_drafts=settings.include_draft_items)
             if not graph.practice_concepts:
                 raise HTTPException(
                     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                     detail={
                         "error": {
                             "code": "CONTENT_NOT_SEEDED",
-                            "message": "No approved items: run python -m app.graph.seed",
+                            "message": "No approved items yet (review content/items, S3)",
                         }
                     },
                 )

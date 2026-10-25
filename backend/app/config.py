@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     # salt for pseudonyms in research exports; exports are refused while it is empty
     analysis_salt: str = ""
 
+    # serve draft (unreviewed) items too: demos and browser tests only, never the study (S3)
+    include_draft_items: bool = False
+
     @field_validator("database_url")
     @classmethod
     def use_psycopg3(cls, url: str) -> str:
@@ -55,6 +58,8 @@ def check_production_settings(s: "Settings") -> list[str]:
         problems.append(f"JWT_SECRET must be a random string of at least {MIN_SECRET_LENGTH} chars")
     if "*" in s.cors_origin_list:
         problems.append("CORS_ORIGINS must list the frontend origin(s), not *")
+    if s.include_draft_items:
+        problems.append("INCLUDE_DRAFT_ITEMS must be off: participants see only reviewed items")
     if s.analysis_salt and len(s.analysis_salt) < 16:
         problems.append("ANALYSIS_SALT must be at least 16 characters")
     return problems

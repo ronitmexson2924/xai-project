@@ -10,7 +10,7 @@ cd backend
 alembic upgrade head && python -m app.graph.seed ../content
 python -m app.graph.demo_seed --password 'Demo-pass-1'     # development databases only
 python -m app.auth.onboard admin --email admin@example.com
-uvicorn app.main:app &
+INCLUDE_DRAFT_ITEMS=true uvicorn app.main:app &   # the item bank is still in review
 cd ../frontend && npm run dev                               # http://localhost:3000
 ```
 

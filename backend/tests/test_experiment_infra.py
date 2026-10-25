@@ -120,7 +120,7 @@ def test_audit_refuses_missing_human_ratings() -> None:
 
 
 def test_production_refuses_unsafe_settings() -> None:
-    unsafe = Settings(jwt_secret="change-me", cors_origins="*")
-    assert len(check_production_settings(unsafe)) == 2
+    unsafe = Settings(jwt_secret="change-me", cors_origins="*", include_draft_items=True)
+    assert len(check_production_settings(unsafe)) == 3
     safe = Settings(jwt_secret="x" * 40, cors_origins="https://pcg.example.org")
     assert check_production_settings(safe) == []

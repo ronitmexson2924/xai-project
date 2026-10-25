@@ -22,6 +22,7 @@ os.environ.setdefault("JWT_SECRET", "e2e-only-secret-" + "x" * 32)
 os.environ.setdefault("CORS_ORIGINS", "http://localhost:3005")
 os.environ.setdefault("ANALYSIS_SALT", "e2e-salt-0123456789")
 os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
+os.environ.setdefault("INCLUDE_DRAFT_ITEMS", "true")  # the item bank awaits review (S3)
 
 admin = create_engine(url.set(database="postgres"), isolation_level="AUTOCOMMIT")
 with admin.connect() as conn:
