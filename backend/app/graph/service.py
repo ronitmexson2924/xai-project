@@ -26,6 +26,9 @@ class GraphSnapshot:
         self._concepts = {c.id: c for c in concepts}
         self._edges = list(edges)
         self._items = {i.id: i for i in items}
+        self._items_by_kind: dict[tuple[str, bool], list[Item]] = {}  # (concept, microcheck)
+        for i in items:
+            self._items_by_kind.setdefault((i.concept_id, i.is_microcheck), []).append(i)
         self._misconceptions = {mc.id: mc for mc in misconceptions}
         self._prereqs: dict[str, list[str]] = {c: [] for c in self._concepts}
         self._dependents: dict[str, list[str]] = {c: [] for c in self._concepts}
@@ -101,11 +104,12 @@ class GraphSnapshot:
         return self._items[item_id]
 
     def items_for_concept(self, concept_id: str, microcheck: bool = False) -> list[Item]:
-        return [
-            i
-            for i in self._items.values()
-            if i.concept_id == concept_id and i.is_microcheck == microcheck
-        ]
+        return list(self._items_by_kind.get((concept_id, microcheck), []))
+
+    @cached_property
+    def practice_concepts(self) -> frozenset[str]:
+        """Concepts that have at least one (non-micro-check) practice item."""
+        return frozenset(c for (c, microcheck) in self._items_by_kind if not microcheck)
 
     # --- helpers for the planner and learner model ----------------------------------------------
 

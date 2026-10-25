@@ -65,6 +65,7 @@ class LearnerModel:
         # Behavioural-trait EWMA rate. Off by default: R6 showed uncalibrated proxies make
         # persistence/self-efficacy worse than the questionnaire alone (MODEL_SPEC §2.3).
         self.behaviour_alpha = behaviour_alpha
+        self._arms: dict[UUID, ExperimentArm] = {}  # arms never change, so cache per instance
 
     # --- reads -----------------------------------------------------------------------------------
 
@@ -75,10 +76,10 @@ class LearnerModel:
             .outerjoin(m.LearnerTraitsRow, m.LearnerTraitsRow.user_id == m.User.id)
             .outerjoin(m.LearnerAffectRow, m.LearnerAffectRow.user_id == m.User.id)
             .outerjoin(m.ExperimentAssignment, m.ExperimentAssignment.user_id == m.User.id)
-            .where(m.User.id == user_id)
+            .where(m.User.id == user_id, m.User.deleted_at.is_(None))
         ).one_or_none()
         if row is None:
-            raise LookupError(f"unknown user {user_id}")
+            raise LookupError(f"unknown or deleted user {user_id}")
         traits_row, affect_row, arm = row
 
         mastery = {
@@ -166,11 +167,19 @@ class LearnerModel:
     def _concept_row(self, user_id: UUID, concept_id: str) -> m.LearnerConceptStateRow:
         row = self.session.get(m.LearnerConceptStateRow, (user_id, concept_id))
         if row is None:
-            state = self.get_state(user_id)
+            # (not dict(result): a Result has .keys(), so dict() would treat it as a mapping)
+            known = {
+                concept: mastery
+                for concept, mastery in self.session.execute(
+                    select(
+                        m.LearnerConceptStateRow.concept_id, m.LearnerConceptStateRow.p_mastery
+                    ).where(m.LearnerConceptStateRow.user_id == user_id)
+                )
+            }
             row = m.LearnerConceptStateRow(
                 user_id=user_id,
                 concept_id=concept_id,
-                p_mastery=self.effective_mastery(state)[concept_id],
+                p_mastery=bkt.effective_mastery(self.graph, known, self.params)[concept_id],
                 n_attempts=0,
                 streak=0,
                 misconception_ids=[],
@@ -186,6 +195,16 @@ class LearnerModel:
         source_id = str(attempt.id)
         if (done := self._already_applied("attempt", source_id)) is not None:
             return done
+        arm = self._arm(attempt.user_id)  # also rejects unknown or deleted users
+        try:
+            item = self.graph.get_item(attempt.item_id)
+        except KeyError:
+            raise LookupError(f"unknown item {attempt.item_id}") from None
+        if item.concept_id != attempt.concept_id:
+            raise ValueError(
+                f"attempt concept {attempt.concept_id} does not match item concept "
+                f"{item.concept_id}"
+            )
 
         previous = self.session.execute(
             select(m.AttemptRow.correct, m.AttemptRow.created_at)
@@ -211,7 +230,6 @@ class LearnerModel:
                 )
             )
 
-        item = self.graph.get_item(attempt.item_id)
         row = self._concept_row(attempt.user_id, attempt.concept_id)
         before = row.p_mastery
         row.p_mastery = bkt.update(
@@ -239,7 +257,7 @@ class LearnerModel:
 
         self._update_affect_after_attempt(attempt, row.streak, previous)
         trait_changes: dict[TraitName, tuple[float, float]] = {}
-        if self._arm(attempt.user_id) == "closed_loop" and self.behaviour_alpha > 0:
+        if arm == "closed_loop" and self.behaviour_alpha > 0:
             proxies: dict[TraitName, float | None] = {
                 "persistence": None
                 if previous is None
@@ -356,10 +374,18 @@ class LearnerModel:
         return self._record(delta)
 
     def _arm(self, user_id: UUID) -> ExperimentArm:
-        arm = self.session.scalar(
-            select(m.ExperimentAssignment.arm).where(m.ExperimentAssignment.user_id == user_id)
-        )
-        return arm or DEFAULT_ARM
+        """The learner's experiment arm; raises LookupError for unknown or deleted users."""
+        if user_id not in self._arms:
+            row = self.session.execute(
+                select(m.ExperimentAssignment.arm)
+                .select_from(m.User)
+                .outerjoin(m.ExperimentAssignment, m.ExperimentAssignment.user_id == m.User.id)
+                .where(m.User.id == user_id, m.User.deleted_at.is_(None))
+            ).one_or_none()
+            if row is None:
+                raise LookupError(f"unknown or deleted user {user_id}")
+            self._arms[user_id] = row.arm or DEFAULT_ARM
+        return self._arms[user_id]
 
     def _affect_row(self, user_id: UUID) -> m.LearnerAffectRow:
         row = self.session.get(m.LearnerAffectRow, user_id)
@@ -457,6 +483,10 @@ class LearnerModel:
         source_id = str(summary.explanation_id)
         if (done := self._already_applied("explanation_feedback", source_id)) is not None:
             return done
+        arm = self._arm(summary.user_id)
+        unknown = [c for c in summary.concept_ids if c not in self.graph.depth]
+        if unknown:
+            raise ValueError(f"unknown concepts in feedback: {unknown}")
 
         notes: list[str] = []
         for concept_id in summary.concept_ids:
@@ -478,7 +508,7 @@ class LearnerModel:
         trait_changes: dict[TraitName, tuple[float, float]] = {}
         if y is None:
             notes.append("no informative outcome (no follow-up answer or clarity rating)")
-        elif self._arm(summary.user_id) == "closed_loop":
+        elif arm == "closed_loop":
             style = (summary.style.example_first, summary.style.length, summary.style.depth)
 
             def learn(

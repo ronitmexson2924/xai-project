@@ -57,9 +57,7 @@ class Planner:
         self.seed = seed
         self.now = now
         self.epsilon = epsilon
-        self._practice_concepts = {
-            c for c in graph.concept_ids if graph.items_for_concept(c, microcheck=False)
-        }
+        self._practice_concepts = graph.practice_concepts
         if not self._practice_concepts:
             raise LookupError("no approved practice items in the graph")
 

@@ -188,8 +188,16 @@
   learners with interesting states), and go through your own code for edge
   cases (a new user, a concept with no items, deleted users).
 - **Acceptance:**
-  - [ ] p95 within the budgets in `ARCHITECTURE.md` under load
-- [ ] **R7 done**
+  - [x] p95 within the budgets in `ARCHITECTURE.md` under load
+- [x] **R7 done**: `research/reports/load_test.md` (rerun: `research/load_test.py`)
+  - _100 concurrent learners, paced (2 s mean think time, ~12x real pace): p95 35 ms for
+    next step, 54 ms for attempts (budgets 300/200 ms). Burst stress with no think time
+    saturates one process (~130-150 requests/s): steady-state p95 310/449 ms, plus a cold-start
+    tail when all 100 start in the same instant. Deploy with several workers (Asks for Mit)._
+  - _Also: deleted users treated as unknown everywhere, clear errors for unknown items, a
+    concept mismatch or unknown concepts, a cached arm lookup, a lighter prior query, items
+    indexed per concept, a CI query budget (16 statements per learning step, limit 18), and
+    `python -m app.graph.demo_seed` (Asha / Ben / Chen demo learners)._
 
 ## R8: Pilot analysis + resonance/drift backtest (weeks 9–12)
 - **Depends on:** pilot data; S2 pre-registration committed
@@ -224,6 +232,14 @@ _(add items here when you need something from Mit's side)_
   idempotent, so retries are safe.
 - **Style (M1):** call `planner.choose_style(state, rec.target_concept_id)` and pass the
   result into `ExplanationRequest` unchanged. `include_diagram` and `tone` are already decided.
+- **Deploy (M7):** run the API with several worker processes (e.g. `uvicorn --workers 4`). One
+  process saturates at ~130-150 requests/s (R7 load test). Build one `GraphSnapshot` per process at
+  startup; it is immutable and thread-safe once built.
+- **Errors (M1):** `LearnerModel` raises `LookupError` for unknown/deleted users and unknown items
+  (map to 404) and `ValueError` for inconsistent input (map to 422).
+- **Demo (M4/M6):** `python -m app.graph.demo_seed` creates three demo learners (emails
+  `asha|ben|chen@demo.invalid`) with `password_hash = "!demo-account-no-login"`. If you want them
+  to be able to log in for demos, give them a real hash in your auth code or a dev-only route.
 
 ## Notes / decisions log
 _(date: decision, and why)_
