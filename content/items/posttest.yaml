@@ -1,0 +1,266 @@
+items:
+- id: post-01
+  concept_id: loops
+  kind: mcq
+  stem: '[Post-Assessment 1/15] Which invariant holds during the execution of Loops
+    & Iteration?'
+  options:
+  - A loop runs code repeatedly while a termination condition holds.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: A loop runs code repeatedly while a termination condition holds.
+  difficulty: 1
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: loops-off-by-one
+    It reverses all pointers unconditionally without bounds.: loops-off-by-one
+  is_microcheck: false
+  review_status: approved
+- id: post-02
+  concept_id: nested-loops
+  kind: mcq
+  stem: '[Post-Assessment 2/15] Which invariant holds during the execution of Nested
+    Loops?'
+  options:
+  - An inner loop executes its full cycle for every single step of the outer loop.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: An inner loop executes its full cycle for every single step of the outer
+    loop.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: nested-loops-add-not-mult
+    It reverses all pointers unconditionally without bounds.: nested-loops-add-not-mult
+  is_microcheck: false
+  review_status: approved
+- id: post-03
+  concept_id: time-complexity-intro
+  kind: mcq
+  stem: '[Post-Assessment 3/15] Which invariant holds during the execution of Time
+    Complexity Basics?'
+  options:
+  - Big-O characterizes the upper bound of operational steps as input N scales.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: Big-O characterizes the upper bound of operational steps as input N scales.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: time-comp-drop-high-order
+    It reverses all pointers unconditionally without bounds.: time-comp-drop-high-order
+  is_microcheck: false
+  review_status: approved
+- id: post-04
+  concept_id: array-indexing
+  kind: mcq
+  stem: '[Post-Assessment 4/15] Which invariant holds during the execution of Array
+    Indexing & Bounds?'
+  options:
+  - Arrays store elements sequentially in contiguous memory blocks.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: Arrays store elements sequentially in contiguous memory blocks.
+  difficulty: 1
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: array-1-based-indexing
+    It reverses all pointers unconditionally without bounds.: array-1-based-indexing
+  is_microcheck: false
+  review_status: approved
+- id: post-05
+  concept_id: two-pointers-technique
+  kind: mcq
+  stem: '[Post-Assessment 5/15] Which invariant holds during the execution of Two
+    Pointers Technique?'
+  options:
+  - Two pointers traverse a sequence from both ends towards each other or at varying
+    speeds.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: Two pointers traverse a sequence from both ends towards each other or at
+    varying speeds.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: two-pointers-requires-sorted
+    It reverses all pointers unconditionally without bounds.: two-pointers-requires-sorted
+  is_microcheck: false
+  review_status: approved
+- id: post-06
+  concept_id: sliding-window
+  kind: mcq
+  stem: '[Post-Assessment 6/15] Which invariant holds during the execution of Sliding
+    Window?'
+  options:
+  - A sliding window maintains a contiguous subsegment by expanding right and shrinking
+    left.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: A sliding window maintains a contiguous subsegment by expanding right and
+    shrinking left.
+  difficulty: 3
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: sliding-window-discontinuous
+    It reverses all pointers unconditionally without bounds.: sliding-window-discontinuous
+  is_microcheck: false
+  review_status: approved
+- id: post-07
+  concept_id: singly-linked-list-node
+  kind: mcq
+  stem: '[Post-Assessment 7/15] Which invariant holds during the execution of Singly
+    Linked List Nodes?'
+  options:
+  - A linked list node stores data and a pointer reference to the subsequent node.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: A linked list node stores data and a pointer reference to the subsequent
+    node.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: linked-list-random-access
+    It reverses all pointers unconditionally without bounds.: linked-list-random-access
+  is_microcheck: false
+  review_status: approved
+- id: post-08
+  concept_id: linked-list-traversal
+  kind: mcq
+  stem: '[Post-Assessment 8/15] Which invariant holds during the execution of Linked
+    List Traversal?'
+  options:
+  - Traversal steps from current = current.next until current is None.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: Traversal steps from current = current.next until current is None.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: linked-list-deref-null
+    It reverses all pointers unconditionally without bounds.: linked-list-deref-null
+  is_microcheck: false
+  review_status: approved
+- id: post-09
+  concept_id: fast-slow-pointers
+  kind: mcq
+  stem: '[Post-Assessment 9/15] Which invariant holds during the execution of Fast
+    & Slow Pointers (Floyd''s Cycle)?'
+  options:
+  - Slow advances 1 step while fast advances 2 steps per iteration.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: Slow advances 1 step while fast advances 2 steps per iteration.
+  difficulty: 3
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: floyd-skip-null-check
+    It reverses all pointers unconditionally without bounds.: floyd-skip-null-check
+  is_microcheck: false
+  review_status: approved
+- id: post-10
+  concept_id: recursion-base-case
+  kind: mcq
+  stem: '[Post-Assessment 10/15] Which invariant holds during the execution of Recursion:
+    Base Case?'
+  options:
+  - A base case is a direct input condition answered without further recursive calls.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: A base case is a direct input condition answered without further recursive
+    calls.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: recursion-no-base-case
+    It reverses all pointers unconditionally without bounds.: recursion-no-base-case
+  is_microcheck: false
+  review_status: approved
+- id: post-11
+  concept_id: recursive-call-stack
+  kind: mcq
+  stem: '[Post-Assessment 11/15] Which invariant holds during the execution of Recursive
+    Call Stack?'
+  options:
+  - Each call pushes an activation record with local variables onto the call stack.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: Each call pushes an activation record with local variables onto the call
+    stack.
+  difficulty: 3
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: recursion-shared-local-vars
+    It reverses all pointers unconditionally without bounds.: recursion-shared-local-vars
+  is_microcheck: false
+  review_status: approved
+- id: post-12
+  concept_id: linear-search
+  kind: mcq
+  stem: '[Post-Assessment 12/15] Which invariant holds during the execution of Linear
+    Search?'
+  options:
+  - Linear search checks every element sequentially until target is found or list
+    ends.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: Linear search checks every element sequentially until target is found or
+    list ends.
+  difficulty: 1
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: linear-search-requires-sorted
+    It reverses all pointers unconditionally without bounds.: linear-search-requires-sorted
+  is_microcheck: false
+  review_status: approved
+- id: post-13
+  concept_id: binary-search-bounds
+  kind: mcq
+  stem: '[Post-Assessment 13/15] Which invariant holds during the execution of Binary
+    Search Bounds?'
+  options:
+  - Binary search maintains low and high pointers enclosing the search space.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: Binary search maintains low and high pointers enclosing the search space.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: binary-search-infinite-loop
+    It reverses all pointers unconditionally without bounds.: binary-search-infinite-loop
+  is_microcheck: false
+  review_status: approved
+- id: post-14
+  concept_id: binary-tree-traversal-preorder
+  kind: mcq
+  stem: '[Post-Assessment 14/15] Which invariant holds during the execution of Binary
+    Tree: Preorder Traversal?'
+  options:
+  - Preorder processes the current node before traversing left and right subtrees.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: Preorder processes the current node before traversing left and right subtrees.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: preorder-processes-leaves-first
+    It reverses all pointers unconditionally without bounds.: preorder-processes-leaves-first
+  is_microcheck: false
+  review_status: approved
+- id: post-15
+  concept_id: graph-adjacency-list
+  kind: mcq
+  stem: '[Post-Assessment 15/15] Which invariant holds during the execution of Graph
+    Adjacency List?'
+  options:
+  - Adjacency list maps each vertex to a list of adjacent neighbor vertices.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It executes without any state transition or condition check.
+  answer: Adjacency list maps each vertex to a list of adjacent neighbor vertices.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates all resource constraints and halts in zero steps.: undirected-one-way-edge
+    It reverses all pointers unconditionally without bounds.: undirected-one-way-edge
+  is_microcheck: false
+  review_status: approved

@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     gemini_model_explain: str = ""
     gemini_model_offline: str = ""
     llm_timeout_seconds: float = 4.0
+    rate_limit_enabled: bool = True
+    rate_limit_requests_per_minute: int = 120
 
 
 settings = Settings()

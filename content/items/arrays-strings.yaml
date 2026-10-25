@@ -1,0 +1,448 @@
+items:
+- id: array-indexing-1
+  concept_id: array-indexing
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Array Indexing
+    & Bounds?
+  options:
+  - Index arithmetic calculates memory offset in O(1) time.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Index arithmetic calculates memory offset in O(1) time.
+  difficulty: 1
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: array-1-based-indexing
+    It executes in reverse order without updating state.: array-out-of-bounds
+  is_microcheck: false
+  review_status: approved
+- id: array-indexing-2
+  concept_id: array-indexing
+  kind: mcq
+  stem: 'Consider this concrete application of Array Indexing & Bounds:
+
+
+    ```python
+
+    arr[0] gets first element; arr[len(arr)-1] gets last.
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Arrays store elements sequentially in contiguous memory blocks.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Arrays store elements sequentially in contiguous memory blocks.
+  difficulty: 1
+  distractor_misconceptions:
+    It eliminates the need for any base state or bounds.: array-1-based-indexing
+    It executes an infinite loop that ignores input constraints.: array-out-of-bounds
+  is_microcheck: false
+  review_status: approved
+- id: array-indexing-3
+  concept_id: array-indexing
+  kind: mcq
+  stem: When implementing Array Indexing & Bounds, which error represents the most
+    frequent pitfall?
+  options:
+  - Accessing index len(arr) raises IndexError.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Accessing index len(arr) raises IndexError.
+  difficulty: 2
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: array-1-based-indexing
+    Checking preconditions before accessing boundary values.: array-out-of-bounds
+  is_microcheck: false
+  review_status: approved
+- id: array-indexing-mc
+  concept_id: array-indexing
+  kind: mcq
+  stem: 'Quick Check: True or False — for Array Indexing & Bounds, Index arithmetic
+    calculates memory offset in O(1) time.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': array-1-based-indexing
+  is_microcheck: true
+  review_status: approved
+- id: two-pointers-technique-1
+  concept_id: two-pointers-technique
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Two Pointers
+    Technique?
+  options:
+  - Monotonic sorted order guarantees eliminating impossible candidate spaces.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Monotonic sorted order guarantees eliminating impossible candidate spaces.
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: two-pointers-requires-sorted
+    It executes in reverse order without updating state.: two-pointers-requires-sorted
+  is_microcheck: false
+  review_status: approved
+- id: two-pointers-technique-2
+  concept_id: two-pointers-technique
+  kind: mcq
+  stem: 'Consider this concrete application of Two Pointers Technique:
+
+
+    ```python
+
+    low = 0, high = n - 1; increment low or decrement high based on sum.
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Two pointers traverse a sequence from both ends towards each other or at varying
+    speeds.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Two pointers traverse a sequence from both ends towards each other or at
+    varying speeds.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates the need for any base state or bounds.: two-pointers-requires-sorted
+    It executes an infinite loop that ignores input constraints.: two-pointers-requires-sorted
+  is_microcheck: false
+  review_status: approved
+- id: two-pointers-technique-3
+  concept_id: two-pointers-technique
+  kind: mcq
+  stem: When implementing Two Pointers Technique, which error represents the most
+    frequent pitfall?
+  options:
+  - Moving both pointers simultaneously when only one condition is met.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Moving both pointers simultaneously when only one condition is met.
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: two-pointers-requires-sorted
+    Checking preconditions before accessing boundary values.: two-pointers-requires-sorted
+  is_microcheck: false
+  review_status: approved
+- id: two-pointers-technique-mc
+  concept_id: two-pointers-technique
+  kind: mcq
+  stem: 'Quick Check: True or False — for Two Pointers Technique, Monotonic sorted
+    order guarantees eliminating impossible candidate spaces.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': two-pointers-requires-sorted
+  is_microcheck: true
+  review_status: approved
+- id: sliding-window-1
+  concept_id: sliding-window
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Sliding Window?
+  options:
+  - Reuses computation from overlapping subsegments to avoid O(N^2) recalculations.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Reuses computation from overlapping subsegments to avoid O(N^2) recalculations.
+  difficulty: 3
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: sliding-window-discontinuous
+    It executes in reverse order without updating state.: sliding-window-discontinuous
+  is_microcheck: false
+  review_status: approved
+- id: sliding-window-2
+  concept_id: sliding-window
+  kind: mcq
+  stem: 'Consider this concrete application of Sliding Window:
+
+
+    ```python
+
+    Add arr[right] to sum; while sum > target: subtract arr[left]; left += 1.
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - A sliding window maintains a contiguous subsegment by expanding right and shrinking
+    left.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: A sliding window maintains a contiguous subsegment by expanding right and
+    shrinking left.
+  difficulty: 3
+  distractor_misconceptions:
+    It eliminates the need for any base state or bounds.: sliding-window-discontinuous
+    It executes an infinite loop that ignores input constraints.: sliding-window-discontinuous
+  is_microcheck: false
+  review_status: approved
+- id: sliding-window-3
+  concept_id: sliding-window
+  kind: mcq
+  stem: When implementing Sliding Window, which error represents the most frequent
+    pitfall?
+  options:
+  - Resetting window from scratch instead of shrinking the left boundary.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Resetting window from scratch instead of shrinking the left boundary.
+  difficulty: 4
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: sliding-window-discontinuous
+    Checking preconditions before accessing boundary values.: sliding-window-discontinuous
+  is_microcheck: false
+  review_status: approved
+- id: sliding-window-mc
+  concept_id: sliding-window
+  kind: mcq
+  stem: 'Quick Check: True or False — for Sliding Window, Reuses computation from
+    overlapping subsegments to avoid O(N^2) recalculations.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions:
+    'False': sliding-window-discontinuous
+  is_microcheck: true
+  review_status: approved
+- id: prefix-sums-1
+  concept_id: prefix-sums
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Prefix Sums?
+  options:
+  - Range sum query [L, R] = prefix[R] - prefix[L - 1].
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Range sum query [L, R] = prefix[R] - prefix[L - 1].
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: prefix-sums-off-by-one
+    It executes in reverse order without updating state.: prefix-sums-off-by-one
+  is_microcheck: false
+  review_status: approved
+- id: prefix-sums-2
+  concept_id: prefix-sums
+  kind: mcq
+  stem: 'Consider this concrete application of Prefix Sums:
+
+
+    ```python
+
+    P = [0, 2, 5, 9]; sum(1..2) = P[3] - P[1] = 9 - 2 = 7.
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - prefix[i] stores the sum of all elements from index 0 up to i.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: prefix[i] stores the sum of all elements from index 0 up to i.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates the need for any base state or bounds.: prefix-sums-off-by-one
+    It executes an infinite loop that ignores input constraints.: prefix-sums-off-by-one
+  is_microcheck: false
+  review_status: approved
+- id: prefix-sums-3
+  concept_id: prefix-sums
+  kind: mcq
+  stem: When implementing Prefix Sums, which error represents the most frequent pitfall?
+  options:
+  - Forgetting prefix base value 0, causing off-by-one when L=0.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Forgetting prefix base value 0, causing off-by-one when L=0.
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: prefix-sums-off-by-one
+    Checking preconditions before accessing boundary values.: prefix-sums-off-by-one
+  is_microcheck: false
+  review_status: approved
+- id: prefix-sums-mc
+  concept_id: prefix-sums
+  kind: mcq
+  stem: 'Quick Check: True or False — for Prefix Sums, Range sum query [L, R] = prefix[R]
+    - prefix[L - 1].'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': prefix-sums-off-by-one
+  is_microcheck: true
+  review_status: approved
+- id: string-immutability-1
+  concept_id: string-immutability
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of String Immutability
+    & Manipulation?
+  options:
+  - Repeated string += concatenation in a loop takes O(N^2) time; join takes O(N).
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Repeated string += concatenation in a loop takes O(N^2) time; join takes
+    O(N).
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: string-concat-is-constant-time
+    It executes in reverse order without updating state.: string-concat-is-constant-time
+  is_microcheck: false
+  review_status: approved
+- id: string-immutability-2
+  concept_id: string-immutability
+  kind: mcq
+  stem: 'Consider this concrete application of String Immutability & Manipulation:
+
+
+    ```python
+
+    ''''.join(char_list) is O(N) whereas s += c in a loop is O(N^2).
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Immutable strings cannot be modified in place; concatenation copies characters.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Immutable strings cannot be modified in place; concatenation copies characters.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates the need for any base state or bounds.: string-concat-is-constant-time
+    It executes an infinite loop that ignores input constraints.: string-concat-is-constant-time
+  is_microcheck: false
+  review_status: approved
+- id: string-immutability-3
+  concept_id: string-immutability
+  kind: mcq
+  stem: When implementing String Immutability & Manipulation, which error represents
+    the most frequent pitfall?
+  options:
+  - Assuming s[i] = 'a' modifies the string in place.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Assuming s[i] = 'a' modifies the string in place.
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: string-concat-is-constant-time
+    Checking preconditions before accessing boundary values.: string-concat-is-constant-time
+  is_microcheck: false
+  review_status: approved
+- id: string-immutability-mc
+  concept_id: string-immutability
+  kind: mcq
+  stem: 'Quick Check: True or False — for String Immutability & Manipulation, Repeated
+    string += concatenation in a loop takes O(N^2) time; join takes O(N).'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': string-concat-is-constant-time
+  is_microcheck: true
+  review_status: approved
+- id: in-place-array-modification-1
+  concept_id: in-place-array-modification
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of In-Place Array
+    Modification?
+  options:
+  - Maintain write_index <= read_index so unprocessed data is never overwritten.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Maintain write_index <= read_index so unprocessed data is never overwritten.
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: in-place-overwrites-uninspected
+    It executes in reverse order without updating state.: in-place-overwrites-uninspected
+  is_microcheck: false
+  review_status: approved
+- id: in-place-array-modification-2
+  concept_id: in-place-array-modification
+  kind: mcq
+  stem: 'Consider this concrete application of In-Place Array Modification:
+
+
+    ```python
+
+    if arr[read] != val: arr[write] = arr[read]; write += 1.
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - In-place modification overwrites valid elements using read and write pointer indices.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: In-place modification overwrites valid elements using read and write pointer
+    indices.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates the need for any base state or bounds.: in-place-overwrites-uninspected
+    It executes an infinite loop that ignores input constraints.: in-place-overwrites-uninspected
+  is_microcheck: false
+  review_status: approved
+- id: in-place-array-modification-3
+  concept_id: in-place-array-modification
+  kind: mcq
+  stem: When implementing In-Place Array Modification, which error represents the
+    most frequent pitfall?
+  options:
+  - Overwriting elements before their values have been inspected.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Overwriting elements before their values have been inspected.
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: in-place-overwrites-uninspected
+    Checking preconditions before accessing boundary values.: in-place-overwrites-uninspected
+  is_microcheck: false
+  review_status: approved
+- id: in-place-array-modification-mc
+  concept_id: in-place-array-modification
+  kind: mcq
+  stem: 'Quick Check: True or False — for In-Place Array Modification, Maintain write_index
+    <= read_index so unprocessed data is never overwritten.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': in-place-overwrites-uninspected
+  is_microcheck: true
+  review_status: approved
