@@ -1,6 +1,6 @@
 """R7: the demo seed builds three learners in the intended states, idempotently."""
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.contracts.reasons import ReasonCode
@@ -12,6 +12,10 @@ from app.planner.service import Planner
 
 
 def test_demo_learners(seeded: Session) -> None:
+    # the real bank is all drafts until it is reviewed: demos must use those, not placeholders
+    seeded.execute(
+        update(m.ItemRow).where(m.ItemRow.concept_id == "loops").values(review_status="draft")
+    )
     build(seeded)
     users = build(seeded)  # rebuilding replaces the previous demo learners
     demo_count = (
@@ -33,6 +37,16 @@ def test_demo_learners(seeded: Session) -> None:
         "recursion-base-case",
         ReasonCode.MISCONCEPTION_DETECTED,
     )
+
+    # placeholders only fill concepts with no real item, so learners never get one beside real ones
+    rows = seeded.execute(
+        select(m.ItemRow.id, m.ItemRow.concept_id).where(m.ItemRow.is_microcheck.is_(False))
+    ).all()
+    placeholder = {c for i, c in rows if i.startswith("demo-placeholder-")}
+    real = {c for i, c in rows if not i.startswith("demo-placeholder-")}
+    assert placeholder and real  # the fixture bank covers some of the demo concepts
+    assert not placeholder & real
+    assert "loops" in real
 
     chen = model.get_state(users["chen"]).traits.traits
     assert chen["abstraction_preference"].mean > 0.6  # learned rule-first from feedback

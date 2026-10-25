@@ -173,6 +173,8 @@ function Stats({ state, total }: { state: LearnerState; total: number }) {
   );
 }
 
+type Row = { id: number; when: string; text: string; detail?: string; up?: boolean; count?: number };
+
 function Activity({ history, names }: { history: StateUpdateView[]; names: Record<string, string> }) {
   const rows = history
     .map((h) => {
@@ -193,18 +195,28 @@ function Activity({ history, names }: { history: StateUpdateView[]; names: Recor
       const traits = Object.keys(h.delta.trait_changes).length;
       return { id: h.id, when, text: traits ? "Your feedback tuned how explanations are written" : "Recorded your feedback on an explanation" };
     })
-    .filter(Boolean)
-    .slice(0, 8) as Array<{ id: number; when: string; text: string; detail?: string; up?: boolean }>;
+    .filter(Boolean) as Row[];
+  // runs of the same plain event (e.g. several ratings in a row) read better as one line
+  const merged: Row[] = [];
+  for (const r of rows) {
+    const last = merged[merged.length - 1];
+    if (last && !r.detail && !last.detail && last.text === r.text) last.count = (last.count ?? 1) + 1;
+    else merged.push({ ...r });
+  }
+  const shown = merged.slice(0, 8);
 
   return (
     <section className="space-y-4">
       <SectionTitle title="Recent activity" hint="Every change to your estimates, newest first." />
       <Card className="divide-y divide-line">
-        {rows.length === 0 && <p className="p-5 text-sm text-muted">Nothing yet. Your first answers will show up here.</p>}
-        {rows.map((r) => (
+        {shown.length === 0 && <p className="p-5 text-sm text-muted">Nothing yet. Your first answers will show up here.</p>}
+        {shown.map((r) => (
           <div key={r.id} className="flex items-center justify-between gap-4 px-5 py-3.5">
             <div className="min-w-0">
-              <p className="truncate text-sm text-fg">{r.text}</p>
+              <p className="truncate text-sm text-fg">
+                {r.text}
+                {r.count && r.count > 1 && <span className="ml-1.5 text-subtle">× {r.count}</span>}
+              </p>
               <p className="text-xs text-subtle">{r.when}</p>
             </div>
             {r.detail && (
