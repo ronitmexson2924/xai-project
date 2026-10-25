@@ -45,6 +45,9 @@ export type StateDelta =
 // Session types
 export type NextStepResponse =
   paths["/api/v1/session/next"]["post"]["responses"]["200"]["content"]["application/json"];
+export type PublicItem = NonNullable<NextStepResponse["item"]>;
+export type Recommendation = NextStepResponse["recommendation"];
+export type ReasonEvidence = Recommendation["reasons"][number];
 
 // Attempts types
 export type AttemptIn =

@@ -123,8 +123,8 @@
   → next), and loading/fallback states. Make it keyboard-accessible and
   responsive.
 - **Acceptance:**
-  - [ ] Playwright smoke test: a new user completes onboarding and 3 items
-- [ ] **M4 done**
+  - [x] Playwright smoke test: a new user completes onboarding and 3 items
+- [x] **M4 done**
 
 ## M5: Item bank (weeks 4–6)
 - **Depends on:** R1b (concepts + misconceptions)

@@ -22,7 +22,7 @@ export default function ConsentPage() {
     setConsenting(true);
     try {
       await giveConsent();
-      router.push("/");
+      router.push("/onboarding");
     } catch (err) {
       if (err instanceof ApiException) {
         setErrorMsg(`[${err.code}] ${err.message}`);
