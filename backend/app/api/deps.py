@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.deps import DbDep
 from app.config import settings
-from app.explainer import GroundedExplainerService
+from app.explainer import DbVariantStore, GroundedExplainerService
 from app.graph.service import GraphSnapshot
 from app.learner_model.service import LearnerModel
 from app.planner.service import Planner
@@ -27,11 +27,10 @@ from app.telemetry import DbFeedbackAnalyzer
 
 _lock = Lock()
 _graph: GraphSnapshot | None = None
-_explainer: GroundedExplainerService | None = None
 
 
 def _load(session: Session) -> GraphSnapshot:
-    global _graph, _explainer
+    global _graph
     with _lock:
         if _graph is None:
             graph = GraphSnapshot.from_db(session, include_drafts=settings.include_draft_items)
@@ -45,15 +44,15 @@ def _load(session: Session) -> GraphSnapshot:
                         }
                     },
                 )
-            _graph, _explainer = graph, GroundedExplainerService(graph)
+            _graph = graph
         return _graph
 
 
 def reload_graph() -> None:
     """Forget the cached graph; the next request reads it again."""
-    global _graph, _explainer
+    global _graph
     with _lock:
-        _graph, _explainer = None, None
+        _graph = None
 
 
 def get_graph(session: DbDep) -> GraphSnapshot:
@@ -78,9 +77,9 @@ def get_explainability(model: LearnerModelDep) -> Explainability:
     return Explainability(model)
 
 
-def get_explainer(graph: GraphDep) -> GroundedExplainerService:
-    assert _explainer is not None and _graph is graph
-    return _explainer
+def get_explainer(session: DbDep, graph: GraphDep) -> GroundedExplainerService:
+    # precomputed variants are read from explanation_variants (python -m app.explainer.precompute)
+    return GroundedExplainerService(graph, store=DbVariantStore(session))
 
 
 def get_feedback_analyzer(session: DbDep) -> DbFeedbackAnalyzer:

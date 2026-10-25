@@ -4,7 +4,6 @@ Owner: Mit.
 """
 
 import csv
-import hashlib
 import io
 from typing import Annotated, Literal
 
@@ -17,15 +16,11 @@ from app.auth import AdminDep, DbDep
 from app.config import settings
 from app.db import models as m
 from app.graph.service import TEST_ITEM_PREFIXES
+from app.pseudonyms import pseudonym  # the same ids as research/analysis/export.py
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 ExportTable = Literal["users", "assignments", "attempts"]
-
-
-def pseudonym(user_id, salt: str) -> str:
-    """Same pseudonyms as research/analysis/export.py, so exports and analyses line up."""
-    return hashlib.sha256(f"{salt}:{user_id}".encode()).hexdigest()[:12]
 
 
 def _cell(value) -> str:

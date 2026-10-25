@@ -114,7 +114,8 @@ def _run_learner(
 ) -> tuple[list[StepRecord], dict[TraitName, float]]:
     rcfg = cfg.response
     clock = [T0]
-    user_id = uuid.uuid4()
+    # deterministic: the planner seeds its RNG with the user id, so random ids made runs differ
+    user_id = uuid.uuid5(uuid.NAMESPACE_URL, f"sim:{cfg.seed}:{arm}:{index}")
     session.add(m.User(id=user_id, email=f"{user_id}@sim", password_hash="-", display_name="sim"))
     session.flush()
     session.add(m.ExperimentAssignment(user_id=user_id, arm=arm))
@@ -170,6 +171,9 @@ def _run_learner(
                 source=explanation.source,
                 followup_item_id=check.id,
                 prompt_version=explanation.prompt_version,
+                # simulated time: the database default (now()) is one instant for the whole run,
+                # so explanations could not be ordered against the answers they precede
+                created_at=clock[0],
             )
         )
         session.flush()
@@ -204,12 +208,12 @@ def _run_learner(
             dismissed_quickly=dismissed,
         )
         # what Mit's telemetry stores (explanation_feedback), so analyses see production-like logs
-        session.add(
-            m.ExplanationFeedbackRow(
-                explanation_id=explanation.id, summary=summary.model_dump(mode="json")
-            )
+        feedback_row = m.ExplanationFeedbackRow(
+            explanation_id=explanation.id, summary=summary.model_dump(mode="json")
         )
+        session.add(feedback_row)
         model.apply_explanation_feedback(summary)
+        feedback_row.applied_at = clock[0]  # simulated time, like every other timestamp here
 
         item = graph.get_item(rec.item_id)
         clock[0] += STEP_TIME / 2
@@ -262,7 +266,11 @@ def _run_learner(
 
 def _take_test(model, graph, learner, user_id, phase, at, rng, rcfg) -> None:
     """Answer every pre/post-test item from the learner's current true knowledge."""
-    for item_id in sorted(i for i in graph.test_item_ids if i.startswith(f"{phase}-")):
+    test_items = sorted(i for i in graph.test_item_ids if i.startswith(f"{phase}-"))
+    for n, item_id in enumerate(test_items):
+        # distinct timestamps, all before (pre-test) or after (post-test) the practice at `at`,
+        # so the time order of a learner's answers is total and every run is the same
+        offset = n - len(test_items) if phase == "pretest" else n + 1
         item = graph.get_item(item_id)
         response, correct = pop.answer(learner, item, rng, rcfg)
         model.record_test_attempt(
@@ -274,6 +282,6 @@ def _take_test(model, graph, learner, user_id, phase, at, rng, rcfg) -> None:
                 response=response,
                 correct=correct,
                 latency_ms=15_000,
-                created_at=at,
+                created_at=at + timedelta(seconds=15 * offset),
             )
         )

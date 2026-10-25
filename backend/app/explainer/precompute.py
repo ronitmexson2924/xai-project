@@ -9,7 +9,6 @@ import time
 
 from app.config import settings
 from app.contracts.explanation import Depth, Length, StyleParams
-from app.contracts.fakes import FakeGraph
 from app.contracts.graph import Concept
 from app.explainer.llm import LLMClientProtocol, call_live_llm
 from app.explainer.prompt import PROMPT_VERSION
@@ -147,8 +146,12 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    graph = FakeGraph()
-    all_concepts, _ = graph.get_graph()
+    from app.db.session import SessionLocal
+    from app.explainer.store import DbVariantStore
+    from app.graph.service import GraphSnapshot
+
+    session = SessionLocal()
+    all_concepts, _ = GraphSnapshot.from_db(session).get_graph()
 
     if args.concepts == "all":
         selected = all_concepts
@@ -157,8 +160,13 @@ def main() -> None:
         selected = [c for c in all_concepts if c.id in target_ids]
 
     print(f"Precomputing 12 variants for {len(selected)} concept(s)...")
-    total = precompute_all(selected, rate_limit_delay=args.rate_limit)
-    print(f"Precompute finished. Generated {total} variants in store.")
+    store = DbVariantStore(session)
+    total = 0
+    for concept in selected:  # commit per concept, so an interrupted run resumes where it was
+        total += precompute_for_concept(concept, store=store, rate_limit_delay=args.rate_limit)
+        session.commit()
+    session.close()
+    print(f"Precompute finished. Generated {total} variants in explanation_variants.")
 
 
 if __name__ == "__main__":
