@@ -2,33 +2,57 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
+from app.auth.security import BCRYPT_MAX_BYTES
 
 ExperimentArm = Literal["generic", "static_personalized", "closed_loop"]
 
 ALL_ARMS: tuple[ExperimentArm, ...] = ("generic", "static_personalized", "closed_loop")
 
+MIN_PASSWORD_LENGTH = 8
+
 
 class UserRegisterIn(BaseModel):
-    email: EmailStr
-    password: str = Field(min_length=6, description="Minimum 6 characters")
+    model_config = ConfigDict(extra="forbid")
+
+    email: EmailStr = Field(max_length=254)
+    password: str = Field(min_length=MIN_PASSWORD_LENGTH, max_length=BCRYPT_MAX_BYTES)
     display_name: str = Field(min_length=1, max_length=100)
+
+    @field_validator("password")
+    @classmethod
+    def password_fits_bcrypt(cls, value: str) -> str:
+        if len(value.encode("utf-8")) > BCRYPT_MAX_BYTES:
+            raise ValueError(f"password must be at most {BCRYPT_MAX_BYTES} bytes")
+        if value.strip() == "" or len(set(value)) < 4:
+            raise ValueError("password is too simple")
+        return value
+
+    @field_validator("display_name")
+    @classmethod
+    def display_name_is_plain_text(cls, value: str) -> str:
+        value = " ".join(value.split())
+        if not value:
+            raise ValueError("display name must not be blank")
+        if any(not ch.isprintable() for ch in value):
+            raise ValueError("display name contains control characters")
+        return value
 
 
 class UserLoginIn(BaseModel):
-    email: EmailStr
-    password: str
+    email: EmailStr = Field(max_length=254)
+    password: str = Field(min_length=1, max_length=256)
 
 
 class UserResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
     id: UUID
     email: EmailStr
     display_name: str
     arm: ExperimentArm
     consent_at: datetime | None = None
     created_at: datetime
+    is_admin: bool = False
 
 
 class AuthResponse(BaseModel):
@@ -38,19 +62,3 @@ class AuthResponse(BaseModel):
 
 class ConsentResponse(BaseModel):
     consent_at: datetime
-
-
-class UserRecord(BaseModel):
-    id: UUID
-    email: str
-    password_hash: str
-    display_name: str
-    created_at: datetime
-    consent_at: datetime | None = None
-    deleted_at: datetime | None = None
-
-
-class ExperimentAssignment(BaseModel):
-    user_id: UUID
-    arm: ExperimentArm
-    assigned_at: datetime

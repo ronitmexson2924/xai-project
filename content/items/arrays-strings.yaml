@@ -2,8 +2,7 @@ items:
 - id: array-indexing-1
   concept_id: arrays-indexing
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Array Indexing
-    & Bounds?
+  stem: Which statement correctly characterizes the core invariant of Array Indexing & Bounds?
   options:
   - Index arithmetic calculates memory offset in O(1) time.
   - It operates without bounds and skips checking the termination condition.
@@ -11,10 +10,7 @@ items:
   - It treats all elements as mutually independent without relationships.
   answer: Index arithmetic calculates memory offset in O(1) time.
   difficulty: 1
-  distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: arr-last-index-is-len
-    It executes in reverse order without updating state.: arr-index-starts-at-one
-    It treats all elements as mutually independent without relationships.: arr-last-index-is-len
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: array-indexing-2
@@ -38,17 +34,13 @@ items:
   - It executes an infinite loop that ignores input constraints.
   answer: Arrays store elements sequentially in contiguous memory blocks.
   difficulty: 1
-  distractor_misconceptions:
-    It guarantees random O(1) jump access to any uncomputed state.: arr-last-index-is-len
-    It eliminates the need for any base state or bounds.: arr-index-starts-at-one
-    It executes an infinite loop that ignores input constraints.: arr-last-index-is-len
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: array-indexing-3
   concept_id: arrays-indexing
   kind: mcq
-  stem: When implementing Array Indexing & Bounds, which error represents the most
-    frequent pitfall?
+  stem: When implementing Array Indexing & Bounds, which error represents the most frequent pitfall?
   options:
   - Accessing index len(arr) raises IndexError.
   - Using descriptive identifier names for local pointers.
@@ -56,31 +48,26 @@ items:
   - Checking preconditions before accessing boundary values.
   answer: Accessing index len(arr) raises IndexError.
   difficulty: 2
-  distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: arr-last-index-is-len
-    Structuring code inside functions rather than flat scripts.: arr-index-starts-at-one
-    Checking preconditions before accessing boundary values.: arr-last-index-is-len
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: array-indexing-mc
   concept_id: arrays-indexing
   kind: mcq
-  stem: 'Quick Check: True or False — for Array Indexing & Bounds, Index arithmetic
-    calculates memory offset in O(1) time.'
+  stem: 'Quick Check: True or False — for Array Indexing & Bounds, Index arithmetic calculates memory
+    offset in O(1) time.'
   options:
   - 'True'
   - 'False'
   answer: 'True'
   difficulty: 1
-  distractor_misconceptions:
-    'False': arr-last-index-is-len
+  distractor_misconceptions: {}
   is_microcheck: true
   review_status: approved
 - id: two-pointers-technique-1
   concept_id: two-pointers
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Two Pointers
-    Technique?
+  stem: Which statement correctly characterizes the core invariant of Two Pointers Technique?
   options:
   - Monotonic sorted order guarantees eliminating impossible candidate spaces.
   - It operates without bounds and skips checking the termination condition.
@@ -88,10 +75,7 @@ items:
   - It treats all elements as mutually independent without relationships.
   answer: Monotonic sorted order guarantees eliminating impossible candidate spaces.
   difficulty: 2
-  distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: tp-works-unsorted
-    It executes in reverse order without updating state.: tp-works-unsorted
-    It treats all elements as mutually independent without relationships.: tp-works-unsorted
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: two-pointers-technique-2
@@ -109,25 +93,19 @@ items:
 
     What is the fundamental guarantee demonstrated by this trace?'
   options:
-  - Two pointers traverse a sequence from both ends towards each other or at varying
-    speeds.
+  - Two pointers traverse a sequence from both ends towards each other or at varying speeds.
   - It guarantees random O(1) jump access to any uncomputed state.
   - It eliminates the need for any base state or bounds.
   - It executes an infinite loop that ignores input constraints.
-  answer: Two pointers traverse a sequence from both ends towards each other or at
-    varying speeds.
+  answer: Two pointers traverse a sequence from both ends towards each other or at varying speeds.
   difficulty: 2
-  distractor_misconceptions:
-    It guarantees random O(1) jump access to any uncomputed state.: tp-works-unsorted
-    It eliminates the need for any base state or bounds.: tp-works-unsorted
-    It executes an infinite loop that ignores input constraints.: tp-works-unsorted
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: two-pointers-technique-3
   concept_id: two-pointers
   kind: mcq
-  stem: When implementing Two Pointers Technique, which error represents the most
-    frequent pitfall?
+  stem: When implementing Two Pointers Technique, which error represents the most frequent pitfall?
   options:
   - Moving both pointers simultaneously when only one condition is met.
   - Using descriptive identifier names for local pointers.
@@ -135,24 +113,20 @@ items:
   - Checking preconditions before accessing boundary values.
   answer: Moving both pointers simultaneously when only one condition is met.
   difficulty: 3
-  distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: tp-works-unsorted
-    Structuring code inside functions rather than flat scripts.: tp-works-unsorted
-    Checking preconditions before accessing boundary values.: tp-works-unsorted
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: two-pointers-technique-mc
   concept_id: two-pointers
   kind: mcq
-  stem: 'Quick Check: True or False — for Two Pointers Technique, Monotonic sorted
-    order guarantees eliminating impossible candidate spaces.'
+  stem: 'Quick Check: True or False — for Two Pointers Technique, Monotonic sorted order guarantees eliminating
+    impossible candidate spaces.'
   options:
   - 'True'
   - 'False'
   answer: 'True'
   difficulty: 1
-  distractor_misconceptions:
-    'False': tp-works-unsorted
+  distractor_misconceptions: {}
   is_microcheck: true
   review_status: approved
 - id: sliding-window-1
@@ -166,10 +140,7 @@ items:
   - It treats all elements as mutually independent without relationships.
   answer: Reuses computation from overlapping subsegments to avoid O(N^2) recalculations.
   difficulty: 3
-  distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: sw-recompute-window
-    It executes in reverse order without updating state.: sw-recompute-window
-    It treats all elements as mutually independent without relationships.: sw-recompute-window
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: sliding-window-2
@@ -187,25 +158,19 @@ items:
 
     What is the fundamental guarantee demonstrated by this trace?'
   options:
-  - A sliding window maintains a contiguous subsegment by expanding right and shrinking
-    left.
+  - A sliding window maintains a contiguous subsegment by expanding right and shrinking left.
   - It guarantees random O(1) jump access to any uncomputed state.
   - It eliminates the need for any base state or bounds.
   - It executes an infinite loop that ignores input constraints.
-  answer: A sliding window maintains a contiguous subsegment by expanding right and
-    shrinking left.
+  answer: A sliding window maintains a contiguous subsegment by expanding right and shrinking left.
   difficulty: 3
-  distractor_misconceptions:
-    It guarantees random O(1) jump access to any uncomputed state.: sw-recompute-window
-    It eliminates the need for any base state or bounds.: sw-recompute-window
-    It executes an infinite loop that ignores input constraints.: sw-recompute-window
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: sliding-window-3
   concept_id: sliding-window
   kind: mcq
-  stem: When implementing Sliding Window, which error represents the most frequent
-    pitfall?
+  stem: When implementing Sliding Window, which error represents the most frequent pitfall?
   options:
   - Resetting window from scratch instead of shrinking the left boundary.
   - Using descriptive identifier names for local pointers.
@@ -213,24 +178,20 @@ items:
   - Checking preconditions before accessing boundary values.
   answer: Resetting window from scratch instead of shrinking the left boundary.
   difficulty: 4
-  distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: sw-recompute-window
-    Structuring code inside functions rather than flat scripts.: sw-recompute-window
-    Checking preconditions before accessing boundary values.: sw-recompute-window
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: sliding-window-mc
   concept_id: sliding-window
   kind: mcq
-  stem: 'Quick Check: True or False — for Sliding Window, Reuses computation from
-    overlapping subsegments to avoid O(N^2) recalculations.'
+  stem: 'Quick Check: True or False — for Sliding Window, Reuses computation from overlapping subsegments
+    to avoid O(N^2) recalculations.'
   options:
   - 'True'
   - 'False'
   answer: 'True'
   difficulty: 2
-  distractor_misconceptions:
-    'False': sw-recompute-window
+  distractor_misconceptions: {}
   is_microcheck: true
   review_status: approved
 - id: prefix-sums-1
@@ -244,10 +205,7 @@ items:
   - It treats all elements as mutually independent without relationships.
   answer: Range sum query [L, R] = prefix[R] - prefix[L - 1].
   difficulty: 2
-  distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: ps-range-off-by-one
-    It executes in reverse order without updating state.: ps-range-off-by-one
-    It treats all elements as mutually independent without relationships.: ps-range-off-by-one
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: prefix-sums-2
@@ -271,10 +229,7 @@ items:
   - It executes an infinite loop that ignores input constraints.
   answer: prefix[i] stores the sum of all elements from index 0 up to i.
   difficulty: 2
-  distractor_misconceptions:
-    It guarantees random O(1) jump access to any uncomputed state.: ps-range-off-by-one
-    It eliminates the need for any base state or bounds.: ps-range-off-by-one
-    It executes an infinite loop that ignores input constraints.: ps-range-off-by-one
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: prefix-sums-3
@@ -288,43 +243,34 @@ items:
   - Checking preconditions before accessing boundary values.
   answer: Forgetting prefix base value 0, causing off-by-one when L=0.
   difficulty: 3
-  distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: ps-range-off-by-one
-    Structuring code inside functions rather than flat scripts.: ps-range-off-by-one
-    Checking preconditions before accessing boundary values.: ps-range-off-by-one
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: prefix-sums-mc
   concept_id: prefix-sums
   kind: mcq
-  stem: 'Quick Check: True or False — for Prefix Sums, Range sum query [L, R] = prefix[R]
-    - prefix[L - 1].'
+  stem: 'Quick Check: True or False — for Prefix Sums, Range sum query [L, R] = prefix[R] - prefix[L -
+    1].'
   options:
   - 'True'
   - 'False'
   answer: 'True'
   difficulty: 1
-  distractor_misconceptions:
-    'False': ps-range-off-by-one
+  distractor_misconceptions: {}
   is_microcheck: true
   review_status: approved
 - id: string-immutability-1
   concept_id: strings-as-sequences
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of String Immutability
-    & Manipulation?
+  stem: Which statement correctly characterizes the core invariant of String Immutability & Manipulation?
   options:
   - Repeated string += concatenation in a loop takes O(N^2) time; join takes O(N).
   - It operates without bounds and skips checking the termination condition.
   - It executes in reverse order without updating state.
   - It treats all elements as mutually independent without relationships.
-  answer: Repeated string += concatenation in a loop takes O(N^2) time; join takes
-    O(N).
+  answer: Repeated string += concatenation in a loop takes O(N^2) time; join takes O(N).
   difficulty: 2
-  distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: str-mutable
-    It executes in reverse order without updating state.: str-mutable
-    It treats all elements as mutually independent without relationships.: str-mutable
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: string-immutability-2
@@ -348,17 +294,14 @@ items:
   - It executes an infinite loop that ignores input constraints.
   answer: Immutable strings cannot be modified in place; concatenation copies characters.
   difficulty: 2
-  distractor_misconceptions:
-    It guarantees random O(1) jump access to any uncomputed state.: str-mutable
-    It eliminates the need for any base state or bounds.: str-mutable
-    It executes an infinite loop that ignores input constraints.: str-mutable
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: string-immutability-3
   concept_id: strings-as-sequences
   kind: mcq
-  stem: When implementing String Immutability & Manipulation, which error represents
-    the most frequent pitfall?
+  stem: When implementing String Immutability & Manipulation, which error represents the most frequent
+    pitfall?
   options:
   - Assuming s[i] = 'a' modifies the string in place.
   - Using descriptive identifier names for local pointers.
@@ -366,31 +309,26 @@ items:
   - Checking preconditions before accessing boundary values.
   answer: Assuming s[i] = 'a' modifies the string in place.
   difficulty: 3
-  distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: str-mutable
-    Structuring code inside functions rather than flat scripts.: str-mutable
-    Checking preconditions before accessing boundary values.: str-mutable
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: string-immutability-mc
   concept_id: strings-as-sequences
   kind: mcq
-  stem: 'Quick Check: True or False — for String Immutability & Manipulation, Repeated
-    string += concatenation in a loop takes O(N^2) time; join takes O(N).'
+  stem: 'Quick Check: True or False — for String Immutability & Manipulation, Repeated string += concatenation
+    in a loop takes O(N^2) time; join takes O(N).'
   options:
   - 'True'
   - 'False'
   answer: 'True'
   difficulty: 1
-  distractor_misconceptions:
-    'False': str-mutable
+  distractor_misconceptions: {}
   is_microcheck: true
   review_status: approved
 - id: in-place-array-modification-1
   concept_id: array-traversal
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of In-Place Array
-    Modification?
+  stem: Which statement correctly characterizes the core invariant of In-Place Array Modification?
   options:
   - Maintain write_index <= read_index so unprocessed data is never overwritten.
   - It operates without bounds and skips checking the termination condition.
@@ -398,10 +336,7 @@ items:
   - It treats all elements as mutually independent without relationships.
   answer: Maintain write_index <= read_index so unprocessed data is never overwritten.
   difficulty: 2
-  distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: trav-max-init-zero
-    It executes in reverse order without updating state.: trav-max-init-zero
-    It treats all elements as mutually independent without relationships.: trav-max-init-zero
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: in-place-array-modification-2
@@ -423,20 +358,15 @@ items:
   - It guarantees random O(1) jump access to any uncomputed state.
   - It eliminates the need for any base state or bounds.
   - It executes an infinite loop that ignores input constraints.
-  answer: In-place modification overwrites valid elements using read and write pointer
-    indices.
+  answer: In-place modification overwrites valid elements using read and write pointer indices.
   difficulty: 2
-  distractor_misconceptions:
-    It guarantees random O(1) jump access to any uncomputed state.: trav-max-init-zero
-    It eliminates the need for any base state or bounds.: trav-max-init-zero
-    It executes an infinite loop that ignores input constraints.: trav-max-init-zero
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: in-place-array-modification-3
   concept_id: array-traversal
   kind: mcq
-  stem: When implementing In-Place Array Modification, which error represents the
-    most frequent pitfall?
+  stem: When implementing In-Place Array Modification, which error represents the most frequent pitfall?
   options:
   - Overwriting elements before their values have been inspected.
   - Using descriptive identifier names for local pointers.
@@ -444,23 +374,19 @@ items:
   - Checking preconditions before accessing boundary values.
   answer: Overwriting elements before their values have been inspected.
   difficulty: 3
-  distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: trav-max-init-zero
-    Structuring code inside functions rather than flat scripts.: trav-max-init-zero
-    Checking preconditions before accessing boundary values.: trav-max-init-zero
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: in-place-array-modification-mc
   concept_id: array-traversal
   kind: mcq
-  stem: 'Quick Check: True or False — for In-Place Array Modification, Maintain write_index
-    <= read_index so unprocessed data is never overwritten.'
+  stem: 'Quick Check: True or False — for In-Place Array Modification, Maintain write_index <= read_index
+    so unprocessed data is never overwritten.'
   options:
   - 'True'
   - 'False'
   answer: 'True'
   difficulty: 1
-  distractor_misconceptions:
-    'False': trav-max-init-zero
+  distractor_misconceptions: {}
   is_microcheck: true
   review_status: approved

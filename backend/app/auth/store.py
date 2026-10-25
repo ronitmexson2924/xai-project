@@ -1,9 +1,21 @@
+"""User accounts and experiment assignment, stored in Postgres (users, experiment_assignments).
+
+Owner: Mit. Every function takes the request's Session and flushes; the request commits.
+"""
+
 import secrets
-import threading
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from app.auth.models import ALL_ARMS, ExperimentArm, ExperimentAssignment, UserRecord
+from sqlalchemy import func, select, text
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
+from app.auth.models import ALL_ARMS, ExperimentArm
+from app.db import models as m
+
+# any fixed 64-bit key: serialises arm assignment so concurrent sign-ups stay balanced
+_ARM_LOCK_KEY = 0x50434741524D
 
 
 class UserAlreadyExistsError(Exception):
@@ -14,148 +26,89 @@ class UserNotFoundError(Exception):
     pass
 
 
-DEMO_NOVICE_ID = UUID("00000000-0000-0000-0000-000000000001")
-DEMO_INTERMEDIATE_ID = UUID("00000000-0000-0000-0000-000000000002")
-DEMO_ADVANCED_ID = UUID("00000000-0000-0000-0000-000000000003")
-
-# Pre-computed bcrypt hash for "Demo1234!" to keep initialization instantaneous
-DEMO_PASSWORD_HASH = "$2b$12$On16QgoFmP4QOzSOg.3THOwXNlCuQxLfi0rDD9VryTxgQr.JPifO6"
+def normalise_email(email: str) -> str:
+    return email.strip().lower()
 
 
-class InMemoryUserStore:
-    def __init__(self, seed_demos: bool = True) -> None:
-        self._lock = threading.Lock()
-        self._users_by_id: dict[UUID, UserRecord] = {}
-        self._users_by_email: dict[str, UUID] = {}
-        self._assignments_by_user_id: dict[UUID, ExperimentAssignment] = {}
-        self._arm_counts: dict[ExperimentArm, int] = {arm: 0 for arm in ALL_ARMS}
-        if seed_demos:
-            self.seed_demo_users()
-
-    def clear(self, seed_demos: bool = True) -> None:
-        with self._lock:
-            self._users_by_id.clear()
-            self._users_by_email.clear()
-            self._assignments_by_user_id.clear()
-            self._arm_counts = {arm: 0 for arm in ALL_ARMS}
-        if seed_demos:
-            self.seed_demo_users()
-
-    def seed_demo_users(self) -> None:
-        now = datetime.now(UTC)
-        demos = [
-            (DEMO_NOVICE_ID, "novice@example.com", "Ada Lovelace (Novice)", "closed_loop"),
-            (
-                DEMO_INTERMEDIATE_ID,
-                "intermediate@example.com",
-                "Alan Turing (Intermediate)",
-                "static_personalized",
-            ),
-            (DEMO_ADVANCED_ID, "advanced@example.com", "Grace Hopper (Advanced)", "generic"),
-        ]
-        with self._lock:
-            for user_id, email, name, arm in demos:
-                if email not in self._users_by_email:
-                    user = UserRecord(
-                        id=user_id,
-                        email=email,
-                        password_hash=DEMO_PASSWORD_HASH,
-                        display_name=name,
-                        created_at=now,
-                        consent_at=now,
-                        deleted_at=None,
-                    )
-                    assignment = ExperimentAssignment(
-                        user_id=user_id,
-                        arm=arm,  # type: ignore[arg-type]
-                        assigned_at=now,
-                    )
-                    self._users_by_id[user_id] = user
-                    self._users_by_email[email] = user_id
-                    self._assignments_by_user_id[user_id] = assignment
-                    self._arm_counts[arm] += 1  # type: ignore[index]
-
-    def _choose_arm(self) -> ExperimentArm:
-        min_count = min(self._arm_counts.values())
-        candidates = [arm for arm, count in self._arm_counts.items() if count == min_count]
-        return secrets.choice(candidates)
-
-    def register_user(
-        self,
-        email: str,
-        password_hash: str,
-        display_name: str,
-    ) -> tuple[UserRecord, ExperimentAssignment]:
-        email_clean = email.strip().lower()
-        now = datetime.now(UTC)
-
-        with self._lock:
-            if email_clean in self._users_by_email:
-                raise UserAlreadyExistsError(f"User with email {email_clean} already exists")
-
-            user_id = uuid4()
-            arm = self._choose_arm()
-            self._arm_counts[arm] += 1
-
-            user = UserRecord(
-                id=user_id,
-                email=email_clean,
-                password_hash=password_hash,
-                display_name=display_name.strip(),
-                created_at=now,
-                consent_at=None,
-                deleted_at=None,
-            )
-            assignment = ExperimentAssignment(
-                user_id=user_id,
-                arm=arm,
-                assigned_at=now,
-            )
-
-            self._users_by_id[user_id] = user
-            self._users_by_email[email_clean] = user_id
-            self._assignments_by_user_id[user_id] = assignment
-
-            return user, assignment
-
-    def get_user_by_email(self, email: str) -> UserRecord | None:
-        email_clean = email.strip().lower()
-        with self._lock:
-            user_id = self._users_by_email.get(email_clean)
-            if user_id is None:
-                return None
-            user = self._users_by_id.get(user_id)
-            if user and user.deleted_at is None:
-                return user
-            return None
-
-    def get_user_by_id(self, user_id: UUID) -> UserRecord | None:
-        with self._lock:
-            user = self._users_by_id.get(user_id)
-            if user and user.deleted_at is None:
-                return user
-            return None
-
-    def get_assignment(self, user_id: UUID) -> ExperimentAssignment | None:
-        with self._lock:
-            return self._assignments_by_user_id.get(user_id)
-
-    def set_consent(self, user_id: UUID) -> datetime:
-        with self._lock:
-            user = self._users_by_id.get(user_id)
-            if user is None or user.deleted_at is not None:
-                raise UserNotFoundError(f"User {user_id} not found")
-            now = datetime.now(UTC)
-            user.consent_at = now
-            return now
-
-    def soft_delete_user(self, user_id: UUID) -> bool:
-        with self._lock:
-            user = self._users_by_id.get(user_id)
-            if user is None or user.deleted_at is not None:
-                return False
-            user.deleted_at = datetime.now(UTC)
-            return True
+def choose_arm(session: Session) -> ExperimentArm:
+    """Balanced randomisation: the arm with the fewest learners, ties broken at random. Holds a
+    transaction-level advisory lock so two concurrent sign-ups cannot both see the same counts."""
+    session.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": _ARM_LOCK_KEY})
+    counts = dict(
+        session.execute(
+            select(m.ExperimentAssignment.arm, func.count())
+            .join(m.User, m.User.id == m.ExperimentAssignment.user_id)
+            .where(m.User.is_admin.is_(False))
+            .group_by(m.ExperimentAssignment.arm)
+        ).all()
+    )
+    fewest = min(counts.get(arm, 0) for arm in ALL_ARMS)
+    return secrets.choice([arm for arm in ALL_ARMS if counts.get(arm, 0) == fewest])
 
 
-auth_store = InMemoryUserStore()
+def register_user(
+    session: Session,
+    email: str,
+    password_hash: str,
+    display_name: str,
+    arm: ExperimentArm | None = None,
+    is_admin: bool = False,
+) -> tuple[m.User, ExperimentArm]:
+    email = normalise_email(email)
+    if session.scalar(select(m.User.id).where(m.User.email == email)) is not None:
+        raise UserAlreadyExistsError(email)
+    chosen = arm or choose_arm(session)
+    user = m.User(
+        id=uuid4(),
+        email=email,
+        password_hash=password_hash,
+        display_name=display_name.strip(),
+        is_admin=is_admin,
+    )
+    try:
+        with session.begin_nested():
+            session.add(user)
+            session.flush()
+    except IntegrityError:  # lost a race with a concurrent registration of the same email
+        raise UserAlreadyExistsError(email) from None
+    session.add(m.ExperimentAssignment(user_id=user.id, arm=chosen))
+    session.flush()
+    return user, chosen
+
+
+def get_active_user(session: Session, user_id: UUID) -> tuple[m.User, ExperimentArm] | None:
+    row = session.execute(
+        select(m.User, m.ExperimentAssignment.arm)
+        .outerjoin(m.ExperimentAssignment, m.ExperimentAssignment.user_id == m.User.id)
+        .where(m.User.id == user_id, m.User.deleted_at.is_(None))
+    ).one_or_none()
+    if row is None:
+        return None
+    return row[0], row[1] or "generic"
+
+
+def get_user_by_email(session: Session, email: str) -> m.User | None:
+    return session.scalar(
+        select(m.User).where(m.User.email == normalise_email(email), m.User.deleted_at.is_(None))
+    )
+
+
+def set_consent(session: Session, user: m.User) -> datetime:
+    if user.consent_at is None:  # consent is recorded once; repeating it keeps the first time
+        user.consent_at = datetime.now(UTC)
+        session.flush()
+    return user.consent_at
+
+
+def revoke_tokens(session: Session, user: m.User) -> None:
+    """Invalidate every token issued so far (logout everywhere)."""
+    user.tokens_valid_after = datetime.now(UTC).replace(microsecond=0)
+    session.flush()
+
+
+def soft_delete_user(session: Session, user: m.User) -> None:
+    """Withdraw: the account stops working now; app.auth.purge erases its data later."""
+    now = datetime.now(UTC)
+    user.deleted_at = now
+    user.tokens_valid_after = now.replace(microsecond=0)
+    session.flush()

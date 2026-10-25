@@ -1,101 +1,151 @@
-"""Administrative metrics and research export routes.
+"""Administrative metrics and research export routes (admin accounts only).
 
 Owner: Mit.
 """
 
 import csv
+import hashlib
 import io
-from typing import Annotated
+from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Query, Response, status
+from sqlalchemy import Float, Integer, cast, distinct, func, select
 
-from app.api.attempts import get_attempts_log
-from app.api.deps import FeedbackAnalyzerDep, LearnerModelDep
+from app.api.errors import api_error
 from app.api.schemas import AdminMetricsResponse
-from app.auth import UserResponse, auth_store, get_current_user
+from app.auth import AdminDep, DbDep
+from app.config import settings
+from app.db import models as m
+from app.graph.service import TEST_ITEM_PREFIXES
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
+ExportTable = Literal["users", "assignments", "attempts"]
 
-@router.get(
-    "/metrics",
-    response_model=AdminMetricsResponse,
-    summary="Get operational metrics across study arms and latency budgets",
-)
-def get_metrics(
-    _: Annotated[UserResponse, Depends(get_current_user)],
-    learner_model: LearnerModelDep,
-    analyzer: FeedbackAnalyzerDep,
-) -> AdminMetricsResponse:
-    arm_counts = dict(auth_store._arm_counts)
-    total_users = sum(arm_counts.values())
 
-    attempts_log = get_attempts_log()
-    total_attempts = len(attempts_log)
-    if total_attempts == 0 and hasattr(learner_model, "_states"):
-        total_attempts = sum(s.total_attempts for s in learner_model._states.values())
+def pseudonym(user_id, salt: str) -> str:
+    """Same pseudonyms as research/analysis/export.py, so exports and analyses line up."""
+    return hashlib.sha256(f"{salt}:{user_id}".encode()).hexdigest()[:12]
 
-    total_explanations = 0
-    source_counts = {"template": 14, "precomputed": 28, "llm": 8}
-    clarity_counts = {1: 1, 2: 3, 3: 12, 4: 24, 5: 35}
 
-    if hasattr(analyzer, "_explanations"):
-        total_explanations = len(analyzer._explanations)
-        for exp in analyzer._explanations.values():
-            src = exp.source if exp.source in source_counts else "template"
-            source_counts[src] = source_counts.get(src, 0) + 1
+def _cell(value) -> str:
+    """CSV cell that spreadsheets will not execute as a formula."""
+    text = "" if value is None else str(value)
+    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
 
-    if hasattr(analyzer, "_summaries"):
-        for summ in analyzer._summaries.values():
-            if summ.clarity_rating is not None:
-                r = max(1, min(5, summ.clarity_rating))
-                clarity_counts[r] = clarity_counts.get(r, 0) + 1
+
+def _learners():
+    """Active learner accounts (admins and withdrawn accounts are not study data)."""
+    return (m.User.is_admin.is_(False)) & (m.User.deleted_at.is_(None))
+
+
+@router.get("/metrics", response_model=AdminMetricsResponse, summary="Study and system metrics")
+def get_metrics(_: AdminDep, session: DbDep) -> AdminMetricsResponse:
+    learners = _learners()
+    arms = dict(
+        session.execute(
+            select(m.ExperimentAssignment.arm, func.count())
+            .join(m.User, m.User.id == m.ExperimentAssignment.user_id)
+            .where(learners)
+            .group_by(m.ExperimentAssignment.arm)
+        ).all()
+    )
+    total_users = session.scalar(select(func.count()).select_from(m.User).where(learners))
+    consented = session.scalar(
+        select(func.count()).select_from(m.User).where(learners, m.User.consent_at.is_not(None))
+    )
+    attempts = session.scalar(
+        select(func.count())
+        .select_from(m.AttemptRow)
+        .join(m.User, m.User.id == m.AttemptRow.user_id)
+        .where(learners)
+    )
+    p50, p95, n_explanations = session.execute(
+        select(
+            func.percentile_cont(0.5).within_group(m.ExplanationRow.latency_ms),
+            func.percentile_cont(0.95).within_group(m.ExplanationRow.latency_ms),
+            func.count(),
+        )
+    ).one()
+    sources = dict(
+        session.execute(
+            select(m.ExplanationRow.source, func.count()).group_by(m.ExplanationRow.source)
+        ).all()
+    )
+    rating = cast(m.ExplanationFeedbackRow.summary["clarity_rating"].astext, Integer)
+    clarity = dict(
+        session.execute(
+            select(rating, func.count()).where(rating.is_not(None)).group_by(rating)
+        ).all()
+    )
+    avg_dwell = session.scalar(
+        select(func.avg(cast(m.ExplanationFeedbackRow.summary["effective_dwell_ms"].astext, Float)))
+    )
+
+    def submissions(prefix: str) -> int:
+        return session.scalar(
+            select(func.count(distinct(m.AttemptRow.user_id))).where(
+                m.AttemptRow.item_id.startswith(prefix)
+            )
+        )
 
     return AdminMetricsResponse(
         total_users=total_users,
-        arm_distribution=arm_counts,
-        total_attempts=total_attempts,
-        total_explanations=total_explanations or 50,
-        p50_latency_ms=28.5,
-        p95_latency_ms=45.0,
-        source_mix=source_counts,
-        clarity_distribution=clarity_counts,
-        avg_dwell_ms=16420.0,
+        consented_users=consented,
+        arm_distribution={
+            arm: arms.get(arm, 0) for arm in ("generic", "static_personalized", "closed_loop")
+        },
+        total_attempts=attempts,
+        total_explanations=n_explanations,
+        p50_explanation_latency_ms=p50,
+        p95_explanation_latency_ms=p95,
+        source_mix={s: sources.get(s, 0) for s in ("precomputed", "llm", "template")},
+        clarity_distribution={r: clarity.get(r, 0) for r in range(1, 6)},
+        avg_dwell_ms=avg_dwell,
+        pretest_submissions=submissions(TEST_ITEM_PREFIXES[0]),
+        posttest_submissions=submissions(TEST_ITEM_PREFIXES[1]),
     )
 
 
-@router.get(
-    "/export.csv",
-    summary="Export research data tables as pseudonymized CSV",
-)
+@router.get("/export.csv", summary="Pseudonymised research export (one table per request)")
 def export_csv(
-    _: Annotated[UserResponse, Depends(get_current_user)],
-    table: str = Query("users", description="Table to export (users, attempts, assignments)"),
+    _: AdminDep,
+    session: DbDep,
+    table: Annotated[ExportTable, Query()] = "users",
 ) -> Response:
+    salt = settings.analysis_salt
+    if not salt:
+        raise api_error(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            "EXPORT_DISABLED",
+            "Set ANALYSIS_SALT on the server to enable pseudonymised exports",
+        )
     output = io.StringIO()
     writer = csv.writer(output)
-
+    learners = _learners()
     if table == "users":
-        writer.writerow(["pseudonym_id", "created_at", "consent_recorded", "arm"])
-        for user_id, user in auth_store._users_by_id.items():
-            if user.deleted_at is None:
-                assignment = auth_store.get_assignment(user_id)
-                arm = assignment.arm if assignment else "unknown"
-                pseudo_id = f"p_{str(user_id)[:8]}"
-                writer.writerow(
-                    [
-                        pseudo_id,
-                        user.created_at.isoformat(),
-                        user.consent_at is not None,
-                        arm,
-                    ]
-                )
+        writer.writerow(["pseudonym_id", "created_at", "consented", "arm"])
+        rows = session.execute(
+            select(m.User.id, m.User.created_at, m.User.consent_at, m.ExperimentAssignment.arm)
+            .outerjoin(m.ExperimentAssignment, m.ExperimentAssignment.user_id == m.User.id)
+            .where(learners)
+            .order_by(m.User.created_at)
+        )
+        for user_id, created, consent, arm in rows:
+            writer.writerow(
+                [pseudonym(user_id, salt), created.isoformat(), consent is not None, arm]
+            )
     elif table == "assignments":
         writer.writerow(["pseudonym_id", "arm", "assigned_at"])
-        for user_id, assignment in auth_store._assignments_by_user_id.items():
-            pseudo_id = f"p_{str(user_id)[:8]}"
-            writer.writerow([pseudo_id, assignment.arm, assignment.assigned_at.isoformat()])
-    elif table == "attempts":
+        rows = session.execute(
+            select(m.ExperimentAssignment)
+            .join(m.User, m.User.id == m.ExperimentAssignment.user_id)
+            .where(learners)
+            .order_by(m.ExperimentAssignment.assigned_at)
+        ).scalars()
+        for a in rows:
+            writer.writerow([pseudonym(a.user_id, salt), a.arm, a.assigned_at.isoformat()])
+    else:
         writer.writerow(
             [
                 "attempt_id",
@@ -109,28 +159,32 @@ def export_csv(
                 "created_at",
             ]
         )
-        for att in get_attempts_log():
-            pseudo_id = f"p_{str(att.user_id)[:8]}"
+        rows = session.execute(
+            select(m.AttemptRow, m.ItemRow.concept_id)
+            .join(m.User, m.User.id == m.AttemptRow.user_id)
+            .join(m.ItemRow, m.ItemRow.id == m.AttemptRow.item_id)
+            .where(learners)
+            .order_by(m.AttemptRow.created_at)
+        )
+        for a, concept_id in rows:
             writer.writerow(
                 [
-                    str(att.id),
-                    pseudo_id,
-                    att.item_id,
-                    att.concept_id,
-                    att.correct,
-                    att.latency_ms,
-                    att.hints_used,
-                    att.confidence if att.confidence is not None else "",
-                    att.created_at.isoformat(),
+                    a.id,
+                    pseudonym(a.user_id, salt),
+                    _cell(a.item_id),
+                    _cell(concept_id),
+                    a.correct,
+                    a.latency_ms,
+                    a.hints_used,
+                    "" if a.confidence is None else a.confidence,
+                    a.created_at.isoformat(),
                 ]
             )
-    else:
-        writer.writerow(["pseudonym_id", "status"])
-        writer.writerow(["none", "empty"])
-
-    csv_data = output.getvalue()
     return Response(
-        content=csv_data,
+        content=output.getvalue(),
         media_type="text/csv",
-        headers={"Content-Disposition": f'attachment; filename="{table}_export.csv"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{table}_export.csv"',
+            "Cache-Control": "no-store",
+        },
     )

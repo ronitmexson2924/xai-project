@@ -3,161 +3,128 @@
 Owner: Mit.
 """
 
+import uuid
 from datetime import UTC, datetime
-from typing import Annotated
-from uuid import UUID, uuid4
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, status
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
-from app.api.deps import FeedbackAnalyzerDep, GraphDep, LearnerModelDep
-from app.api.flags import get_arm_features
-from app.api.learners import log_state_update
-from app.auth import UserResponse, require_consent
-from app.auth.models import ExperimentArm
-from app.auth.store import (
-    DEMO_ADVANCED_ID,
-    DEMO_INTERMEDIATE_ID,
-    DEMO_NOVICE_ID,
-)
+from app.api.deps import ExplainabilityDep, FeedbackAnalyzerDep, GraphDep, LearnerModelDep
+from app.api.errors import api_error, not_found
+from app.api.schemas import AttemptBody, AttemptResultOut
+from app.auth import DbDep, LearnerDep
 from app.contracts.explanation import ExplanationEventIn
-from app.contracts.learner import AttemptIn, AttemptRecord, AttemptResult
-from app.contracts.services import FeedbackAnalyzer, LearnerModelService
+from app.contracts.graph import Item
+from app.contracts.learner import AttemptRecord, StateDelta
+from app.db import models as m
+from app.learner_model.service import LearnerModel
+from app.telemetry import DbFeedbackAnalyzer
 
 router = APIRouter(prefix="/attempts", tags=["attempts"])
 
-# In-memory attempt log for research audit and CSV export
-_attempts_log: list[AttemptRecord] = []
+FOLLOWUP_EVENT_NAMESPACE = uuid.UUID("6f1f6c1e-2b8f-4a59-9a39-9c7b4fd1c0de")
 
 
-def seed_demo_attempts() -> None:
-    now = datetime.now(UTC)
-    demos = [
-        AttemptRecord(
-            id=uuid4(),
-            user_id=DEMO_NOVICE_ID,
-            item_id="loops-1",
-            concept_id="loops",
-            response="3",
-            correct=True,
-            latency_ms=12400,
-            hints_used=0,
-            confidence=4,
-            created_at=now,
-        ),
-        AttemptRecord(
-            id=uuid4(),
-            user_id=DEMO_NOVICE_ID,
-            item_id="recursion-base-case-1",
-            concept_id="recursion-base-case",
-            response="0",
-            correct=False,
-            latency_ms=24500,
-            hints_used=1,
-            confidence=2,
-            created_at=now,
-        ),
-        AttemptRecord(
-            id=uuid4(),
-            user_id=DEMO_INTERMEDIATE_ID,
-            item_id="array-indexing-1",
-            concept_id="array-indexing",
-            response="arr[i]",
-            correct=True,
-            latency_ms=8400,
-            hints_used=0,
-            confidence=5,
-            created_at=now,
-        ),
-        AttemptRecord(
-            id=uuid4(),
-            user_id=DEMO_ADVANCED_ID,
-            item_id="topological-sort-1",
-            concept_id="topological-sort",
-            response="Kahn algorithm with queue",
-            correct=True,
-            latency_ms=6200,
-            hints_used=0,
-            confidence=5,
-            created_at=now,
-        ),
-    ]
-    _attempts_log.extend(demos)
+def normalise(text: str) -> str:
+    return " ".join(text.split()).casefold()
 
 
-seed_demo_attempts()
+def grade(item: Item, response: str) -> bool:
+    """Server-side grading. Multiple choice must match the option exactly; free text ignores case
+    and spacing."""
+    if item.kind == "mcq":
+        return response == item.answer
+    return normalise(response) == normalise(item.answer)
 
 
-def get_attempts_log() -> list[AttemptRecord]:
-    return list(_attempts_log)
-
-
-def record_attempt_to_log(rec: AttemptRecord) -> None:
-    _attempts_log.append(rec)
-
-
-def clear_attempts_log(seed_demos: bool = True) -> None:
-    _attempts_log.clear()
-    if seed_demos:
-        seed_demo_attempts()
-
-
-def _process_explanation_feedback(
-    analyzer: FeedbackAnalyzer,
-    learner_model: LearnerModelService,
-    explanation_id: UUID,
-    user_id: UUID,
-    item_id: str,
-    correct: bool,
-    arm: ExperimentArm = "closed_loop",
-) -> None:
-    """Background task closing the feedback loop upon micro-check submission."""
-    event = ExplanationEventIn(
-        idempotency_key=uuid4(),
-        type="followup_answered",
-        client_ts=datetime.now(UTC),
-        payload={"item_id": item_id, "correct": correct},
-    )
-    analyzer.record_events(explanation_id, user_id, [event])
-
-    features = get_arm_features(arm)
-    if features.allow_closed_loop_feedback:
-        summary = analyzer.summarize(explanation_id)
-        feedback_delta = learner_model.apply_explanation_feedback(summary)
-        log_state_update(user_id, feedback_delta)
+def close_feedback_loop(
+    session,
+    analyzer: DbFeedbackAnalyzer,
+    learner_model: LearnerModel,
+    explanation: m.ExplanationRow,
+    followup_correct: bool | None,
+) -> StateDelta:
+    """Summarise an explanation's interaction, store the summary and apply it to the learner
+    model (Module C). Idempotent: a second call returns the delta of the first."""
+    if followup_correct is not None:
+        analyzer.record_events(
+            explanation.id,
+            explanation.user_id,
+            [
+                ExplanationEventIn(
+                    # one server-written outcome per explanation: replays are deduplicated
+                    idempotency_key=uuid.uuid5(FOLLOWUP_EVENT_NAMESPACE, str(explanation.id)),
+                    type="followup_answered",
+                    client_ts=datetime.now(UTC),
+                    payload={"item_id": explanation.followup_item_id, "correct": followup_correct},
+                )
+            ],
+        )
+    summary = analyzer.summarize(explanation.id)
+    if session.get(m.ExplanationFeedbackRow, explanation.id) is None:
+        session.add(
+            m.ExplanationFeedbackRow(
+                explanation_id=explanation.id, summary=summary.model_dump(mode="json")
+            )
+        )
+        session.flush()
+    return learner_model.apply_explanation_feedback(summary)
 
 
 @router.post(
     "",
-    response_model=AttemptResult,
-    summary="Submit an answer to a question or micro-check",
+    response_model=AttemptResultOut,
+    summary="Submit the answer to the current recommendation's question",
 )
 def record_attempt(
-    payload: AttemptIn,
-    background_tasks: BackgroundTasks,
-    current_user: Annotated[UserResponse, Depends(require_consent)],
+    payload: AttemptBody,
+    current: LearnerDep,
+    session: DbDep,
     graph: GraphDep,
     learner_model: LearnerModelDep,
     analyzer: FeedbackAnalyzerDep,
-) -> AttemptResult:
+    explainability: ExplainabilityDep,
+) -> AttemptResultOut:
+    rec = session.get(m.RecommendationRow, payload.recommendation_id)
+    if rec is None or rec.user_id != current.id:
+        raise not_found("recommendation")
+    if rec.item_id != payload.item_id:
+        raise api_error(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "ITEM_MISMATCH",
+            "This answer is for a different question than the one recommended",
+        )
+    answered = session.scalar(
+        select(m.AttemptRow.id).where(m.AttemptRow.recommendation_id == rec.id)
+    )
+    if answered is not None:
+        raise api_error(
+            status.HTTP_409_CONFLICT, "ALREADY_ANSWERED", "This question was already answered"
+        )
     try:
         item = graph.get_item(payload.item_id)
-    except StopIteration:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={
-                "error": {
-                    "code": "ITEM_NOT_FOUND",
-                    "message": f"Item {payload.item_id} does not exist",
-                }
-            },
-        ) from None
+    except KeyError:
+        raise not_found("item") from None
+    if item.kind == "mcq" and payload.response not in item.options:
+        raise api_error(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "INVALID_OPTION",
+            "The response must be one of the question's options",
+        )
 
-    correct = payload.response.strip().lower() == item.answer.strip().lower()
-    attempt_id = uuid4()
+    explanation = session.scalar(
+        select(m.ExplanationRow).where(m.ExplanationRow.recommendation_id == rec.id)
+    )
+    if payload.explanation_id is not None and (
+        explanation is None or explanation.id != payload.explanation_id
+    ):
+        raise not_found("explanation")
 
+    correct = grade(item, payload.response)
     record = AttemptRecord(
-        id=attempt_id,
-        user_id=current_user.id,
+        id=uuid.uuid4(),
+        user_id=current.id,
         concept_id=item.concept_id,
         correct=correct,
         created_at=datetime.now(UTC),
@@ -166,30 +133,22 @@ def record_attempt(
         latency_ms=payload.latency_ms,
         hints_used=payload.hints_used,
         confidence=payload.confidence,
-        recommendation_id=payload.recommendation_id,
-        explanation_id=payload.explanation_id,
+        recommendation_id=rec.id,
+        explanation_id=explanation.id if explanation is not None else None,
     )
-    record_attempt_to_log(record)
+    try:
+        delta = learner_model.apply_attempt(record)
+        notice = explainability.explain_change(delta)
+        messages = list(notice.messages)
+        if explanation is not None and explanation.followup_item_id == item.id:
+            feedback = close_feedback_loop(session, analyzer, learner_model, explanation, correct)
+            messages += explainability.explain_change(feedback).messages
+        session.commit()
+    except IntegrityError:  # a concurrent duplicate submission won the race
+        session.rollback()
+        raise api_error(
+            status.HTTP_409_CONFLICT, "ALREADY_ANSWERED", "This question was already answered"
+        ) from None
 
-    # 1. Update concept mastery (synchronous O(1) BKT update)
-    delta = learner_model.apply_attempt(record)
-    log_state_update(current_user.id, delta)
-
-    # 2. If this item was a micro-check for an explanation, close the feedback loop asynchronously
-    if payload.explanation_id is not None:
-        background_tasks.add_task(
-            _process_explanation_feedback,
-            analyzer=analyzer,
-            learner_model=learner_model,
-            explanation_id=payload.explanation_id,
-            user_id=current_user.id,
-            item_id=payload.item_id,
-            correct=correct,
-            arm=current_user.arm,
-        )
-
-    return AttemptResult(
-        correct=correct,
-        correct_answer=item.answer,
-        delta=delta,
-    )
+    change = notice.model_copy(update={"messages": messages})
+    return AttemptResultOut(correct=correct, correct_answer=item.answer, delta=delta, change=change)

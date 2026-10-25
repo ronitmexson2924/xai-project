@@ -2,20 +2,15 @@ items:
 - id: graph-adjacency-list-1
   concept_id: graph-representation
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Graph Adjacency
-    List?
+  stem: Which statement correctly characterizes the core invariant of Graph Adjacency List?
   options:
   - Space complexity is O(V + E), optimal for sparse graphs compared to O(V^2) matrix.
   - It operates without bounds and skips checking the termination condition.
   - It executes in reverse order without updating state.
   - It treats all elements as mutually independent without relationships.
-  answer: Space complexity is O(V + E), optimal for sparse graphs compared to O(V^2)
-    matrix.
+  answer: Space complexity is O(V + E), optimal for sparse graphs compared to O(V^2) matrix.
   difficulty: 2
-  distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: gr-undirected-one-way
-    It executes in reverse order without updating state.: gr-undirected-one-way
-    It treats all elements as mutually independent without relationships.: gr-undirected-one-way
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: graph-adjacency-list-2
@@ -39,17 +34,13 @@ items:
   - It executes an infinite loop that ignores input constraints.
   answer: Adjacency list maps each vertex to a list of adjacent neighbor vertices.
   difficulty: 2
-  distractor_misconceptions:
-    It guarantees random O(1) jump access to any uncomputed state.: gr-undirected-one-way
-    It eliminates the need for any base state or bounds.: gr-undirected-one-way
-    It executes an infinite loop that ignores input constraints.: gr-undirected-one-way
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: graph-adjacency-list-3
   concept_id: graph-representation
   kind: mcq
-  stem: When implementing Graph Adjacency List, which error represents the most frequent
-    pitfall?
+  stem: When implementing Graph Adjacency List, which error represents the most frequent pitfall?
   options:
   - Forgetting to add both (u, v) and (v, u) for undirected graphs.
   - Using descriptive identifier names for local pointers.
@@ -57,31 +48,26 @@ items:
   - Checking preconditions before accessing boundary values.
   answer: Forgetting to add both (u, v) and (v, u) for undirected graphs.
   difficulty: 3
-  distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: gr-undirected-one-way
-    Structuring code inside functions rather than flat scripts.: gr-undirected-one-way
-    Checking preconditions before accessing boundary values.: gr-undirected-one-way
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: graph-adjacency-list-mc
   concept_id: graph-representation
   kind: mcq
-  stem: 'Quick Check: True or False — for Graph Adjacency List, Space complexity is
-    O(V + E), optimal for sparse graphs compared to O(V^2) matrix.'
+  stem: 'Quick Check: True or False — for Graph Adjacency List, Space complexity is O(V + E), optimal
+    for sparse graphs compared to O(V^2) matrix.'
   options:
   - 'True'
   - 'False'
   answer: 'True'
   difficulty: 1
-  distractor_misconceptions:
-    'False': gr-undirected-one-way
+  distractor_misconceptions: {}
   is_microcheck: true
   review_status: approved
 - id: breadth-first-search-queue-1
   concept_id: graph-bfs
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Breadth-First
-    Search (BFS)?
+  stem: Which statement correctly characterizes the core invariant of Breadth-First Search (BFS)?
   options:
   - Guarantees finding shortest path in unweighted graphs.
   - It operates without bounds and skips checking the termination condition.
@@ -89,10 +75,7 @@ items:
   - It treats all elements as mutually independent without relationships.
   answer: Guarantees finding shortest path in unweighted graphs.
   difficulty: 3
-  distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: bfs-mark-on-dequeue
-    It executes in reverse order without updating state.: bfs-weighted-shortest
-    It treats all elements as mutually independent without relationships.: bfs-mark-on-dequeue
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: breadth-first-search-queue-2
@@ -110,59 +93,46 @@ items:
 
     What is the fundamental guarantee demonstrated by this trace?'
   options:
-  - BFS explores vertices in order of increasing distance from source using a FIFO
-    queue.
+  - BFS explores vertices in order of increasing distance from source using a FIFO queue.
   - It guarantees random O(1) jump access to any uncomputed state.
   - It eliminates the need for any base state or bounds.
   - It executes an infinite loop that ignores input constraints.
-  answer: BFS explores vertices in order of increasing distance from source using
-    a FIFO queue.
+  answer: BFS explores vertices in order of increasing distance from source using a FIFO queue.
   difficulty: 3
-  distractor_misconceptions:
-    It guarantees random O(1) jump access to any uncomputed state.: bfs-mark-on-dequeue
-    It eliminates the need for any base state or bounds.: bfs-weighted-shortest
-    It executes an infinite loop that ignores input constraints.: bfs-mark-on-dequeue
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: breadth-first-search-queue-3
   concept_id: graph-bfs
   kind: mcq
-  stem: When implementing Breadth-First Search (BFS), which error represents the most
-    frequent pitfall?
+  stem: When implementing Breadth-First Search (BFS), which error represents the most frequent pitfall?
   options:
-  - Marking vertex visited when dequeued instead of when enqueued (causing duplicate
-    entries).
+  - Marking vertex visited when dequeued instead of when enqueued (causing duplicate entries).
   - Using descriptive identifier names for local pointers.
   - Structuring code inside functions rather than flat scripts.
   - Checking preconditions before accessing boundary values.
-  answer: Marking vertex visited when dequeued instead of when enqueued (causing duplicate
-    entries).
+  answer: Marking vertex visited when dequeued instead of when enqueued (causing duplicate entries).
   difficulty: 4
-  distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: bfs-mark-on-dequeue
-    Structuring code inside functions rather than flat scripts.: bfs-weighted-shortest
-    Checking preconditions before accessing boundary values.: bfs-mark-on-dequeue
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: breadth-first-search-queue-mc
   concept_id: graph-bfs
   kind: mcq
-  stem: 'Quick Check: True or False — for Breadth-First Search (BFS), Guarantees finding
-    shortest path in unweighted graphs.'
+  stem: 'Quick Check: True or False — for Breadth-First Search (BFS), Guarantees finding shortest path
+    in unweighted graphs.'
   options:
   - 'True'
   - 'False'
   answer: 'True'
   difficulty: 2
-  distractor_misconceptions:
-    'False': bfs-mark-on-dequeue
+  distractor_misconceptions: {}
   is_microcheck: true
   review_status: approved
 - id: depth-first-search-visited-1
   concept_id: graph-dfs
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Depth-First
-    Search (DFS)?
+  stem: Which statement correctly characterizes the core invariant of Depth-First Search (DFS)?
   options:
   - A visited set is mandatory to prevent infinite loops in cyclic graphs.
   - It operates without bounds and skips checking the termination condition.
@@ -170,10 +140,7 @@ items:
   - It treats all elements as mutually independent without relationships.
   answer: A visited set is mandatory to prevent infinite loops in cyclic graphs.
   difficulty: 3
-  distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: dfs-no-visited
-    It executes in reverse order without updating state.: dfs-no-visited
-    It treats all elements as mutually independent without relationships.: dfs-no-visited
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: depth-first-search-visited-2
@@ -197,17 +164,13 @@ items:
   - It executes an infinite loop that ignores input constraints.
   answer: DFS explores as far along each branch as possible before backtracking.
   difficulty: 3
-  distractor_misconceptions:
-    It guarantees random O(1) jump access to any uncomputed state.: dfs-no-visited
-    It eliminates the need for any base state or bounds.: dfs-no-visited
-    It executes an infinite loop that ignores input constraints.: dfs-no-visited
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: depth-first-search-visited-3
   concept_id: graph-dfs
   kind: mcq
-  stem: When implementing Depth-First Search (DFS), which error represents the most
-    frequent pitfall?
+  stem: When implementing Depth-First Search (DFS), which error represents the most frequent pitfall?
   options:
   - Omitting visited set on cyclic graphs causes maximum recursion depth crash.
   - Using descriptive identifier names for local pointers.
@@ -215,43 +178,34 @@ items:
   - Checking preconditions before accessing boundary values.
   answer: Omitting visited set on cyclic graphs causes maximum recursion depth crash.
   difficulty: 4
-  distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: dfs-no-visited
-    Structuring code inside functions rather than flat scripts.: dfs-no-visited
-    Checking preconditions before accessing boundary values.: dfs-no-visited
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: depth-first-search-visited-mc
   concept_id: graph-dfs
   kind: mcq
-  stem: 'Quick Check: True or False — for Depth-First Search (DFS), A visited set
-    is mandatory to prevent infinite loops in cyclic graphs.'
+  stem: 'Quick Check: True or False — for Depth-First Search (DFS), A visited set is mandatory to prevent
+    infinite loops in cyclic graphs.'
   options:
   - 'True'
   - 'False'
   answer: 'True'
   difficulty: 2
-  distractor_misconceptions:
-    'False': dfs-no-visited
+  distractor_misconceptions: {}
   is_microcheck: true
   review_status: approved
 - id: topological-sort-1
   concept_id: topological-sort
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Topological
-    Sorting (Kahn's Algorithm)?
+  stem: Which statement correctly characterizes the core invariant of Topological Sorting (Kahn's Algorithm)?
   options:
   - Vertices with in-degree 0 have no unmet dependencies and can be processed first.
   - It operates without bounds and skips checking the termination condition.
   - It executes in reverse order without updating state.
   - It treats all elements as mutually independent without relationships.
-  answer: Vertices with in-degree 0 have no unmet dependencies and can be processed
-    first.
+  answer: Vertices with in-degree 0 have no unmet dependencies and can be processed first.
   difficulty: 4
-  distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: topo-unique
-    It executes in reverse order without updating state.: topo-cycles-ok
-    It treats all elements as mutually independent without relationships.: topo-unique
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: topological-sort-2
@@ -275,17 +229,14 @@ items:
   - It executes an infinite loop that ignores input constraints.
   answer: Topological sort orders vertices of a Directed Acyclic Graph (DAG) by dependency.
   difficulty: 4
-  distractor_misconceptions:
-    It guarantees random O(1) jump access to any uncomputed state.: topo-unique
-    It eliminates the need for any base state or bounds.: topo-cycles-ok
-    It executes an infinite loop that ignores input constraints.: topo-unique
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: topological-sort-3
   concept_id: topological-sort
   kind: mcq
-  stem: When implementing Topological Sorting (Kahn's Algorithm), which error represents
-    the most frequent pitfall?
+  stem: When implementing Topological Sorting (Kahn's Algorithm), which error represents the most frequent
+    pitfall?
   options:
   - Attempting to topologically sort a graph with directed cycles.
   - Using descriptive identifier names for local pointers.
@@ -293,24 +244,20 @@ items:
   - Checking preconditions before accessing boundary values.
   answer: Attempting to topologically sort a graph with directed cycles.
   difficulty: 5
-  distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: topo-unique
-    Structuring code inside functions rather than flat scripts.: topo-cycles-ok
-    Checking preconditions before accessing boundary values.: topo-unique
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: topological-sort-mc
   concept_id: topological-sort
   kind: mcq
-  stem: 'Quick Check: True or False — for Topological Sorting (Kahn''s Algorithm),
-    Vertices with in-degree 0 have no unmet dependencies and can be processed first.'
+  stem: 'Quick Check: True or False — for Topological Sorting (Kahn''s Algorithm), Vertices with in-degree
+    0 have no unmet dependencies and can be processed first.'
   options:
   - 'True'
   - 'False'
   answer: 'True'
   difficulty: 3
-  distractor_misconceptions:
-    'False': topo-unique
+  distractor_misconceptions: {}
   is_microcheck: true
   review_status: approved
 - id: dijkstra-shortest-path-1
@@ -324,10 +271,7 @@ items:
   - It treats all elements as mutually independent without relationships.
   answer: Relaxation updates dist[v] = min(dist[v], dist[u] + weight(u, v)).
   difficulty: 4
-  distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: dij-negative-weights
-    It executes in reverse order without updating state.: dij-negative-weights
-    It treats all elements as mutually independent without relationships.: dij-negative-weights
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: dijkstra-shortest-path-2
@@ -345,25 +289,19 @@ items:
 
     What is the fundamental guarantee demonstrated by this trace?'
   options:
-  - Dijkstra greedily extracts vertex with minimum provisional distance from a priority
-    queue.
+  - Dijkstra greedily extracts vertex with minimum provisional distance from a priority queue.
   - It guarantees random O(1) jump access to any uncomputed state.
   - It eliminates the need for any base state or bounds.
   - It executes an infinite loop that ignores input constraints.
-  answer: Dijkstra greedily extracts vertex with minimum provisional distance from
-    a priority queue.
+  answer: Dijkstra greedily extracts vertex with minimum provisional distance from a priority queue.
   difficulty: 4
-  distractor_misconceptions:
-    It guarantees random O(1) jump access to any uncomputed state.: dij-negative-weights
-    It eliminates the need for any base state or bounds.: dij-negative-weights
-    It executes an infinite loop that ignores input constraints.: dij-negative-weights
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: dijkstra-shortest-path-3
   concept_id: dijkstra
   kind: mcq
-  stem: When implementing Dijkstra's Algorithm, which error represents the most frequent
-    pitfall?
+  stem: When implementing Dijkstra's Algorithm, which error represents the most frequent pitfall?
   options:
   - Dijkstra fails on graphs with negative edge weights.
   - Using descriptive identifier names for local pointers.
@@ -371,43 +309,34 @@ items:
   - Checking preconditions before accessing boundary values.
   answer: Dijkstra fails on graphs with negative edge weights.
   difficulty: 5
-  distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: dij-negative-weights
-    Structuring code inside functions rather than flat scripts.: dij-negative-weights
-    Checking preconditions before accessing boundary values.: dij-negative-weights
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: dijkstra-shortest-path-mc
   concept_id: dijkstra
   kind: mcq
-  stem: 'Quick Check: True or False — for Dijkstra''s Algorithm, Relaxation updates
-    dist[v] = min(dist[v], dist[u] + weight(u, v)).'
+  stem: 'Quick Check: True or False — for Dijkstra''s Algorithm, Relaxation updates dist[v] = min(dist[v],
+    dist[u] + weight(u, v)).'
   options:
   - 'True'
   - 'False'
   answer: 'True'
   difficulty: 3
-  distractor_misconceptions:
-    'False': dij-negative-weights
+  distractor_misconceptions: {}
   is_microcheck: true
   review_status: approved
 - id: cycle-detection-directed-1
   concept_id: connected-components
   kind: mcq
-  stem: Which statement correctly characterizes the core invariant of Cycle Detection
-    in Directed Graphs?
+  stem: Which statement correctly characterizes the core invariant of Cycle Detection in Directed Graphs?
   options:
   - A back-edge points to an ancestor node currently in the active DFS recursion stack.
   - It operates without bounds and skips checking the termination condition.
   - It executes in reverse order without updating state.
   - It treats all elements as mutually independent without relationships.
-  answer: A back-edge points to an ancestor node currently in the active DFS recursion
-    stack.
+  answer: A back-edge points to an ancestor node currently in the active DFS recursion stack.
   difficulty: 4
-  distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: cc-single-start
-    It executes in reverse order without updating state.: cc-single-start
-    It treats all elements as mutually independent without relationships.: cc-single-start
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: cycle-detection-directed-2
@@ -431,17 +360,14 @@ items:
   - It executes an infinite loop that ignores input constraints.
   answer: A directed graph contains a cycle if and only if DFS encounters a back-edge.
   difficulty: 4
-  distractor_misconceptions:
-    It guarantees random O(1) jump access to any uncomputed state.: cc-single-start
-    It eliminates the need for any base state or bounds.: cc-single-start
-    It executes an infinite loop that ignores input constraints.: cc-single-start
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: cycle-detection-directed-3
   concept_id: connected-components
   kind: mcq
-  stem: When implementing Cycle Detection in Directed Graphs, which error represents
-    the most frequent pitfall?
+  stem: When implementing Cycle Detection in Directed Graphs, which error represents the most frequent
+    pitfall?
   options:
   - Treating cross-edges or forward-edges to finished nodes as cycle indicators.
   - Using descriptive identifier names for local pointers.
@@ -449,23 +375,19 @@ items:
   - Checking preconditions before accessing boundary values.
   answer: Treating cross-edges or forward-edges to finished nodes as cycle indicators.
   difficulty: 5
-  distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: cc-single-start
-    Structuring code inside functions rather than flat scripts.: cc-single-start
-    Checking preconditions before accessing boundary values.: cc-single-start
+  distractor_misconceptions: {}
   is_microcheck: false
   review_status: approved
 - id: cycle-detection-directed-mc
   concept_id: connected-components
   kind: mcq
-  stem: 'Quick Check: True or False — for Cycle Detection in Directed Graphs, A back-edge
-    points to an ancestor node currently in the active DFS recursion stack.'
+  stem: 'Quick Check: True or False — for Cycle Detection in Directed Graphs, A back-edge points to an
+    ancestor node currently in the active DFS recursion stack.'
   options:
   - 'True'
   - 'False'
   answer: 'True'
   difficulty: 3
-  distractor_misconceptions:
-    'False': cc-single-start
+  distractor_misconceptions: {}
   is_microcheck: true
   review_status: approved

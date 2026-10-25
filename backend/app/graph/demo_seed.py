@@ -1,8 +1,10 @@
 """Create three demo learners with interesting states, by running the real services.
 
-    python -m app.graph.demo_seed      (from backend/, after seeding content with app.graph.seed)
+    python -m app.graph.demo_seed [--password PW]   (from backend/, after app.graph.seed)
 
-For local development and demos only; never run it against the pilot database. It is idempotent:
+For local development and demos only; never run it against the pilot database. With --password
+the demo accounts can log in (asha@demo.invalid, ben@..., chen@...); without it they cannot.
+It is idempotent:
 existing demo learners are deleted and rebuilt. Concepts without approved items get clearly
 labelled draft placeholder items so the demo works before the real item bank (M5) exists.
 
@@ -81,14 +83,21 @@ def ensure_items(session: Session, concept_ids: list[str]) -> None:
 
 
 class DemoLearner:
-    def __init__(self, session: Session, graph: GraphSnapshot, name: str, arm: ExperimentArm):
+    def __init__(
+        self,
+        session: Session,
+        graph: GraphSnapshot,
+        name: str,
+        arm: ExperimentArm,
+        password_hash: str = NO_LOGIN,
+    ):
         self.session, self.graph = session, graph
         self.user_id = uuid.uuid4()
         session.add(
             m.User(
                 id=self.user_id,
                 email=f"{name.lower()}{DEMO_DOMAIN}",
-                password_hash=NO_LOGIN,
+                password_hash=password_hash,
                 display_name=f"{name} (demo)",
                 consent_at=START,
             )
@@ -163,12 +172,12 @@ ARRAYS = ["arrays-indexing", "array-traversal", "big-o-notation", "loop-complexi
 RECURSION = ["recursion-base-case", "recursive-case"]
 
 
-def build(session: Session) -> dict[str, uuid.UUID]:
+def build(session: Session, password_hash: str = NO_LOGIN) -> dict[str, uuid.UUID]:
     session.execute(delete(m.User).where(m.User.email.like(f"%{DEMO_DOMAIN}")))
     ensure_items(session, BASICS + ARRAYS + RECURSION + ["references", "two-pointers"])
     graph = GraphSnapshot.from_db(session, include_drafts=True)
 
-    asha = DemoLearner(session, graph, "Asha", "closed_loop")
+    asha = DemoLearner(session, graph, "Asha", "closed_loop", password_hash)
     asha.questionnaire(
         {
             "abstraction_preference": 1,
@@ -181,7 +190,7 @@ def build(session: Session) -> dict[str, uuid.UUID]:
     for concept_id, correct in (("variables-and-types", True), ("loops", False)):
         asha.answer(concept_id, correct)
 
-    ben = DemoLearner(session, graph, "Ben", "static_personalized")
+    ben = DemoLearner(session, graph, "Ben", "static_personalized", password_hash)
     ben.questionnaire(_neutral())
     for concept_id in BASICS:
         for _ in range(3):
@@ -190,7 +199,7 @@ def build(session: Session) -> dict[str, uuid.UUID]:
     ben.answer("recursive-case", False)
     ben.answer("recursive-case", False)
 
-    chen = DemoLearner(session, graph, "Chen", "closed_loop")
+    chen = DemoLearner(session, graph, "Chen", "closed_loop", password_hash)
     chen.questionnaire(_neutral())
     for concept_id in BASICS + ARRAYS + RECURSION:
         for _ in range(4):
@@ -217,10 +226,18 @@ def _neutral() -> dict[str, int]:
 
 
 def main() -> int:
+    import argparse
+
+    from app.auth.security import hash_password
     from app.db.session import SessionLocal
 
+    parser = argparse.ArgumentParser(description="Create the demo learners (development only).")
+    parser.add_argument("--password", help="let the demo accounts log in with this password")
+    args = parser.parse_args()
+    password_hash = hash_password(args.password) if args.password else NO_LOGIN
+
     with SessionLocal() as session:
-        users = build(session)
+        users = build(session, password_hash)
         session.commit()
         graph = GraphSnapshot.from_db(session, include_drafts=True)
         model = LearnerModel(session, graph)

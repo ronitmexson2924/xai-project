@@ -10,6 +10,10 @@ SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 
 
 def get_db() -> Iterator[Session]:
-    """FastAPI dependency: one session per request, committed by the caller."""
+    """FastAPI dependency: one session per request. Handlers commit explicitly; anything not
+    committed (an error, a read-only request) is rolled back when the request ends."""
     with SessionLocal() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            session.rollback()

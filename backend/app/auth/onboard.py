@@ -1,122 +1,113 @@
-"""Cohort onboarding and batch provisioning CLI for pilot study (Task M8).
+"""Pilot account provisioning (Task M8).
 
 Owner: Mit.
-Provisions batches of participants with balanced experiment arm assignment
-and exports credentials for study coordinators (EVALUATION_PLAN.md § Pilot protocol).
+
+    python -m app.auth.onboard cohort --count 45 --domain study.edu --output-csv roster.csv
+    python -m app.auth.onboard admin --email you@uni.edu      (asks for the password)
+
+`cohort` creates participant accounts with balanced, randomised arms (the same allocation as
+self-registration) and writes their temporary passwords to a CSV for the study coordinator. The CSV
+holds credentials: keep it out of git (*.roster.csv is ignored) and delete it after hand-out.
+`admin` creates the account that may open /admin and the research export.
 """
 
 import argparse
 import csv
+import getpass
 import secrets
 import string
+import sys
 from pathlib import Path
 
-from app.auth.models import ALL_ARMS, ExperimentArm
+from sqlalchemy.orm import Session
+
+from app.auth.models import MIN_PASSWORD_LENGTH
 from app.auth.security import hash_password
-from app.auth.store import InMemoryUserStore, auth_store
+from app.auth.store import UserAlreadyExistsError, register_user
+
+PASSWORD_SYMBOLS = "!@#$%^&*"
 
 
-def generate_secure_password(length: int = 12) -> str:
-    """Generates a secure temporary password containing upper, lower, digits, and special chars."""
-    alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+def generate_secure_password(length: int = 14) -> str:
+    """A random password with upper- and lower-case letters, a digit and a symbol."""
+    alphabet = string.ascii_letters + string.digits + PASSWORD_SYMBOLS
     while True:
         password = "".join(secrets.choice(alphabet) for _ in range(length))
         if (
             any(c.islower() for c in password)
             and any(c.isupper() for c in password)
             and any(c.isdigit() for c in password)
-            and any(c in "!@#$%^&*" for c in password)
+            and any(c in PASSWORD_SYMBOLS for c in password)
         ):
             return password
 
 
 def onboard_cohort(
-    count: int = 45,
-    email_prefix: str = "pilot_student",
-    domain: str = "dsa-pilot.edu",
-    store: InMemoryUserStore | None = None,
+    session: Session,
+    count: int,
+    email_prefix: str = "participant",
+    domain: str = "study.edu",
     csv_output_path: Path | None = None,
-) -> list[dict]:
-    """Provisions a batch of pilot participants with balanced arm distribution."""
-    target_store = store or auth_store
+) -> list[dict[str, str]]:
     participants = []
-
-    # Cycle evenly through experiment arms
-    arms_cycle: list[ExperimentArm] = list(ALL_ARMS)
-
-    for i in range(count):
-        idx = i + 1
-        email = f"{email_prefix}_{idx:03d}@{domain}"
-        display_name = f"Student {idx:03d}"
-        temp_pwd = generate_secure_password()
-        pwd_hash = hash_password(temp_pwd)
-
-        # Balanced assignment round-robin across arms
-        arm = arms_cycle[i % len(arms_cycle)]
-
-        user, assignment = target_store.register_user(email, pwd_hash, display_name)
-        assignment.arm = arm
-
-        participant_info = {
-            "user_id": str(user.id),
-            "email": email,
-            "display_name": display_name,
-            "temporary_password": temp_pwd,
-            "arm": arm,
-        }
-        participants.append(participant_info)
-
-    if csv_output_path:
+    for i in range(1, count + 1):
+        email = f"{email_prefix}_{i:03d}@{domain}"
+        password = generate_secure_password()
+        try:
+            user, arm = register_user(session, email, hash_password(password), f"Student {i:03d}")
+        except UserAlreadyExistsError:
+            continue  # re-running the command only adds the missing accounts
+        participants.append(
+            {"user_id": str(user.id), "email": email, "temporary_password": password, "arm": arm}
+        )
+    if csv_output_path and participants:
         csv_output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(csv_output_path, "w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(
-                f,
-                fieldnames=["user_id", "email", "display_name", "temporary_password", "arm"],
-            )
+            writer = csv.DictWriter(f, fieldnames=list(participants[0]))
             writer.writeheader()
             writer.writerows(participants)
-
     return participants
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Onboard pilot participant cohort.")
-    parser.add_argument(
-        "--count",
-        type=int,
-        default=45,
-        help="Number of participant accounts to provision (default: 45).",
-    )
-    parser.add_argument(
-        "--prefix",
-        type=str,
-        default="participant",
-        help="Email prefix for learners.",
-    )
-    parser.add_argument(
-        "--domain",
-        type=str,
-        default="study.edu",
-        help="Email domain for learners.",
-    )
-    parser.add_argument(
-        "--output-csv",
-        type=Path,
-        default=Path("research/pilot_cohort_roster.csv"),
-        help="Destination path for coordinator credentials CSV.",
+def create_admin(session: Session, email: str, password: str, display_name: str = "Admin") -> None:
+    if len(password) < MIN_PASSWORD_LENGTH:
+        raise ValueError(f"password must be at least {MIN_PASSWORD_LENGTH} characters")
+    register_user(
+        session, email, hash_password(password), display_name, arm="generic", is_admin=True
     )
 
+
+def main() -> int:
+    from app.db.session import SessionLocal
+
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    sub = parser.add_subparsers(dest="command", required=True)
+    cohort = sub.add_parser("cohort", help="create participant accounts")
+    cohort.add_argument("--count", type=int, default=45)
+    cohort.add_argument("--prefix", default="participant")
+    cohort.add_argument("--domain", default="study.edu")
+    cohort.add_argument("--output-csv", type=Path, default=Path("pilot.roster.csv"))
+    admin = sub.add_parser("admin", help="create an administrator account")
+    admin.add_argument("--email", required=True)
+    admin.add_argument("--name", default="Admin")
     args = parser.parse_args()
-    results = onboard_cohort(
-        count=args.count,
-        email_prefix=args.prefix,
-        domain=args.domain,
-        csv_output_path=args.output_csv,
-    )
 
-    print(f"Successfully provisioned {len(results)} pilot participants.")
-    print(f"Credentials written to: {args.output_csv}")
+    with SessionLocal() as session:
+        if args.command == "cohort":
+            results = onboard_cohort(session, args.count, args.prefix, args.domain, args.output_csv)
+            session.commit()
+            print(f"Created {len(results)} accounts; credentials in {args.output_csv}")
+        else:
+            password = getpass.getpass("Admin password: ")
+            try:
+                create_admin(session, args.email, password, args.name)
+            except (ValueError, UserAlreadyExistsError) as err:
+                print(f"error: {err}", file=sys.stderr)
+                return 1
+            session.commit()
+            print(f"Created admin {args.email}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

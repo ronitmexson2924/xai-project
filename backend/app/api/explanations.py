@@ -3,43 +3,34 @@
 Owner: Mit.
 """
 
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter
 
-from app.api.deps import FeedbackAnalyzerDep, LearnerModelDep
-from app.api.learners import log_state_update
-from app.api.schemas import EventBatchIn, EventBatchResponse
-from app.auth import UserResponse, require_consent
-from app.contracts.explanation import Explanation, ExplanationFeedbackSummary
+from app.api.attempts import close_feedback_loop
+from app.api.deps import ExplainabilityDep, FeedbackAnalyzerDep, LearnerModelDep
+from app.api.errors import not_found
+from app.api.schemas import EventBatchIn, EventBatchResponse, FeedbackOut
+from app.auth import CurrentUser, DbDep, LearnerDep
+from app.contracts.explanation import Explanation, ExplanationEventIn
+from app.db import models as m
+from app.telemetry import explanation_from_row
 
 router = APIRouter(prefix="/explanations", tags=["explanations"])
 
 
-@router.get(
-    "/{explanation_id}",
-    response_model=Explanation,
-    summary="Fetch explanation details by ID",
-)
-def get_explanation(
-    explanation_id: UUID,
-    _: Annotated[UserResponse, Depends(require_consent)],
-    analyzer: FeedbackAnalyzerDep,
-) -> Explanation:
-    # Look up in registered explanations (or database in production)
-    if hasattr(analyzer, "_explanations") and explanation_id in analyzer._explanations:
-        return analyzer._explanations[explanation_id]
+def own_explanation(session, current: CurrentUser, explanation_id: UUID) -> m.ExplanationRow:
+    row = session.get(m.ExplanationRow, explanation_id)
+    if row is None or row.user_id != current.id:
+        raise not_found("explanation")
+    return row
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail={
-            "error": {
-                "code": "EXPLANATION_NOT_FOUND",
-                "message": f"Explanation {explanation_id} was not found",
-            }
-        },
-    )
+
+@router.get(
+    "/{explanation_id}", response_model=Explanation, summary="Fetch one of your explanations"
+)
+def get_explanation(explanation_id: UUID, current: LearnerDep, session: DbDep) -> Explanation:
+    return explanation_from_row(own_explanation(session, current, explanation_id))
 
 
 @router.post(
@@ -50,41 +41,35 @@ def get_explanation(
 def record_events(
     explanation_id: UUID,
     payload: EventBatchIn,
-    current_user: Annotated[UserResponse, Depends(require_consent)],
+    current: LearnerDep,
+    session: DbDep,
     analyzer: FeedbackAnalyzerDep,
 ) -> EventBatchResponse:
-    accepted, duplicates = analyzer.record_events(
-        explanation_id=explanation_id,
-        user_id=current_user.id,
-        events=payload.events,
-    )
+    own_explanation(session, current, explanation_id)
+    events = [ExplanationEventIn.model_validate(e.model_dump()) for e in payload.events]
+    accepted, duplicates = analyzer.record_events(explanation_id, current.id, events)
+    session.commit()
     return EventBatchResponse(accepted=accepted, duplicates=duplicates)
 
 
 @router.post(
     "/{explanation_id}/close",
-    response_model=ExplanationFeedbackSummary,
-    summary="Finalize explanation interaction when dismissed without micro-check",
+    response_model=FeedbackOut,
+    summary="Finalise an explanation dismissed without answering its micro-check",
 )
 def close_explanation(
     explanation_id: UUID,
-    current_user: Annotated[UserResponse, Depends(require_consent)],
+    current: LearnerDep,
+    session: DbDep,
     analyzer: FeedbackAnalyzerDep,
     learner_model: LearnerModelDep,
-) -> ExplanationFeedbackSummary:
-    try:
-        summary = analyzer.summarize(explanation_id)
-    except KeyError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={
-                "error": {
-                    "code": "EXPLANATION_NOT_FOUND",
-                    "message": f"Explanation {explanation_id} does not exist",
-                }
-            },
-        ) from None
-
-    delta = learner_model.apply_explanation_feedback(summary)
-    log_state_update(current_user.id, delta)
-    return summary
+    explainability: ExplainabilityDep,
+) -> FeedbackOut:
+    row = own_explanation(session, current, explanation_id)
+    stored = session.get(m.ExplanationFeedbackRow, explanation_id)
+    if stored is not None:  # already summarised (answered or closed before): nothing new to apply
+        return FeedbackOut.model_validate(stored.summary)
+    delta = close_feedback_loop(session, analyzer, learner_model, row, followup_correct=None)
+    summary = session.get(m.ExplanationFeedbackRow, explanation_id).summary
+    session.commit()
+    return FeedbackOut(**summary, change=explainability.explain_change(delta))
