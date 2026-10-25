@@ -13,8 +13,9 @@ items:
     operations.
   difficulty: 3
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: dp-apply-to-disjoint-subproblems
-    It executes in reverse order without updating state.: dp-apply-to-disjoint-subproblems
+    It operates without bounds and skips checking the termination condition.: ovl-dc-is-dp
+    It executes in reverse order without updating state.: ovl-dc-is-dp
+    It treats all elements as mutually independent without relationships.: ovl-dc-is-dp
   is_microcheck: false
   review_status: approved
 - id: overlapping-subproblems-2
@@ -41,8 +42,9 @@ items:
     identical states.
   difficulty: 3
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: dp-apply-to-disjoint-subproblems
-    It executes an infinite loop that ignores input constraints.: dp-apply-to-disjoint-subproblems
+    It guarantees random O(1) jump access to any uncomputed state.: ovl-dc-is-dp
+    It eliminates the need for any base state or bounds.: ovl-dc-is-dp
+    It executes an infinite loop that ignores input constraints.: ovl-dc-is-dp
   is_microcheck: false
   review_status: approved
 - id: overlapping-subproblems-3
@@ -59,8 +61,9 @@ items:
     distinct).
   difficulty: 4
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: dp-apply-to-disjoint-subproblems
-    Checking preconditions before accessing boundary values.: dp-apply-to-disjoint-subproblems
+    Using descriptive identifier names for local pointers.: ovl-dc-is-dp
+    Structuring code inside functions rather than flat scripts.: ovl-dc-is-dp
+    Checking preconditions before accessing boundary values.: ovl-dc-is-dp
   is_microcheck: false
   review_status: approved
 - id: overlapping-subproblems-mc
@@ -74,11 +77,11 @@ items:
   answer: 'True'
   difficulty: 2
   distractor_misconceptions:
-    'False': dp-apply-to-disjoint-subproblems
+    'False': ovl-dc-is-dp
   is_microcheck: true
   review_status: approved
 - id: optimal-substructure-1
-  concept_id: optimal-substructure
+  concept_id: dp-state-design
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Optimal Substructure?
   options:
@@ -91,12 +94,13 @@ items:
     B and B to C.
   difficulty: 3
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: all-problems-have-optimal-substructure
-    It executes in reverse order without updating state.: all-problems-have-optimal-substructure
+    It operates without bounds and skips checking the termination condition.: dps-vague-state
+    It executes in reverse order without updating state.: dps-vague-state
+    It treats all elements as mutually independent without relationships.: dps-vague-state
   is_microcheck: false
   review_status: approved
 - id: optimal-substructure-2
-  concept_id: optimal-substructure
+  concept_id: dp-state-design
   kind: mcq
   stem: 'Consider this concrete application of Optimal Substructure:
 
@@ -118,12 +122,13 @@ items:
     solutions.
   difficulty: 3
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: all-problems-have-optimal-substructure
-    It executes an infinite loop that ignores input constraints.: all-problems-have-optimal-substructure
+    It guarantees random O(1) jump access to any uncomputed state.: dps-vague-state
+    It eliminates the need for any base state or bounds.: dps-vague-state
+    It executes an infinite loop that ignores input constraints.: dps-vague-state
   is_microcheck: false
   review_status: approved
 - id: optimal-substructure-3
-  concept_id: optimal-substructure
+  concept_id: dp-state-design
   kind: mcq
   stem: When implementing Optimal Substructure, which error represents the most frequent
     pitfall?
@@ -135,12 +140,13 @@ items:
   answer: Assuming longest simple path exhibits optimal substructure.
   difficulty: 4
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: all-problems-have-optimal-substructure
-    Checking preconditions before accessing boundary values.: all-problems-have-optimal-substructure
+    Using descriptive identifier names for local pointers.: dps-vague-state
+    Structuring code inside functions rather than flat scripts.: dps-vague-state
+    Checking preconditions before accessing boundary values.: dps-vague-state
   is_microcheck: false
   review_status: approved
 - id: optimal-substructure-mc
-  concept_id: optimal-substructure
+  concept_id: dp-state-design
   kind: mcq
   stem: 'Quick Check: True or False — for Optimal Substructure, Shortest path from
     A to C via B requires optimal shortest path from A to B and B to C.'
@@ -150,11 +156,11 @@ items:
   answer: 'True'
   difficulty: 2
   distractor_misconceptions:
-    'False': all-problems-have-optimal-substructure
+    'False': dps-vague-state
   is_microcheck: true
   review_status: approved
 - id: memoization-top-down-1
-  concept_id: memoization-top-down
+  concept_id: memoization
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Top-Down DP
     (Memoization)?
@@ -166,12 +172,13 @@ items:
   answer: Check memo table before computing; store result before returning.
   difficulty: 3
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: memoization-forget-store
-    It executes in reverse order without updating state.: memoization-forget-store
+    It operates without bounds and skips checking the termination condition.: memo-fresh-cache
+    It executes in reverse order without updating state.: memo-mutable-default
+    It treats all elements as mutually independent without relationships.: memo-fresh-cache
   is_microcheck: false
   review_status: approved
 - id: memoization-top-down-2
-  concept_id: memoization-top-down
+  concept_id: memoization
   kind: mcq
   stem: 'Consider this concrete application of Top-Down DP (Memoization):
 
@@ -194,12 +201,13 @@ items:
     a memo table.
   difficulty: 3
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: memoization-forget-store
-    It executes an infinite loop that ignores input constraints.: memoization-forget-store
+    It guarantees random O(1) jump access to any uncomputed state.: memo-fresh-cache
+    It eliminates the need for any base state or bounds.: memo-mutable-default
+    It executes an infinite loop that ignores input constraints.: memo-fresh-cache
   is_microcheck: false
   review_status: approved
 - id: memoization-top-down-3
-  concept_id: memoization-top-down
+  concept_id: memoization
   kind: mcq
   stem: When implementing Top-Down DP (Memoization), which error represents the most
     frequent pitfall?
@@ -211,12 +219,13 @@ items:
   answer: Forgetting to store the result into the memo table before returning.
   difficulty: 4
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: memoization-forget-store
-    Checking preconditions before accessing boundary values.: memoization-forget-store
+    Using descriptive identifier names for local pointers.: memo-fresh-cache
+    Structuring code inside functions rather than flat scripts.: memo-mutable-default
+    Checking preconditions before accessing boundary values.: memo-fresh-cache
   is_microcheck: false
   review_status: approved
 - id: memoization-top-down-mc
-  concept_id: memoization-top-down
+  concept_id: memoization
   kind: mcq
   stem: 'Quick Check: True or False — for Top-Down DP (Memoization), Check memo table
     before computing; store result before returning.'
@@ -226,11 +235,11 @@ items:
   answer: 'True'
   difficulty: 2
   distractor_misconceptions:
-    'False': memoization-forget-store
+    'False': memo-fresh-cache
   is_microcheck: true
   review_status: approved
 - id: tabulation-bottom-up-1
-  concept_id: tabulation-bottom-up
+  concept_id: tabulation
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Bottom-Up DP
     (Tabulation)?
@@ -242,12 +251,13 @@ items:
   answer: Eliminates recursion call stack overhead and allows space optimization.
   difficulty: 3
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: tabulation-wrong-order
-    It executes in reverse order without updating state.: tabulation-wrong-order
+    It operates without bounds and skips checking the termination condition.: tab-wrong-order
+    It executes in reverse order without updating state.: tab-wrong-order
+    It treats all elements as mutually independent without relationships.: tab-wrong-order
   is_microcheck: false
   review_status: approved
 - id: tabulation-bottom-up-2
-  concept_id: tabulation-bottom-up
+  concept_id: tabulation
   kind: mcq
   stem: 'Consider this concrete application of Bottom-Up DP (Tabulation):
 
@@ -269,12 +279,13 @@ items:
     state.
   difficulty: 3
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: tabulation-wrong-order
-    It executes an infinite loop that ignores input constraints.: tabulation-wrong-order
+    It guarantees random O(1) jump access to any uncomputed state.: tab-wrong-order
+    It eliminates the need for any base state or bounds.: tab-wrong-order
+    It executes an infinite loop that ignores input constraints.: tab-wrong-order
   is_microcheck: false
   review_status: approved
 - id: tabulation-bottom-up-3
-  concept_id: tabulation-bottom-up
+  concept_id: tabulation
   kind: mcq
   stem: When implementing Bottom-Up DP (Tabulation), which error represents the most
     frequent pitfall?
@@ -286,12 +297,13 @@ items:
   answer: Iterating in an order where required predecessor states are not yet computed.
   difficulty: 4
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: tabulation-wrong-order
-    Checking preconditions before accessing boundary values.: tabulation-wrong-order
+    Using descriptive identifier names for local pointers.: tab-wrong-order
+    Structuring code inside functions rather than flat scripts.: tab-wrong-order
+    Checking preconditions before accessing boundary values.: tab-wrong-order
   is_microcheck: false
   review_status: approved
 - id: tabulation-bottom-up-mc
-  concept_id: tabulation-bottom-up
+  concept_id: tabulation
   kind: mcq
   stem: 'Quick Check: True or False — for Bottom-Up DP (Tabulation), Eliminates recursion
     call stack overhead and allows space optimization.'
@@ -301,11 +313,11 @@ items:
   answer: 'True'
   difficulty: 2
   distractor_misconceptions:
-    'False': tabulation-wrong-order
+    'False': tab-wrong-order
   is_microcheck: true
   review_status: approved
 - id: dp-state-transition-1d-1
-  concept_id: dp-state-transition-1d
+  concept_id: knapsack-01
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of 1D State Transitions?
   options:
@@ -317,12 +329,13 @@ items:
     state.
   difficulty: 3
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: dp-transition-incomplete-branches
-    It executes in reverse order without updating state.: dp-transition-incomplete-branches
+    It operates without bounds and skips checking the termination condition.: ks-upward-loop
+    It executes in reverse order without updating state.: ks-greedy-by-ratio
+    It treats all elements as mutually independent without relationships.: ks-upward-loop
   is_microcheck: false
   review_status: approved
 - id: dp-state-transition-1d-2
-  concept_id: dp-state-transition-1d
+  concept_id: knapsack-01
   kind: mcq
   stem: 'Consider this concrete application of 1D State Transitions:
 
@@ -345,12 +358,13 @@ items:
     dp[i-1], dp[i-2].
   difficulty: 3
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: dp-transition-incomplete-branches
-    It executes an infinite loop that ignores input constraints.: dp-transition-incomplete-branches
+    It guarantees random O(1) jump access to any uncomputed state.: ks-upward-loop
+    It eliminates the need for any base state or bounds.: ks-greedy-by-ratio
+    It executes an infinite loop that ignores input constraints.: ks-upward-loop
   is_microcheck: false
   review_status: approved
 - id: dp-state-transition-1d-3
-  concept_id: dp-state-transition-1d
+  concept_id: knapsack-01
   kind: mcq
   stem: When implementing 1D State Transitions, which error represents the most frequent
     pitfall?
@@ -362,12 +376,13 @@ items:
   answer: Missing base cases causing index out-of-bounds or zero multiplication.
   difficulty: 4
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: dp-transition-incomplete-branches
-    Checking preconditions before accessing boundary values.: dp-transition-incomplete-branches
+    Using descriptive identifier names for local pointers.: ks-upward-loop
+    Structuring code inside functions rather than flat scripts.: ks-greedy-by-ratio
+    Checking preconditions before accessing boundary values.: ks-upward-loop
   is_microcheck: false
   review_status: approved
 - id: dp-state-transition-1d-mc
-  concept_id: dp-state-transition-1d
+  concept_id: knapsack-01
   kind: mcq
   stem: 'Quick Check: True or False — for 1D State Transitions, Identify minimum information
     required to unambiguously describe subproblem state.'
@@ -377,11 +392,11 @@ items:
   answer: 'True'
   difficulty: 2
   distractor_misconceptions:
-    'False': dp-transition-incomplete-branches
+    'False': ks-upward-loop
   is_microcheck: true
   review_status: approved
 - id: dp-state-transition-2d-1
-  concept_id: dp-state-transition-2d
+  concept_id: lcs
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of 2D Grid & Subsequence
     Transitions?
@@ -395,12 +410,13 @@ items:
     dp[i][j-1]).'
   difficulty: 4
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: 2d-dp-diagonal-vs-orthogonal
-    It executes in reverse order without updating state.: 2d-dp-diagonal-vs-orthogonal
+    It operates without bounds and skips checking the termination condition.: lcs-substring
+    It executes in reverse order without updating state.: lcs-substring
+    It treats all elements as mutually independent without relationships.: lcs-substring
   is_microcheck: false
   review_status: approved
 - id: dp-state-transition-2d-2
-  concept_id: dp-state-transition-2d
+  concept_id: lcs
   kind: mcq
   stem: 'Consider this concrete application of 2D Grid & Subsequence Transitions:
 
@@ -423,12 +439,13 @@ items:
     i and j).
   difficulty: 4
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: 2d-dp-diagonal-vs-orthogonal
-    It executes an infinite loop that ignores input constraints.: 2d-dp-diagonal-vs-orthogonal
+    It guarantees random O(1) jump access to any uncomputed state.: lcs-substring
+    It eliminates the need for any base state or bounds.: lcs-substring
+    It executes an infinite loop that ignores input constraints.: lcs-substring
   is_microcheck: false
   review_status: approved
 - id: dp-state-transition-2d-3
-  concept_id: dp-state-transition-2d
+  concept_id: lcs
   kind: mcq
   stem: When implementing 2D Grid & Subsequence Transitions, which error represents
     the most frequent pitfall?
@@ -440,12 +457,13 @@ items:
   answer: Confusing i and j indices or off-by-one with 1-indexed DP tables.
   difficulty: 5
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: 2d-dp-diagonal-vs-orthogonal
-    Checking preconditions before accessing boundary values.: 2d-dp-diagonal-vs-orthogonal
+    Using descriptive identifier names for local pointers.: lcs-substring
+    Structuring code inside functions rather than flat scripts.: lcs-substring
+    Checking preconditions before accessing boundary values.: lcs-substring
   is_microcheck: false
   review_status: approved
 - id: dp-state-transition-2d-mc
-  concept_id: dp-state-transition-2d
+  concept_id: lcs
   kind: mcq
   stem: 'Quick Check: True or False — for 2D Grid & Subsequence Transitions, LCS:
     if s1[i-1] == s2[j-1]: dp[i][j] = 1 + dp[i-1][j-1] else: max(dp[i-1][j], dp[i][j-1]).'
@@ -455,6 +473,6 @@ items:
   answer: 'True'
   difficulty: 3
   distractor_misconceptions:
-    'False': 2d-dp-diagonal-vs-orthogonal
+    'False': lcs-substring
   is_microcheck: true
   review_status: approved

@@ -12,7 +12,8 @@ items:
   difficulty: 1
   distractor_misconceptions:
     It operates without bounds and skips checking the termination condition.: loops-off-by-one
-    It executes in reverse order without updating state.: loops-never-terminate
+    It executes in reverse order without updating state.: loops-while-never-ends
+    It treats all elements as mutually independent without relationships.: loops-off-by-one
   is_microcheck: false
   review_status: approved
 - id: loops-2
@@ -37,8 +38,9 @@ items:
   answer: A loop runs code repeatedly while a termination condition holds.
   difficulty: 1
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: loops-off-by-one
-    It executes an infinite loop that ignores input constraints.: loops-never-terminate
+    It guarantees random O(1) jump access to any uncomputed state.: loops-off-by-one
+    It eliminates the need for any base state or bounds.: loops-while-never-ends
+    It executes an infinite loop that ignores input constraints.: loops-off-by-one
   is_microcheck: false
   review_status: approved
 - id: loops-3
@@ -55,7 +57,8 @@ items:
   difficulty: 2
   distractor_misconceptions:
     Using descriptive identifier names for local pointers.: loops-off-by-one
-    Checking preconditions before accessing boundary values.: loops-never-terminate
+    Structuring code inside functions rather than flat scripts.: loops-while-never-ends
+    Checking preconditions before accessing boundary values.: loops-off-by-one
   is_microcheck: false
   review_status: approved
 - id: loops-mc
@@ -73,7 +76,7 @@ items:
   is_microcheck: true
   review_status: approved
 - id: nested-loops-1
-  concept_id: nested-loops
+  concept_id: loop-complexity-analysis
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Nested Loops?
   options:
@@ -84,12 +87,13 @@ items:
   answer: 'Total iterations multiply: outer iterations * inner iterations.'
   difficulty: 2
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: nested-loops-add-not-mult
-    It executes in reverse order without updating state.: nested-loops-add-not-mult
+    It operates without bounds and skips checking the termination condition.: loopcx-two-loops-quadratic
+    It executes in reverse order without updating state.: loopcx-inner-bound-ignored
+    It treats all elements as mutually independent without relationships.: loopcx-two-loops-quadratic
   is_microcheck: false
   review_status: approved
 - id: nested-loops-2
-  concept_id: nested-loops
+  concept_id: loop-complexity-analysis
   kind: mcq
   stem: "Consider this concrete application of Nested Loops:\n\n```python\nfor i in\
     \ range(2):\n    for j in range(3): print(i, j)\n```\n\nWhat is the fundamental\
@@ -103,12 +107,13 @@ items:
     loop.
   difficulty: 2
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: nested-loops-add-not-mult
-    It executes an infinite loop that ignores input constraints.: nested-loops-add-not-mult
+    It guarantees random O(1) jump access to any uncomputed state.: loopcx-two-loops-quadratic
+    It eliminates the need for any base state or bounds.: loopcx-inner-bound-ignored
+    It executes an infinite loop that ignores input constraints.: loopcx-two-loops-quadratic
   is_microcheck: false
   review_status: approved
 - id: nested-loops-3
-  concept_id: nested-loops
+  concept_id: loop-complexity-analysis
   kind: mcq
   stem: When implementing Nested Loops, which error represents the most frequent pitfall?
   options:
@@ -119,12 +124,13 @@ items:
   answer: Confusing inner and outer index variables.
   difficulty: 3
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: nested-loops-add-not-mult
-    Checking preconditions before accessing boundary values.: nested-loops-add-not-mult
+    Using descriptive identifier names for local pointers.: loopcx-two-loops-quadratic
+    Structuring code inside functions rather than flat scripts.: loopcx-inner-bound-ignored
+    Checking preconditions before accessing boundary values.: loopcx-two-loops-quadratic
   is_microcheck: false
   review_status: approved
 - id: nested-loops-mc
-  concept_id: nested-loops
+  concept_id: loop-complexity-analysis
   kind: mcq
   stem: 'Quick Check: True or False — for Nested Loops, Total iterations multiply:
     outer iterations * inner iterations.'
@@ -134,11 +140,11 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': nested-loops-add-not-mult
+    'False': loopcx-two-loops-quadratic
   is_microcheck: true
   review_status: approved
 - id: time-complexity-intro-1
-  concept_id: time-complexity-intro
+  concept_id: big-o-notation
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Time Complexity
     Basics?
@@ -150,12 +156,13 @@ items:
   answer: Ignore constant multipliers and lower-order terms as N approaches infinity.
   difficulty: 2
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: time-comp-drop-high-order
-    It executes in reverse order without updating state.: time-comp-line-count-equals-time
+    It operates without bounds and skips checking the termination condition.: bigo-measures-seconds
+    It executes in reverse order without updating state.: bigo-keeps-constants
+    It treats all elements as mutually independent without relationships.: bigo-measures-seconds
   is_microcheck: false
   review_status: approved
 - id: time-complexity-intro-2
-  concept_id: time-complexity-intro
+  concept_id: big-o-notation
   kind: mcq
   stem: 'Consider this concrete application of Time Complexity Basics:
 
@@ -176,12 +183,13 @@ items:
   answer: Big-O characterizes the upper bound of operational steps as input N scales.
   difficulty: 2
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: time-comp-drop-high-order
-    It executes an infinite loop that ignores input constraints.: time-comp-line-count-equals-time
+    It guarantees random O(1) jump access to any uncomputed state.: bigo-measures-seconds
+    It eliminates the need for any base state or bounds.: bigo-keeps-constants
+    It executes an infinite loop that ignores input constraints.: bigo-measures-seconds
   is_microcheck: false
   review_status: approved
 - id: time-complexity-intro-3
-  concept_id: time-complexity-intro
+  concept_id: big-o-notation
   kind: mcq
   stem: When implementing Time Complexity Basics, which error represents the most
     frequent pitfall?
@@ -193,12 +201,13 @@ items:
   answer: Treating O(1) as fast in seconds rather than invariant to input size.
   difficulty: 3
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: time-comp-drop-high-order
-    Checking preconditions before accessing boundary values.: time-comp-line-count-equals-time
+    Using descriptive identifier names for local pointers.: bigo-measures-seconds
+    Structuring code inside functions rather than flat scripts.: bigo-keeps-constants
+    Checking preconditions before accessing boundary values.: bigo-measures-seconds
   is_microcheck: false
   review_status: approved
 - id: time-complexity-intro-mc
-  concept_id: time-complexity-intro
+  concept_id: big-o-notation
   kind: mcq
   stem: 'Quick Check: True or False — for Time Complexity Basics, Ignore constant
     multipliers and lower-order terms as N approaches infinity.'
@@ -208,11 +217,11 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': time-comp-drop-high-order
+    'False': bigo-measures-seconds
   is_microcheck: true
   review_status: approved
 - id: space-complexity-intro-1
-  concept_id: space-complexity-intro
+  concept_id: space-complexity
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Space Complexity
     Basics?
@@ -224,12 +233,13 @@ items:
   answer: Creating a new array of size N requires O(N) auxiliary space.
   difficulty: 2
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: space-comp-include-input-as-aux
-    It executes in reverse order without updating state.: space-comp-include-input-as-aux
+    It operates without bounds and skips checking the termination condition.: space-o1-means-no-memory
+    It executes in reverse order without updating state.: space-ignores-recursion-stack
+    It treats all elements as mutually independent without relationships.: space-o1-means-no-memory
   is_microcheck: false
   review_status: approved
 - id: space-complexity-intro-2
-  concept_id: space-complexity-intro
+  concept_id: space-complexity
   kind: mcq
   stem: 'Consider this concrete application of Space Complexity Basics:
 
@@ -250,12 +260,13 @@ items:
   answer: Auxiliary space measures extra working memory beyond the input itself.
   difficulty: 2
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: space-comp-include-input-as-aux
-    It executes an infinite loop that ignores input constraints.: space-comp-include-input-as-aux
+    It guarantees random O(1) jump access to any uncomputed state.: space-o1-means-no-memory
+    It eliminates the need for any base state or bounds.: space-ignores-recursion-stack
+    It executes an infinite loop that ignores input constraints.: space-o1-means-no-memory
   is_microcheck: false
   review_status: approved
 - id: space-complexity-intro-3
-  concept_id: space-complexity-intro
+  concept_id: space-complexity
   kind: mcq
   stem: When implementing Space Complexity Basics, which error represents the most
     frequent pitfall?
@@ -267,12 +278,13 @@ items:
   answer: Confusing input space with auxiliary space.
   difficulty: 3
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: space-comp-include-input-as-aux
-    Checking preconditions before accessing boundary values.: space-comp-include-input-as-aux
+    Using descriptive identifier names for local pointers.: space-o1-means-no-memory
+    Structuring code inside functions rather than flat scripts.: space-ignores-recursion-stack
+    Checking preconditions before accessing boundary values.: space-o1-means-no-memory
   is_microcheck: false
   review_status: approved
 - id: space-complexity-intro-mc
-  concept_id: space-complexity-intro
+  concept_id: space-complexity
   kind: mcq
   stem: 'Quick Check: True or False — for Space Complexity Basics, Creating a new
     array of size N requires O(N) auxiliary space.'
@@ -282,11 +294,11 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': space-comp-include-input-as-aux
+    'False': space-o1-means-no-memory
   is_microcheck: true
   review_status: approved
 - id: conditional-invariants-1
-  concept_id: conditional-invariants
+  concept_id: conditionals
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Conditional
     Invariants?
@@ -298,12 +310,13 @@ items:
   answer: Mutual exclusion guarantees exactly one branch runs in an if-elif-else chain.
   difficulty: 1
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: cond-chain-multi-execute
-    It executes in reverse order without updating state.: cond-chain-multi-execute
+    It operates without bounds and skips checking the termination condition.: cond-all-branches-checked
+    It executes in reverse order without updating state.: cond-all-branches-checked
+    It treats all elements as mutually independent without relationships.: cond-all-branches-checked
   is_microcheck: false
   review_status: approved
 - id: conditional-invariants-2
-  concept_id: conditional-invariants
+  concept_id: conditionals
   kind: mcq
   stem: 'Consider this concrete application of Conditional Invariants:
 
@@ -324,12 +337,13 @@ items:
   answer: Branching routes execution based on Boolean predicates.
   difficulty: 1
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: cond-chain-multi-execute
-    It executes an infinite loop that ignores input constraints.: cond-chain-multi-execute
+    It guarantees random O(1) jump access to any uncomputed state.: cond-all-branches-checked
+    It eliminates the need for any base state or bounds.: cond-all-branches-checked
+    It executes an infinite loop that ignores input constraints.: cond-all-branches-checked
   is_microcheck: false
   review_status: approved
 - id: conditional-invariants-3
-  concept_id: conditional-invariants
+  concept_id: conditionals
   kind: mcq
   stem: When implementing Conditional Invariants, which error represents the most
     frequent pitfall?
@@ -341,12 +355,13 @@ items:
   answer: Assuming independent if statements are mutually exclusive.
   difficulty: 2
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: cond-chain-multi-execute
-    Checking preconditions before accessing boundary values.: cond-chain-multi-execute
+    Using descriptive identifier names for local pointers.: cond-all-branches-checked
+    Structuring code inside functions rather than flat scripts.: cond-all-branches-checked
+    Checking preconditions before accessing boundary values.: cond-all-branches-checked
   is_microcheck: false
   review_status: approved
 - id: conditional-invariants-mc
-  concept_id: conditional-invariants
+  concept_id: conditionals
   kind: mcq
   stem: 'Quick Check: True or False — for Conditional Invariants, Mutual exclusion
     guarantees exactly one branch runs in an if-elif-else chain.'
@@ -356,11 +371,11 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': cond-chain-multi-execute
+    'False': cond-all-branches-checked
   is_microcheck: true
   review_status: approved
 - id: variables-and-scope-1
-  concept_id: variables-and-scope
+  concept_id: variables-and-types
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Variable Scope
     & Mutation?
@@ -372,12 +387,13 @@ items:
   answer: Reassigning a pointer differs from modifying the object it points to.
   difficulty: 1
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: scope-rebinding-modifies-caller
-    It executes in reverse order without updating state.: scope-rebinding-modifies-caller
+    It operates without bounds and skips checking the termination condition.: vars-assignment-links-names
+    It executes in reverse order without updating state.: vars-assignment-links-names
+    It treats all elements as mutually independent without relationships.: vars-assignment-links-names
   is_microcheck: false
   review_status: approved
 - id: variables-and-scope-2
-  concept_id: variables-and-scope
+  concept_id: variables-and-types
   kind: mcq
   stem: 'Consider this concrete application of Variable Scope & Mutation:
 
@@ -398,12 +414,13 @@ items:
   answer: Scope determines identifier visibility; mutable structures mutate in place.
   difficulty: 1
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: scope-rebinding-modifies-caller
-    It executes an infinite loop that ignores input constraints.: scope-rebinding-modifies-caller
+    It guarantees random O(1) jump access to any uncomputed state.: vars-assignment-links-names
+    It eliminates the need for any base state or bounds.: vars-assignment-links-names
+    It executes an infinite loop that ignores input constraints.: vars-assignment-links-names
   is_microcheck: false
   review_status: approved
 - id: variables-and-scope-3
-  concept_id: variables-and-scope
+  concept_id: variables-and-types
   kind: mcq
   stem: When implementing Variable Scope & Mutation, which error represents the most
     frequent pitfall?
@@ -415,12 +432,13 @@ items:
   answer: Unexpected side-effects from passing mutable lists to functions.
   difficulty: 2
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: scope-rebinding-modifies-caller
-    Checking preconditions before accessing boundary values.: scope-rebinding-modifies-caller
+    Using descriptive identifier names for local pointers.: vars-assignment-links-names
+    Structuring code inside functions rather than flat scripts.: vars-assignment-links-names
+    Checking preconditions before accessing boundary values.: vars-assignment-links-names
   is_microcheck: false
   review_status: approved
 - id: variables-and-scope-mc
-  concept_id: variables-and-scope
+  concept_id: variables-and-types
   kind: mcq
   stem: 'Quick Check: True or False — for Variable Scope & Mutation, Reassigning a
     pointer differs from modifying the object it points to.'
@@ -430,6 +448,6 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': scope-rebinding-modifies-caller
+    'False': vars-assignment-links-names
   is_microcheck: true
   review_status: approved

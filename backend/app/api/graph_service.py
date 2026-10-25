@@ -85,12 +85,31 @@ class CurriculumGraphService:
         self._load_items()
 
     def _build_edges(self) -> None:
-        for dst, srcs in PREREQUISITES_MAP.items():
-            if dst in self._concepts_by_id:
-                for src in srcs:
-                    if src in self._concepts_by_id:
-                        self._edges.append(ConceptEdge(src=src, dst=dst, weight=0.8))
-                        self._prereqs_by_dst[dst].append(src)
+        root_dir = Path(__file__).resolve().parents[3]
+        concepts_file = root_dir / "content" / "concepts.yaml"
+        loaded_from_yaml = False
+        if concepts_file.exists():
+            try:
+                with open(concepts_file, encoding="utf-8") as f:
+                    data = yaml.safe_load(f) or {}
+                for c in data.get("concepts", []):
+                    dst = c.get("id")
+                    if dst in self._concepts_by_id:
+                        for src in c.get("prerequisites", []):
+                            if src in self._concepts_by_id:
+                                self._edges.append(ConceptEdge(src=src, dst=dst, weight=0.8))
+                                self._prereqs_by_dst[dst].append(src)
+                loaded_from_yaml = True
+            except Exception:
+                pass
+
+        if not loaded_from_yaml:
+            for dst, srcs in PREREQUISITES_MAP.items():
+                if dst in self._concepts_by_id:
+                    for src in srcs:
+                        if src in self._concepts_by_id:
+                            self._edges.append(ConceptEdge(src=src, dst=dst, weight=0.8))
+                            self._prereqs_by_dst[dst].append(src)
 
     def _load_items(self) -> None:
         # 1. First include any fake items as fallbacks

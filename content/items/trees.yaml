@@ -1,6 +1,6 @@
 items:
 - id: binary-tree-traversal-preorder-1
-  concept_id: binary-tree-traversal-preorder
+  concept_id: tree-terminology
   kind: mcq
   stem: 'Which statement correctly characterizes the core invariant of Binary Tree:
     Preorder Traversal?'
@@ -12,12 +12,13 @@ items:
   answer: Useful for serializing or cloning tree hierarchies.
   difficulty: 2
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: preorder-processes-leaves-first
-    It executes in reverse order without updating state.: preorder-processes-leaves-first
+    It operates without bounds and skips checking the termination condition.: tree-has-cycles
+    It executes in reverse order without updating state.: tree-has-cycles
+    It treats all elements as mutually independent without relationships.: tree-has-cycles
   is_microcheck: false
   review_status: approved
 - id: binary-tree-traversal-preorder-2
-  concept_id: binary-tree-traversal-preorder
+  concept_id: tree-terminology
   kind: mcq
   stem: 'Consider this concrete application of Binary Tree: Preorder Traversal:
 
@@ -38,12 +39,13 @@ items:
   answer: Preorder processes the current node before traversing left and right subtrees.
   difficulty: 2
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: preorder-processes-leaves-first
-    It executes an infinite loop that ignores input constraints.: preorder-processes-leaves-first
+    It guarantees random O(1) jump access to any uncomputed state.: tree-has-cycles
+    It eliminates the need for any base state or bounds.: tree-has-cycles
+    It executes an infinite loop that ignores input constraints.: tree-has-cycles
   is_microcheck: false
   review_status: approved
 - id: binary-tree-traversal-preorder-3
-  concept_id: binary-tree-traversal-preorder
+  concept_id: tree-terminology
   kind: mcq
   stem: 'When implementing Binary Tree: Preorder Traversal, which error represents
     the most frequent pitfall?'
@@ -55,12 +57,13 @@ items:
   answer: Visiting children before recording parent value.
   difficulty: 3
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: preorder-processes-leaves-first
-    Checking preconditions before accessing boundary values.: preorder-processes-leaves-first
+    Using descriptive identifier names for local pointers.: tree-has-cycles
+    Structuring code inside functions rather than flat scripts.: tree-has-cycles
+    Checking preconditions before accessing boundary values.: tree-has-cycles
   is_microcheck: false
   review_status: approved
 - id: binary-tree-traversal-preorder-mc
-  concept_id: binary-tree-traversal-preorder
+  concept_id: tree-terminology
   kind: mcq
   stem: 'Quick Check: True or False — for Binary Tree: Preorder Traversal, Useful
     for serializing or cloning tree hierarchies.'
@@ -70,11 +73,11 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': preorder-processes-leaves-first
+    'False': tree-has-cycles
   is_microcheck: true
   review_status: approved
 - id: binary-tree-traversal-inorder-1
-  concept_id: binary-tree-traversal-inorder
+  concept_id: binary-tree
   kind: mcq
   stem: 'Which statement correctly characterizes the core invariant of Binary Tree:
     Inorder Traversal?'
@@ -88,12 +91,13 @@ items:
     order.
   difficulty: 2
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: inorder-always-sorted-arbitrary-tree
-    It executes in reverse order without updating state.: inorder-always-sorted-arbitrary-tree
+    It operates without bounds and skips checking the termination condition.: bt-leaf-base-case-only
+    It executes in reverse order without updating state.: bt-leaf-base-case-only
+    It treats all elements as mutually independent without relationships.: bt-leaf-base-case-only
   is_microcheck: false
   review_status: approved
 - id: binary-tree-traversal-inorder-2
-  concept_id: binary-tree-traversal-inorder
+  concept_id: binary-tree
   kind: mcq
   stem: 'Consider this concrete application of Binary Tree: Inorder Traversal:
 
@@ -114,12 +118,13 @@ items:
   answer: Inorder traverses the left subtree, processes the root, then traverses right.
   difficulty: 2
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: inorder-always-sorted-arbitrary-tree
-    It executes an infinite loop that ignores input constraints.: inorder-always-sorted-arbitrary-tree
+    It guarantees random O(1) jump access to any uncomputed state.: bt-leaf-base-case-only
+    It eliminates the need for any base state or bounds.: bt-leaf-base-case-only
+    It executes an infinite loop that ignores input constraints.: bt-leaf-base-case-only
   is_microcheck: false
   review_status: approved
 - id: binary-tree-traversal-inorder-3
-  concept_id: binary-tree-traversal-inorder
+  concept_id: binary-tree
   kind: mcq
   stem: 'When implementing Binary Tree: Inorder Traversal, which error represents
     the most frequent pitfall?'
@@ -131,12 +136,13 @@ items:
   answer: Assuming inorder gives sorted output for any arbitrary binary tree.
   difficulty: 3
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: inorder-always-sorted-arbitrary-tree
-    Checking preconditions before accessing boundary values.: inorder-always-sorted-arbitrary-tree
+    Using descriptive identifier names for local pointers.: bt-leaf-base-case-only
+    Structuring code inside functions rather than flat scripts.: bt-leaf-base-case-only
+    Checking preconditions before accessing boundary values.: bt-leaf-base-case-only
   is_microcheck: false
   review_status: approved
 - id: binary-tree-traversal-inorder-mc
-  concept_id: binary-tree-traversal-inorder
+  concept_id: binary-tree
   kind: mcq
   stem: 'Quick Check: True or False — for Binary Tree: Inorder Traversal, Inorder
     traversal of a Binary Search Tree (BST) visits nodes in sorted ascending order.'
@@ -146,11 +152,11 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': inorder-always-sorted-arbitrary-tree
+    'False': bt-leaf-base-case-only
   is_microcheck: true
   review_status: approved
 - id: binary-tree-traversal-postorder-1
-  concept_id: binary-tree-traversal-postorder
+  concept_id: tree-dfs-traversals
   kind: mcq
   stem: 'Which statement correctly characterizes the core invariant of Binary Tree:
     Postorder Traversal?'
@@ -163,12 +169,13 @@ items:
     heights.
   difficulty: 2
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: postorder-root-first
-    It executes in reverse order without updating state.: postorder-root-first
+    It operates without bounds and skips checking the termination condition.: trav-inorder-is-levels
+    It executes in reverse order without updating state.: trav-preorder-postorder-swap
+    It treats all elements as mutually independent without relationships.: trav-inorder-is-levels
   is_microcheck: false
   review_status: approved
 - id: binary-tree-traversal-postorder-2
-  concept_id: binary-tree-traversal-postorder
+  concept_id: tree-dfs-traversals
   kind: mcq
   stem: 'Consider this concrete application of Binary Tree: Postorder Traversal:
 
@@ -189,12 +196,13 @@ items:
   answer: Postorder processes both children before processing the parent node.
   difficulty: 2
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: postorder-root-first
-    It executes an infinite loop that ignores input constraints.: postorder-root-first
+    It guarantees random O(1) jump access to any uncomputed state.: trav-inorder-is-levels
+    It eliminates the need for any base state or bounds.: trav-preorder-postorder-swap
+    It executes an infinite loop that ignores input constraints.: trav-inorder-is-levels
   is_microcheck: false
   review_status: approved
 - id: binary-tree-traversal-postorder-3
-  concept_id: binary-tree-traversal-postorder
+  concept_id: tree-dfs-traversals
   kind: mcq
   stem: 'When implementing Binary Tree: Postorder Traversal, which error represents
     the most frequent pitfall?'
@@ -206,12 +214,13 @@ items:
   answer: Trying to delete parent before children have been freed.
   difficulty: 3
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: postorder-root-first
-    Checking preconditions before accessing boundary values.: postorder-root-first
+    Using descriptive identifier names for local pointers.: trav-inorder-is-levels
+    Structuring code inside functions rather than flat scripts.: trav-preorder-postorder-swap
+    Checking preconditions before accessing boundary values.: trav-inorder-is-levels
   is_microcheck: false
   review_status: approved
 - id: binary-tree-traversal-postorder-mc
-  concept_id: binary-tree-traversal-postorder
+  concept_id: tree-dfs-traversals
   kind: mcq
   stem: 'Quick Check: True or False — for Binary Tree: Postorder Traversal, Ideal
     for bottom-up operations like tree deletion or calculating subtree heights.'
@@ -221,11 +230,11 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': postorder-root-first
+    'False': trav-inorder-is-levels
   is_microcheck: true
   review_status: approved
 - id: bst-search-property-1
-  concept_id: bst-search-property
+  concept_id: binary-search-tree
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of BST Search Property?
   options:
@@ -236,12 +245,13 @@ items:
   answer: Enables O(h) search by eliminating half of remaining search space per step.
   difficulty: 2
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: bst-check-immediate-only
-    It executes in reverse order without updating state.: bst-check-immediate-only
+    It operates without bounds and skips checking the termination condition.: bst-local-check
+    It executes in reverse order without updating state.: bst-always-logn
+    It treats all elements as mutually independent without relationships.: bst-local-check
   is_microcheck: false
   review_status: approved
 - id: bst-search-property-2
-  concept_id: bst-search-property
+  concept_id: binary-search-tree
   kind: mcq
   stem: 'Consider this concrete application of BST Search Property:
 
@@ -262,12 +272,13 @@ items:
   answer: 'Every node satisfies: max(left_subtree) < node.val < min(right_subtree).'
   difficulty: 2
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: bst-check-immediate-only
-    It executes an infinite loop that ignores input constraints.: bst-check-immediate-only
+    It guarantees random O(1) jump access to any uncomputed state.: bst-local-check
+    It eliminates the need for any base state or bounds.: bst-always-logn
+    It executes an infinite loop that ignores input constraints.: bst-local-check
   is_microcheck: false
   review_status: approved
 - id: bst-search-property-3
-  concept_id: bst-search-property
+  concept_id: binary-search-tree
   kind: mcq
   stem: When implementing BST Search Property, which error represents the most frequent
     pitfall?
@@ -279,12 +290,13 @@ items:
   answer: Only checking immediate children instead of the entire subtree invariant.
   difficulty: 3
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: bst-check-immediate-only
-    Checking preconditions before accessing boundary values.: bst-check-immediate-only
+    Using descriptive identifier names for local pointers.: bst-local-check
+    Structuring code inside functions rather than flat scripts.: bst-always-logn
+    Checking preconditions before accessing boundary values.: bst-local-check
   is_microcheck: false
   review_status: approved
 - id: bst-search-property-mc
-  concept_id: bst-search-property
+  concept_id: binary-search-tree
   kind: mcq
   stem: 'Quick Check: True or False — for BST Search Property, Enables O(h) search
     by eliminating half of remaining search space per step.'
@@ -294,11 +306,11 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': bst-check-immediate-only
+    'False': bst-local-check
   is_microcheck: true
   review_status: approved
 - id: bst-insertion-1
-  concept_id: bst-insertion
+  concept_id: bst-insert-delete
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of BST Insertion?
   options:
@@ -309,12 +321,13 @@ items:
   answer: New values in standard BST insertion are always added as leaf nodes.
   difficulty: 3
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: bst-insert-restructures-root
-    It executes in reverse order without updating state.: bst-insert-restructures-root
+    It operates without bounds and skips checking the termination condition.: bstd-two-children-delete
+    It executes in reverse order without updating state.: bstd-two-children-delete
+    It treats all elements as mutually independent without relationships.: bstd-two-children-delete
   is_microcheck: false
   review_status: approved
 - id: bst-insertion-2
-  concept_id: bst-insertion
+  concept_id: bst-insert-delete
   kind: mcq
   stem: 'Consider this concrete application of BST Insertion:
 
@@ -336,12 +349,13 @@ items:
     property.
   difficulty: 3
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: bst-insert-restructures-root
-    It executes an infinite loop that ignores input constraints.: bst-insert-restructures-root
+    It guarantees random O(1) jump access to any uncomputed state.: bstd-two-children-delete
+    It eliminates the need for any base state or bounds.: bstd-two-children-delete
+    It executes an infinite loop that ignores input constraints.: bstd-two-children-delete
   is_microcheck: false
   review_status: approved
 - id: bst-insertion-3
-  concept_id: bst-insertion
+  concept_id: bst-insert-delete
   kind: mcq
   stem: When implementing BST Insertion, which error represents the most frequent
     pitfall?
@@ -353,12 +367,13 @@ items:
   answer: Inserting duplicates without a defined tie-breaker convention.
   difficulty: 4
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: bst-insert-restructures-root
-    Checking preconditions before accessing boundary values.: bst-insert-restructures-root
+    Using descriptive identifier names for local pointers.: bstd-two-children-delete
+    Structuring code inside functions rather than flat scripts.: bstd-two-children-delete
+    Checking preconditions before accessing boundary values.: bstd-two-children-delete
   is_microcheck: false
   review_status: approved
 - id: bst-insertion-mc
-  concept_id: bst-insertion
+  concept_id: bst-insert-delete
   kind: mcq
   stem: 'Quick Check: True or False — for BST Insertion, New values in standard BST
     insertion are always added as leaf nodes.'
@@ -368,11 +383,11 @@ items:
   answer: 'True'
   difficulty: 2
   distractor_misconceptions:
-    'False': bst-insert-restructures-root
+    'False': bstd-two-children-delete
   is_microcheck: true
   review_status: approved
 - id: tree-height-depth-1
-  concept_id: tree-height-depth
+  concept_id: tree-height
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Tree Height
     vs Depth?
@@ -385,12 +400,13 @@ items:
     0.
   difficulty: 2
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: tree-height-depth-confused
-    It executes in reverse order without updating state.: tree-height-depth-confused
+    It operates without bounds and skips checking the termination condition.: height-conventions
+    It executes in reverse order without updating state.: height-conventions
+    It treats all elements as mutually independent without relationships.: height-conventions
   is_microcheck: false
   review_status: approved
 - id: tree-height-depth-2
-  concept_id: tree-height-depth
+  concept_id: tree-height
   kind: mcq
   stem: 'Consider this concrete application of Tree Height vs Depth:
 
@@ -413,12 +429,13 @@ items:
     deepest leaf.
   difficulty: 2
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: tree-height-depth-confused
-    It executes an infinite loop that ignores input constraints.: tree-height-depth-confused
+    It guarantees random O(1) jump access to any uncomputed state.: height-conventions
+    It eliminates the need for any base state or bounds.: height-conventions
+    It executes an infinite loop that ignores input constraints.: height-conventions
   is_microcheck: false
   review_status: approved
 - id: tree-height-depth-3
-  concept_id: tree-height-depth
+  concept_id: tree-height
   kind: mcq
   stem: When implementing Tree Height vs Depth, which error represents the most frequent
     pitfall?
@@ -430,12 +447,13 @@ items:
   answer: Using depth when height calculation is required.
   difficulty: 3
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: tree-height-depth-confused
-    Checking preconditions before accessing boundary values.: tree-height-depth-confused
+    Using descriptive identifier names for local pointers.: height-conventions
+    Structuring code inside functions rather than flat scripts.: height-conventions
+    Checking preconditions before accessing boundary values.: height-conventions
   is_microcheck: false
   review_status: approved
 - id: tree-height-depth-mc
-  concept_id: tree-height-depth
+  concept_id: tree-height
   kind: mcq
   stem: 'Quick Check: True or False — for Tree Height vs Depth, Height of empty tree
     is -1 (or 0 depending on convention); root has depth 0.'
@@ -445,6 +463,6 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': tree-height-depth-confused
+    'False': height-conventions
   is_microcheck: true
   review_status: approved

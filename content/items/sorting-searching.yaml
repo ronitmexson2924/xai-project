@@ -11,8 +11,9 @@ items:
   answer: Works on unsorted collections in O(N) worst-case time.
   difficulty: 1
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: linear-search-requires-sorted
-    It executes in reverse order without updating state.: linear-search-requires-sorted
+    It operates without bounds and skips checking the termination condition.: ls-return-early-miss
+    It executes in reverse order without updating state.: ls-return-early-miss
+    It treats all elements as mutually independent without relationships.: ls-return-early-miss
   is_microcheck: false
   review_status: approved
 - id: linear-search-2
@@ -39,8 +40,9 @@ items:
     list ends.
   difficulty: 1
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: linear-search-requires-sorted
-    It executes an infinite loop that ignores input constraints.: linear-search-requires-sorted
+    It guarantees random O(1) jump access to any uncomputed state.: ls-return-early-miss
+    It eliminates the need for any base state or bounds.: ls-return-early-miss
+    It executes an infinite loop that ignores input constraints.: ls-return-early-miss
   is_microcheck: false
   review_status: approved
 - id: linear-search-3
@@ -56,8 +58,9 @@ items:
   answer: Stopping early before examining all items when target is absent.
   difficulty: 2
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: linear-search-requires-sorted
-    Checking preconditions before accessing boundary values.: linear-search-requires-sorted
+    Using descriptive identifier names for local pointers.: ls-return-early-miss
+    Structuring code inside functions rather than flat scripts.: ls-return-early-miss
+    Checking preconditions before accessing boundary values.: ls-return-early-miss
   is_microcheck: false
   review_status: approved
 - id: linear-search-mc
@@ -71,11 +74,11 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': linear-search-requires-sorted
+    'False': ls-return-early-miss
   is_microcheck: true
   review_status: approved
 - id: binary-search-bounds-1
-  concept_id: binary-search-bounds
+  concept_id: binary-search-boundaries
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Binary Search
     Bounds?
@@ -87,12 +90,13 @@ items:
   answer: Update low = mid + 1 or high = mid - 1 to guarantee progress each iteration.
   difficulty: 2
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: binary-search-infinite-loop
-    It executes in reverse order without updating state.: binary-search-on-unsorted
+    It operates without bounds and skips checking the termination condition.: bsb-mixed-convention
+    It executes in reverse order without updating state.: bsb-mixed-convention
+    It treats all elements as mutually independent without relationships.: bsb-mixed-convention
   is_microcheck: false
   review_status: approved
 - id: binary-search-bounds-2
-  concept_id: binary-search-bounds
+  concept_id: binary-search-boundaries
   kind: mcq
   stem: 'Consider this concrete application of Binary Search Bounds:
 
@@ -113,12 +117,13 @@ items:
   answer: Binary search maintains low and high pointers enclosing the search space.
   difficulty: 2
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: binary-search-infinite-loop
-    It executes an infinite loop that ignores input constraints.: binary-search-on-unsorted
+    It guarantees random O(1) jump access to any uncomputed state.: bsb-mixed-convention
+    It eliminates the need for any base state or bounds.: bsb-mixed-convention
+    It executes an infinite loop that ignores input constraints.: bsb-mixed-convention
   is_microcheck: false
   review_status: approved
 - id: binary-search-bounds-3
-  concept_id: binary-search-bounds
+  concept_id: binary-search-boundaries
   kind: mcq
   stem: When implementing Binary Search Bounds, which error represents the most frequent
     pitfall?
@@ -130,12 +135,13 @@ items:
   answer: Using high = mid with while low <= high can cause an infinite loop.
   difficulty: 3
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: binary-search-infinite-loop
-    Checking preconditions before accessing boundary values.: binary-search-on-unsorted
+    Using descriptive identifier names for local pointers.: bsb-mixed-convention
+    Structuring code inside functions rather than flat scripts.: bsb-mixed-convention
+    Checking preconditions before accessing boundary values.: bsb-mixed-convention
   is_microcheck: false
   review_status: approved
 - id: binary-search-bounds-mc
-  concept_id: binary-search-bounds
+  concept_id: binary-search-boundaries
   kind: mcq
   stem: 'Quick Check: True or False — for Binary Search Bounds, Update low = mid +
     1 or high = mid - 1 to guarantee progress each iteration.'
@@ -145,11 +151,11 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': binary-search-infinite-loop
+    'False': bsb-mixed-convention
   is_microcheck: true
   review_status: approved
 - id: binary-search-midpoint-1
-  concept_id: binary-search-midpoint
+  concept_id: binary-search
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Binary Search
     Midpoint Calculation?
@@ -161,12 +167,13 @@ items:
   answer: In bounded integer arithmetic, use low + (high - low) // 2 to avoid overflow.
   difficulty: 2
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: bsearch-float-division
-    It executes in reverse order without updating state.: bsearch-float-division
+    It operates without bounds and skips checking the termination condition.: bs-unsorted-ok
+    It executes in reverse order without updating state.: bs-linear-time
+    It treats all elements as mutually independent without relationships.: bs-unsorted-ok
   is_microcheck: false
   review_status: approved
 - id: binary-search-midpoint-2
-  concept_id: binary-search-midpoint
+  concept_id: binary-search
   kind: mcq
   stem: 'Consider this concrete application of Binary Search Midpoint Calculation:
 
@@ -187,12 +194,13 @@ items:
   answer: Midpoint calculation partitions the active interval into two equal halves.
   difficulty: 2
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: bsearch-float-division
-    It executes an infinite loop that ignores input constraints.: bsearch-float-division
+    It guarantees random O(1) jump access to any uncomputed state.: bs-unsorted-ok
+    It eliminates the need for any base state or bounds.: bs-linear-time
+    It executes an infinite loop that ignores input constraints.: bs-unsorted-ok
   is_microcheck: false
   review_status: approved
 - id: binary-search-midpoint-3
-  concept_id: binary-search-midpoint
+  concept_id: binary-search
   kind: mcq
   stem: When implementing Binary Search Midpoint Calculation, which error represents
     the most frequent pitfall?
@@ -204,12 +212,13 @@ items:
   answer: Floating point division instead of integer floor division.
   difficulty: 3
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: bsearch-float-division
-    Checking preconditions before accessing boundary values.: bsearch-float-division
+    Using descriptive identifier names for local pointers.: bs-unsorted-ok
+    Structuring code inside functions rather than flat scripts.: bs-linear-time
+    Checking preconditions before accessing boundary values.: bs-unsorted-ok
   is_microcheck: false
   review_status: approved
 - id: binary-search-midpoint-mc
-  concept_id: binary-search-midpoint
+  concept_id: binary-search
   kind: mcq
   stem: 'Quick Check: True or False — for Binary Search Midpoint Calculation, In bounded
     integer arithmetic, use low + (high - low) // 2 to avoid overflow.'
@@ -219,11 +228,11 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': bsearch-float-division
+    'False': bs-unsorted-ok
   is_microcheck: true
   review_status: approved
 - id: bubble-sort-invariant-1
-  concept_id: bubble-sort-invariant
+  concept_id: elementary-sorts
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Bubble Sort
     Invariant?
@@ -236,12 +245,13 @@ items:
     positions.
   difficulty: 2
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: bubble-sort-is-linear
-    It executes in reverse order without updating state.: bubble-sort-is-linear
+    It operates without bounds and skips checking the termination condition.: es-all-quadratic-same
+    It executes in reverse order without updating state.: es-all-quadratic-same
+    It treats all elements as mutually independent without relationships.: es-all-quadratic-same
   is_microcheck: false
   review_status: approved
 - id: bubble-sort-invariant-2
-  concept_id: bubble-sort-invariant
+  concept_id: elementary-sorts
   kind: mcq
   stem: 'Consider this concrete application of Bubble Sort Invariant:
 
@@ -262,12 +272,13 @@ items:
   answer: Bubble sort swaps adjacent out-of-order elements across repeated passes.
   difficulty: 2
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: bubble-sort-is-linear
-    It executes an infinite loop that ignores input constraints.: bubble-sort-is-linear
+    It guarantees random O(1) jump access to any uncomputed state.: es-all-quadratic-same
+    It eliminates the need for any base state or bounds.: es-all-quadratic-same
+    It executes an infinite loop that ignores input constraints.: es-all-quadratic-same
   is_microcheck: false
   review_status: approved
 - id: bubble-sort-invariant-3
-  concept_id: bubble-sort-invariant
+  concept_id: elementary-sorts
   kind: mcq
   stem: When implementing Bubble Sort Invariant, which error represents the most frequent
     pitfall?
@@ -279,12 +290,13 @@ items:
   answer: Continuing passes even when no swaps occurred during an entire scan.
   difficulty: 3
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: bubble-sort-is-linear
-    Checking preconditions before accessing boundary values.: bubble-sort-is-linear
+    Using descriptive identifier names for local pointers.: es-all-quadratic-same
+    Structuring code inside functions rather than flat scripts.: es-all-quadratic-same
+    Checking preconditions before accessing boundary values.: es-all-quadratic-same
   is_microcheck: false
   review_status: approved
 - id: bubble-sort-invariant-mc
-  concept_id: bubble-sort-invariant
+  concept_id: elementary-sorts
   kind: mcq
   stem: 'Quick Check: True or False — for Bubble Sort Invariant, After pass k, the
     k largest elements are guaranteed in their final sorted positions.'
@@ -294,11 +306,11 @@ items:
   answer: 'True'
   difficulty: 1
   distractor_misconceptions:
-    'False': bubble-sort-is-linear
+    'False': es-all-quadratic-same
   is_microcheck: true
   review_status: approved
 - id: merge-sort-merge-step-1
-  concept_id: merge-sort-merge-step
+  concept_id: merge-sort
   kind: mcq
   stem: 'Which statement correctly characterizes the core invariant of Merge Sort:
     Merging Subarrays?'
@@ -310,12 +322,13 @@ items:
   answer: Two sorted arrays of size N and M can be merged in O(N + M) time.
   difficulty: 3
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: merge-sort-in-place-naive
-    It executes in reverse order without updating state.: merge-sort-in-place-naive
+    It operates without bounds and skips checking the termination condition.: ms-forget-leftovers
+    It executes in reverse order without updating state.: ms-in-place-free
+    It treats all elements as mutually independent without relationships.: ms-forget-leftovers
   is_microcheck: false
   review_status: approved
 - id: merge-sort-merge-step-2
-  concept_id: merge-sort-merge-step
+  concept_id: merge-sort
   kind: mcq
   stem: 'Consider this concrete application of Merge Sort: Merging Subarrays:
 
@@ -336,12 +349,13 @@ items:
   answer: The merge step compares headers of two sorted slices and appends the smaller.
   difficulty: 3
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: merge-sort-in-place-naive
-    It executes an infinite loop that ignores input constraints.: merge-sort-in-place-naive
+    It guarantees random O(1) jump access to any uncomputed state.: ms-forget-leftovers
+    It eliminates the need for any base state or bounds.: ms-in-place-free
+    It executes an infinite loop that ignores input constraints.: ms-forget-leftovers
   is_microcheck: false
   review_status: approved
 - id: merge-sort-merge-step-3
-  concept_id: merge-sort-merge-step
+  concept_id: merge-sort
   kind: mcq
   stem: 'When implementing Merge Sort: Merging Subarrays, which error represents the
     most frequent pitfall?'
@@ -354,12 +368,13 @@ items:
     first.
   difficulty: 4
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: merge-sort-in-place-naive
-    Checking preconditions before accessing boundary values.: merge-sort-in-place-naive
+    Using descriptive identifier names for local pointers.: ms-forget-leftovers
+    Structuring code inside functions rather than flat scripts.: ms-in-place-free
+    Checking preconditions before accessing boundary values.: ms-forget-leftovers
   is_microcheck: false
   review_status: approved
 - id: merge-sort-merge-step-mc
-  concept_id: merge-sort-merge-step
+  concept_id: merge-sort
   kind: mcq
   stem: 'Quick Check: True or False — for Merge Sort: Merging Subarrays, Two sorted
     arrays of size N and M can be merged in O(N + M) time.'
@@ -369,11 +384,11 @@ items:
   answer: 'True'
   difficulty: 2
   distractor_misconceptions:
-    'False': merge-sort-in-place-naive
+    'False': ms-forget-leftovers
   is_microcheck: true
   review_status: approved
 - id: quick-sort-partition-1
-  concept_id: quick-sort-partition
+  concept_id: quick-sort
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Quick Sort Partitioning?
   options:
@@ -385,12 +400,13 @@ items:
     step.
   difficulty: 3
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: quicksort-always-nlogn
-    It executes in reverse order without updating state.: quicksort-always-nlogn
+    It operates without bounds and skips checking the termination condition.: qs-always-nlogn
+    It executes in reverse order without updating state.: qs-always-nlogn
+    It treats all elements as mutually independent without relationships.: qs-always-nlogn
   is_microcheck: false
   review_status: approved
 - id: quick-sort-partition-2
-  concept_id: quick-sort-partition
+  concept_id: quick-sort
   kind: mcq
   stem: 'Consider this concrete application of Quick Sort Partitioning:
 
@@ -413,12 +429,13 @@ items:
     right.
   difficulty: 3
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: quicksort-always-nlogn
-    It executes an infinite loop that ignores input constraints.: quicksort-always-nlogn
+    It guarantees random O(1) jump access to any uncomputed state.: qs-always-nlogn
+    It eliminates the need for any base state or bounds.: qs-always-nlogn
+    It executes an infinite loop that ignores input constraints.: qs-always-nlogn
   is_microcheck: false
   review_status: approved
 - id: quick-sort-partition-3
-  concept_id: quick-sort-partition
+  concept_id: quick-sort
   kind: mcq
   stem: When implementing Quick Sort Partitioning, which error represents the most
     frequent pitfall?
@@ -432,12 +449,13 @@ items:
     pivot.
   difficulty: 4
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: quicksort-always-nlogn
-    Checking preconditions before accessing boundary values.: quicksort-always-nlogn
+    Using descriptive identifier names for local pointers.: qs-always-nlogn
+    Structuring code inside functions rather than flat scripts.: qs-always-nlogn
+    Checking preconditions before accessing boundary values.: qs-always-nlogn
   is_microcheck: false
   review_status: approved
 - id: quick-sort-partition-mc
-  concept_id: quick-sort-partition
+  concept_id: quick-sort
   kind: mcq
   stem: 'Quick Check: True or False — for Quick Sort Partitioning, The pivot lands
     in its absolute sorted position at the end of the partition step.'
@@ -447,6 +465,6 @@ items:
   answer: 'True'
   difficulty: 2
   distractor_misconceptions:
-    'False': quicksort-always-nlogn
+    'False': qs-always-nlogn
   is_microcheck: true
   review_status: approved

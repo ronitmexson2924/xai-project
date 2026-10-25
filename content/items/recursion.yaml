@@ -14,7 +14,8 @@ items:
   difficulty: 2
   distractor_misconceptions:
     It operates without bounds and skips checking the termination condition.: recursion-no-base-case
-    It executes in reverse order without updating state.: recursion-base-case-unreachable
+    It executes in reverse order without updating state.: rbc-unreachable-base
+    It treats all elements as mutually independent without relationships.: rbc-base-case-wrong-value
   is_microcheck: false
   review_status: approved
 - id: recursion-base-case-2
@@ -40,8 +41,9 @@ items:
     calls.
   difficulty: 2
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: recursion-no-base-case
-    It executes an infinite loop that ignores input constraints.: recursion-base-case-unreachable
+    It guarantees random O(1) jump access to any uncomputed state.: recursion-no-base-case
+    It eliminates the need for any base state or bounds.: rbc-unreachable-base
+    It executes an infinite loop that ignores input constraints.: rbc-base-case-wrong-value
   is_microcheck: false
   review_status: approved
 - id: recursion-base-case-3
@@ -58,7 +60,8 @@ items:
   difficulty: 3
   distractor_misconceptions:
     Using descriptive identifier names for local pointers.: recursion-no-base-case
-    Checking preconditions before accessing boundary values.: recursion-base-case-unreachable
+    Structuring code inside functions rather than flat scripts.: rbc-unreachable-base
+    Checking preconditions before accessing boundary values.: rbc-base-case-wrong-value
   is_microcheck: false
   review_status: approved
 - id: recursion-base-case-mc
@@ -76,7 +79,7 @@ items:
   is_microcheck: true
   review_status: approved
 - id: recursive-call-stack-1
-  concept_id: recursive-call-stack
+  concept_id: call-stack
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Recursive Call
     Stack?
@@ -88,12 +91,13 @@ items:
   answer: Max stack depth is bounded by recursion depth, requiring O(D) memory.
   difficulty: 3
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: recursion-shared-local-vars
-    It executes in reverse order without updating state.: recursion-shared-local-vars
+    It operates without bounds and skips checking the termination condition.: cs-shared-locals
+    It executes in reverse order without updating state.: cs-code-after-call-skipped
+    It treats all elements as mutually independent without relationships.: cs-shared-locals
   is_microcheck: false
   review_status: approved
 - id: recursive-call-stack-2
-  concept_id: recursive-call-stack
+  concept_id: call-stack
   kind: mcq
   stem: 'Consider this concrete application of Recursive Call Stack:
 
@@ -115,12 +119,13 @@ items:
     stack.
   difficulty: 3
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: recursion-shared-local-vars
-    It executes an infinite loop that ignores input constraints.: recursion-shared-local-vars
+    It guarantees random O(1) jump access to any uncomputed state.: cs-shared-locals
+    It eliminates the need for any base state or bounds.: cs-code-after-call-skipped
+    It executes an infinite loop that ignores input constraints.: cs-shared-locals
   is_microcheck: false
   review_status: approved
 - id: recursive-call-stack-3
-  concept_id: recursive-call-stack
+  concept_id: call-stack
   kind: mcq
   stem: When implementing Recursive Call Stack, which error represents the most frequent
     pitfall?
@@ -132,12 +137,13 @@ items:
   answer: Assuming recursive calls execute concurrently rather than sequentially.
   difficulty: 4
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: recursion-shared-local-vars
-    Checking preconditions before accessing boundary values.: recursion-shared-local-vars
+    Using descriptive identifier names for local pointers.: cs-shared-locals
+    Structuring code inside functions rather than flat scripts.: cs-code-after-call-skipped
+    Checking preconditions before accessing boundary values.: cs-shared-locals
   is_microcheck: false
   review_status: approved
 - id: recursive-call-stack-mc
-  concept_id: recursive-call-stack
+  concept_id: call-stack
   kind: mcq
   stem: 'Quick Check: True or False — for Recursive Call Stack, Max stack depth is
     bounded by recursion depth, requiring O(D) memory.'
@@ -147,7 +153,7 @@ items:
   answer: 'True'
   difficulty: 2
   distractor_misconceptions:
-    'False': recursion-shared-local-vars
+    'False': cs-shared-locals
   is_microcheck: true
   review_status: approved
 - id: divide-and-conquer-1
@@ -162,8 +168,9 @@ items:
   answer: 'Master theorem: T(N) = aT(N/b) + f(N) governs asymptotic complexity.'
   difficulty: 3
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: divide-conquer-overlapping-subproblems
-    It executes in reverse order without updating state.: divide-conquer-overlapping-subproblems
+    It operates without bounds and skips checking the termination condition.: dc-overlapping-split
+    It executes in reverse order without updating state.: dc-combine-free
+    It treats all elements as mutually independent without relationships.: dc-overlapping-split
   is_microcheck: false
   review_status: approved
 - id: divide-and-conquer-2
@@ -188,8 +195,9 @@ items:
   answer: Divide problem into independent subproblems, solve recursively, and combine.
   difficulty: 3
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: divide-conquer-overlapping-subproblems
-    It executes an infinite loop that ignores input constraints.: divide-conquer-overlapping-subproblems
+    It guarantees random O(1) jump access to any uncomputed state.: dc-overlapping-split
+    It eliminates the need for any base state or bounds.: dc-combine-free
+    It executes an infinite loop that ignores input constraints.: dc-overlapping-split
   is_microcheck: false
   review_status: approved
 - id: divide-and-conquer-3
@@ -205,8 +213,9 @@ items:
   answer: Doing too much work in the combine step, ruining logarithmic depth benefit.
   difficulty: 4
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: divide-conquer-overlapping-subproblems
-    Checking preconditions before accessing boundary values.: divide-conquer-overlapping-subproblems
+    Using descriptive identifier names for local pointers.: dc-overlapping-split
+    Structuring code inside functions rather than flat scripts.: dc-combine-free
+    Checking preconditions before accessing boundary values.: dc-overlapping-split
   is_microcheck: false
   review_status: approved
 - id: divide-and-conquer-mc
@@ -220,11 +229,11 @@ items:
   answer: 'True'
   difficulty: 2
   distractor_misconceptions:
-    'False': divide-conquer-overlapping-subproblems
+    'False': dc-overlapping-split
   is_microcheck: true
   review_status: approved
 - id: tree-recursion-1
-  concept_id: tree-recursion
+  concept_id: recursion-tracing
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Tree & Branching
     Recursion?
@@ -236,12 +245,13 @@ items:
   answer: Total calls grow exponentially O(b^d) unless subproblems are pruned.
   difficulty: 3
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: tree-recursion-linear-time
-    It executes in reverse order without updating state.: tree-recursion-linear-time
+    It operates without bounds and skips checking the termination condition.: trace-depth-is-cost
+    It executes in reverse order without updating state.: trace-top-down-values
+    It treats all elements as mutually independent without relationships.: trace-depth-is-cost
   is_microcheck: false
   review_status: approved
 - id: tree-recursion-2
-  concept_id: tree-recursion
+  concept_id: recursion-tracing
   kind: mcq
   stem: 'Consider this concrete application of Tree & Branching Recursion:
 
@@ -262,12 +272,13 @@ items:
   answer: Branching recursion calls self multiple times, forming an execution tree.
   difficulty: 3
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: tree-recursion-linear-time
-    It executes an infinite loop that ignores input constraints.: tree-recursion-linear-time
+    It guarantees random O(1) jump access to any uncomputed state.: trace-depth-is-cost
+    It eliminates the need for any base state or bounds.: trace-top-down-values
+    It executes an infinite loop that ignores input constraints.: trace-depth-is-cost
   is_microcheck: false
   review_status: approved
 - id: tree-recursion-3
-  concept_id: tree-recursion
+  concept_id: recursion-tracing
   kind: mcq
   stem: When implementing Tree & Branching Recursion, which error represents the most
     frequent pitfall?
@@ -279,12 +290,13 @@ items:
   answer: Exponential time explosion from re-computing identical subtrees.
   difficulty: 4
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: tree-recursion-linear-time
-    Checking preconditions before accessing boundary values.: tree-recursion-linear-time
+    Using descriptive identifier names for local pointers.: trace-depth-is-cost
+    Structuring code inside functions rather than flat scripts.: trace-top-down-values
+    Checking preconditions before accessing boundary values.: trace-depth-is-cost
   is_microcheck: false
   review_status: approved
 - id: tree-recursion-mc
-  concept_id: tree-recursion
+  concept_id: recursion-tracing
   kind: mcq
   stem: 'Quick Check: True or False — for Tree & Branching Recursion, Total calls
     grow exponentially O(b^d) unless subproblems are pruned.'
@@ -294,11 +306,11 @@ items:
   answer: 'True'
   difficulty: 2
   distractor_misconceptions:
-    'False': tree-recursion-linear-time
+    'False': trace-depth-is-cost
   is_microcheck: true
   review_status: approved
 - id: backtracking-basics-1
-  concept_id: backtracking-basics
+  concept_id: backtracking
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Backtracking
     Exploration?
@@ -310,12 +322,13 @@ items:
   answer: Always revert the state change after the recursive call returns.
   difficulty: 4
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: backtracking-forget-undo
-    It executes in reverse order without updating state.: backtracking-forget-undo
+    It operates without bounds and skips checking the termination condition.: bt-missing-unchoose
+    It executes in reverse order without updating state.: bt-store-reference
+    It treats all elements as mutually independent without relationships.: bt-missing-unchoose
   is_microcheck: false
   review_status: approved
 - id: backtracking-basics-2
-  concept_id: backtracking-basics
+  concept_id: backtracking
   kind: mcq
   stem: 'Consider this concrete application of Backtracking Exploration:
 
@@ -338,12 +351,13 @@ items:
     paths.
   difficulty: 4
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: backtracking-forget-undo
-    It executes an infinite loop that ignores input constraints.: backtracking-forget-undo
+    It guarantees random O(1) jump access to any uncomputed state.: bt-missing-unchoose
+    It eliminates the need for any base state or bounds.: bt-store-reference
+    It executes an infinite loop that ignores input constraints.: bt-missing-unchoose
   is_microcheck: false
   review_status: approved
 - id: backtracking-basics-3
-  concept_id: backtracking-basics
+  concept_id: backtracking
   kind: mcq
   stem: When implementing Backtracking Exploration, which error represents the most
     frequent pitfall?
@@ -355,12 +369,13 @@ items:
   answer: Forgetting to revert the choice before backtracking to the parent frame.
   difficulty: 5
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: backtracking-forget-undo
-    Checking preconditions before accessing boundary values.: backtracking-forget-undo
+    Using descriptive identifier names for local pointers.: bt-missing-unchoose
+    Structuring code inside functions rather than flat scripts.: bt-store-reference
+    Checking preconditions before accessing boundary values.: bt-missing-unchoose
   is_microcheck: false
   review_status: approved
 - id: backtracking-basics-mc
-  concept_id: backtracking-basics
+  concept_id: backtracking
   kind: mcq
   stem: 'Quick Check: True or False — for Backtracking Exploration, Always revert
     the state change after the recursive call returns.'
@@ -370,11 +385,11 @@ items:
   answer: 'True'
   difficulty: 3
   distractor_misconceptions:
-    'False': backtracking-forget-undo
+    'False': bt-missing-unchoose
   is_microcheck: true
   review_status: approved
 - id: tail-recursion-1
-  concept_id: tail-recursion
+  concept_id: recursion-vs-iteration
   kind: mcq
   stem: Which statement correctly characterizes the core invariant of Tail Call Recursion?
   options:
@@ -385,12 +400,13 @@ items:
   answer: Can be transformed into an iterative loop with O(1) stack frames.
   difficulty: 3
   distractor_misconceptions:
-    It operates without bounds and skips checking the termination condition.: tail-call-pending-mult
-    It executes in reverse order without updating state.: tail-call-pending-mult
+    It operates without bounds and skips checking the termination condition.: rvi-recursion-faster
+    It executes in reverse order without updating state.: rvi-no-depth-limit
+    It treats all elements as mutually independent without relationships.: rvi-recursion-faster
   is_microcheck: false
   review_status: approved
 - id: tail-recursion-2
-  concept_id: tail-recursion
+  concept_id: recursion-vs-iteration
   kind: mcq
   stem: 'Consider this concrete application of Tail Call Recursion:
 
@@ -411,12 +427,13 @@ items:
   answer: A tail-recursive call has no pending computations after the call returns.
   difficulty: 3
   distractor_misconceptions:
-    It eliminates the need for any base state or bounds.: tail-call-pending-mult
-    It executes an infinite loop that ignores input constraints.: tail-call-pending-mult
+    It guarantees random O(1) jump access to any uncomputed state.: rvi-recursion-faster
+    It eliminates the need for any base state or bounds.: rvi-no-depth-limit
+    It executes an infinite loop that ignores input constraints.: rvi-recursion-faster
   is_microcheck: false
   review_status: approved
 - id: tail-recursion-3
-  concept_id: tail-recursion
+  concept_id: recursion-vs-iteration
   kind: mcq
   stem: When implementing Tail Call Recursion, which error represents the most frequent
     pitfall?
@@ -429,12 +446,13 @@ items:
     acc).
   difficulty: 4
   distractor_misconceptions:
-    Using descriptive identifier names for local pointers.: tail-call-pending-mult
-    Checking preconditions before accessing boundary values.: tail-call-pending-mult
+    Using descriptive identifier names for local pointers.: rvi-recursion-faster
+    Structuring code inside functions rather than flat scripts.: rvi-no-depth-limit
+    Checking preconditions before accessing boundary values.: rvi-recursion-faster
   is_microcheck: false
   review_status: approved
 - id: tail-recursion-mc
-  concept_id: tail-recursion
+  concept_id: recursion-vs-iteration
   kind: mcq
   stem: 'Quick Check: True or False — for Tail Call Recursion, Can be transformed
     into an iterative loop with O(1) stack frames.'
@@ -444,6 +462,6 @@ items:
   answer: 'True'
   difficulty: 2
   distractor_misconceptions:
-    'False': tail-call-pending-mult
+    'False': rvi-recursion-faster
   is_microcheck: true
   review_status: approved
