@@ -40,7 +40,7 @@
   - [x] `docker compose up -d db && alembic upgrade head` works from empty;
         `alembic downgrade base` works too
   - [x] A test inserts and reads one row per table
-  - [ ] CI is green with Postgres _(Postgres service added; confirm on the first PR run)_
+  - [x] CI is green with Postgres _(first run on PR #2: backend job passed against postgres:16)_
 - [x] **R0 done**
 
 ## R1: Concept graph content + GraphService (weeks 1–4)
