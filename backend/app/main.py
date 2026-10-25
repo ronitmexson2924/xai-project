@@ -10,6 +10,7 @@ from sqlalchemy import text
 
 from app import __version__
 from app.api import api_router
+from app.api.errors import UNPROCESSABLE
 from app.api.middleware import (
     BodySizeLimitMiddleware,
     RateLimitMiddleware,
@@ -70,7 +71,7 @@ async def validation_exception_handler(_: Request, exc: RequestValidationError) 
     else:
         msg = "Invalid request payload"
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=UNPROCESSABLE,
         content={"error": {"code": "VALIDATION_ERROR", "message": msg}},
     )
 

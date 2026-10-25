@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.api.deps import ExplainabilityDep, FeedbackAnalyzerDep, GraphDep, LearnerModelDep
-from app.api.errors import api_error, not_found
+from app.api.errors import UNPROCESSABLE, api_error, not_found
 from app.api.schemas import AttemptBody, AttemptResultOut
 from app.auth import DbDep, LearnerDep
 from app.contracts.explanation import ExplanationEventIn
@@ -91,7 +91,7 @@ def record_attempt(
         raise not_found("recommendation")
     if rec.item_id != payload.item_id:
         raise api_error(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            UNPROCESSABLE,
             "ITEM_MISMATCH",
             "This answer is for a different question than the one recommended",
         )
@@ -108,7 +108,7 @@ def record_attempt(
         raise not_found("item") from None
     if item.kind == "mcq" and payload.response not in item.options:
         raise api_error(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            UNPROCESSABLE,
             "INVALID_OPTION",
             "The response must be one of the question's options",
         )

@@ -16,3 +16,6 @@ def not_found(what: str) -> HTTPException:
     return api_error(
         status.HTTP_404_NOT_FOUND, f"{what.upper()}_NOT_FOUND", f"{what.capitalize()} not found"
     )
+
+
+UNPROCESSABLE = 422  # the status constant was renamed across Starlette versions

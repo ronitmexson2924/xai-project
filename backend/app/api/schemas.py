@@ -5,11 +5,19 @@ Builds on the domain models in app.contracts. Request bodies here are stricter t
 (length and range limits, unknown fields rejected): they are the trust boundary.
 """
 
+import math
 from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictInt,
+    field_validator,
+    model_validator,
+)
 
 from app.contracts.explanation import ExplanationEventIn, ExplanationFeedbackSummary
 from app.contracts.graph import Concept, ConceptEdge, PublicItem
@@ -41,6 +49,13 @@ class Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+def no_nul(value: str) -> str:
+    """Postgres text and JSONB cannot hold NUL characters: reject them as bad input."""
+    if "\x00" in value:
+        raise ValueError("text must not contain NUL characters")
+    return value
+
+
 class QuestionnaireItem(BaseModel):
     id: str
     trait: str
@@ -50,7 +65,7 @@ class QuestionnaireItem(BaseModel):
 
 
 class QuestionnaireAnswersIn(Strict):
-    answers: dict[str, int] = Field(
+    answers: dict[str, StrictInt] = Field(
         ..., max_length=100, description="Map of questionnaire item ID to Likert rating (1 to 5)"
     )
 
@@ -80,6 +95,11 @@ class AttemptBody(AttemptIn):
     hints_used: int = Field(default=0, ge=0, le=20)
     recommendation_id: UUID
 
+    @field_validator("item_id", "response")
+    @classmethod
+    def text_is_storable(cls, value: str) -> str:
+        return no_nul(value)
+
 
 class AttemptResultOut(AttemptResult):
     """AttemptResult plus the XAI E5 notice of what the answer changed."""
@@ -107,6 +127,11 @@ class EventIn(ExplanationEventIn):
                 raise ValueError("payload values must be short scalars")
             if isinstance(v, str) and len(v) > 200:
                 raise ValueError("payload strings must be at most 200 characters")
+            no_nul(key)
+            if isinstance(v, str):
+                no_nul(v)
+            if isinstance(v, float) and not math.isfinite(v):
+                raise ValueError("payload numbers must be finite")
         return value
 
     @model_validator(mode="after")
@@ -149,6 +174,8 @@ class TestAnswersIn(Strict):
     def short_answers(cls, value: dict[str, str]) -> dict[str, str]:
         if any(len(k) > 200 or len(v) > MAX_RESPONSE_CHARS for k, v in value.items()):
             raise ValueError("answer too long")
+        for k, v in value.items():
+            no_nul(k), no_nul(v)
         return value
 
 

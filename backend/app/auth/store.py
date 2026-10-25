@@ -102,7 +102,7 @@ def set_consent(session: Session, user: m.User) -> datetime:
 
 def revoke_tokens(session: Session, user: m.User) -> None:
     """Invalidate every token issued so far (logout everywhere)."""
-    user.tokens_valid_after = datetime.now(UTC).replace(microsecond=0)
+    user.tokens_valid_after = datetime.now(UTC)
     session.flush()
 
 
@@ -110,5 +110,5 @@ def soft_delete_user(session: Session, user: m.User) -> None:
     """Withdraw: the account stops working now; app.auth.purge erases its data later."""
     now = datetime.now(UTC)
     user.deleted_at = now
-    user.tokens_valid_after = now.replace(microsecond=0)
+    user.tokens_valid_after = now
     session.flush()

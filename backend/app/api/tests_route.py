@@ -14,7 +14,7 @@ from sqlalchemy import func, select
 
 from app.api.attempts import grade
 from app.api.deps import GraphDep, LearnerModelDep
-from app.api.errors import api_error
+from app.api.errors import UNPROCESSABLE, api_error
 from app.api.schemas import TestAnswersIn, TestOut, TestPhase, TestSubmitted
 from app.api.session import public_item
 from app.auth import DbDep, LearnerDep
@@ -68,7 +68,7 @@ def submit_test(
         raise api_error(status.HTTP_404_NOT_FOUND, "TEST_NOT_FOUND", f"No {phase} is set up")
     if unknown := sorted(set(payload.answers) - set(ids)):
         raise api_error(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            UNPROCESSABLE,
             "UNKNOWN_TEST_ITEMS",
             f"{len(unknown)} answer(s) are not {phase} questions",
         )

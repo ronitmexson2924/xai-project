@@ -25,6 +25,8 @@ class UserRegisterIn(BaseModel):
     def password_fits_bcrypt(cls, value: str) -> str:
         if len(value.encode("utf-8")) > BCRYPT_MAX_BYTES:
             raise ValueError(f"password must be at most {BCRYPT_MAX_BYTES} bytes")
+        if "\x00" in value:
+            raise ValueError("password must not contain NUL characters")
         if value.strip() == "" or len(set(value)) < 4:
             raise ValueError("password is too simple")
         return value

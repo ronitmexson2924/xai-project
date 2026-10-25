@@ -68,6 +68,8 @@ def next_step(
     explainer: ExplainerDep,
     analyzer: FeedbackAnalyzerDep,
 ) -> NextStepResponse:
+    # one planning step per learner at a time: concurrent tabs wait, then get the same question
+    session.execute(select(m.User.id).where(m.User.id == current.id).with_for_update())
     pending = session.execute(
         select(m.RecommendationRow, m.ExplanationRow)
         .join(m.ExplanationRow, m.ExplanationRow.recommendation_id == m.RecommendationRow.id)

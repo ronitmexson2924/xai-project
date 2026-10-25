@@ -36,7 +36,8 @@ def _secret() -> str:
 def create_access_token(user_id: UUID, expires_delta: timedelta | None = None) -> str:
     now = datetime.now(UTC)
     expire = now + (expires_delta or timedelta(hours=settings.jwt_expire_hours))
-    payload = {"sub": str(user_id), "iat": int(now.timestamp()), "exp": int(expire.timestamp())}
+    # sub-second iat, so a token issued just after a logout is told apart from one just before
+    payload = {"sub": str(user_id), "iat": now.timestamp(), "exp": int(expire.timestamp())}
     return jwt.encode(payload, _secret(), algorithm=ALGORITHM)
 
 

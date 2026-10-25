@@ -5,10 +5,10 @@ The questionnaire is content/questionnaire.yaml (seeded into the database, docs/
 §2.1); scoring and the trait priors live in the learner model.
 """
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter
 
 from app.api.deps import LearnerModelDep
-from app.api.errors import api_error
+from app.api.errors import UNPROCESSABLE, api_error
 from app.api.schemas import QuestionnaireAnswersIn, QuestionnaireItem
 from app.auth import DbDep, LearnerDep
 from app.contracts.learner import StateDelta
@@ -42,13 +42,13 @@ def submit_questionnaire(
     known = {i.id for i in learner_model.questionnaire_items()}
     if missing := sorted(known - set(payload.answers)):
         raise api_error(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            UNPROCESSABLE,
             "INCOMPLETE_QUESTIONNAIRE",
             f"{len(missing)} question(s) unanswered",
         )
     try:
         delta = learner_model.init_from_questionnaire(current.id, payload.answers)
     except ValueError as err:
-        raise api_error(status.HTTP_422_UNPROCESSABLE_ENTITY, "INVALID_ANSWERS", str(err)) from None
+        raise api_error(UNPROCESSABLE, "INVALID_ANSWERS", str(err)) from None
     session.commit()
     return delta
