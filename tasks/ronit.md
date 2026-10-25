@@ -216,9 +216,10 @@
   - `research/analyze.py` with `--from-db` (pilot) or `--simulated` (validation), plus
     `research/analysis/` (export, H1, H2, H4, reliability) and `research/backtest/` (H5).
   - Validation report: `research/reports/results_simulated.md`.
-  - Draft pre-registration: `research/preregistration.md`, including open decisions A-C,
-    above all **whether H1 should stay primary: it is null in simulation even though the
-    loop works**.
+  - Draft pre-registration: `research/preregistration.md`, including open decisions A-C.
+    **Decision A needs a second look:** once H1 stopped reading feedback that arrived after the
+    answer and the exclusion rule was applied, H1 is no longer null in simulation (AUC +0.006,
+    CI +0.001 to +0.011). The preregistration text was not edited; that is yours to amend.
   - On pilot day: sign off S2, run `--from-db`, and tick the boxes above.
 
 ## R9: Faithful decision rationale + counterfactuals (XAI E1, E2)

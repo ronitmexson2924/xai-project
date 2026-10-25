@@ -124,6 +124,7 @@
   responsive.
 - **Acceptance:**
   - [x] Playwright smoke test: a new user completes onboarding and 3 items
+        _(now `frontend/tests/journey.spec.ts` + `abuse.spec.ts`, against the real API; CI job `e2e`)_
 - [x] **M4 done**
 
 ## M5: Item bank (weeks 4–6)
@@ -169,9 +170,12 @@
   - **LLM audit:** export 100 random shown explanations; both of you rate
     them; compute κ; write `research/reports/llm_audit.md`.
 - **Acceptance:**
-  - [x] The production URL works end-to-end
-  - [x] The audit is done; fix the prompt if the wrong rate is ≥ 2%
-- [x] **M7 done**
+  - [ ] The production URL works end-to-end _(render.yaml is ready; nothing is deployed yet)_
+  - [ ] The audit is done; fix the prompt if the wrong rate is ≥ 2% _(needs both of you to rate:
+        `python -m app.explainer.audit export` → rate → `score`; the earlier report had no human
+        ratings and was removed)_
+  - [x] Feature flags per arm, rate limiting, the purge job and pseudonymised exports
+- [ ] **M7 done**
 
 ## M8: Pilot ops & delivery (weeks 9–12)
 - **Do:** onboard the students, watch error logs and dashboards every day,
@@ -185,7 +189,7 @@
   - Add `GET /recommendations/{id}/why` → `Rationale` + `StyleRationale`.
   - Add `GET /learners/me/explain?subject=` → `BeliefExplanation`.
   - Return the E5 change notice in the `POST /attempts` and feedback responses.
-- [ ] **M9 done**
+- [x] **M9 done** _(plus `GET /items/{id}` and `GET /tests/{phase}`; see docs/API_CONTRACT.md)_
 
 ## M10: XAI UI (proposed by Ronit)
 - **Do:**
@@ -196,7 +200,8 @@
   - A small notice when feedback changed something (E5).
 - **Faithfulness:** when the LLM rephrases a rationale, a validator must keep every number
   and concept name (XAI_DESIGN §3, rule 4).
-- [ ] **M10 done**
+- [x] **M10 done** _(rationales are shown verbatim, never LLM-rephrased, so rule 4 holds trivially;
+  whether the generic arm shows "Why this?" is still decision D)_
 
 ---
 

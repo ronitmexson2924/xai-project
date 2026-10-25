@@ -5,7 +5,8 @@
 ## Data
 
 - Learners per arm: closed_loop 30, generic 30, static_personalized 30.
-- Answers: 4500 practice, 3587 micro-check, 2880 pre/post-test. Explanations shown: 4500 (4500 with a feedback summary).
+- Answers: 4500 practice, 3567 micro-check, 2880 pre/post-test. Explanations shown: 4500 (4500 with a feedback summary).
+- Excluded from H1, H2 and H4 (fewer than 5 practice answers, pre-registered): 0 learner(s).
 
 ## H1: explanation-interaction features improve next-answer prediction
 
@@ -13,38 +14,38 @@
 
 | model | AUC | log-loss |
 |---|---|---|
-| BKT p̂ only | 0.748 | 0.526 |
-| + explanation feedback | 0.749 | 0.526 |
+| BKT p̂ only | 0.751 | 0.518 |
+| + explanation feedback | 0.757 | 0.514 |
 
-AUC gain +0.001 (95% learner-bootstrap CI -0.002 to +0.004); log-loss reduction -0.0000 (CI -0.0015 to +0.0014). **H1 is supported only if both CIs exclude 0.**
+AUC gain +0.006 (95% learner-bootstrap CI +0.001 to +0.011); log-loss reduction +0.0036 (CI +0.0008 to +0.0065). **H1 is supported only if both CIs exclude 0.**
 
 ## H2: arm effect on micro-check accuracy
 
 | arm | micro-checks | accuracy |
 |---|---|---|
-| closed_loop | 1189 | 0.693 |
-| generic | 1213 | 0.629 |
-| static_personalized | 1185 | 0.729 |
+| closed_loop | 1183 | 0.681 |
+| generic | 1210 | 0.621 |
+| static_personalized | 1174 | 0.733 |
 
 GEE logistic regression (exchangeable correlation within learner), adjusted for concept cluster; odds ratios vs. generic:
 
 | arm | odds ratio | 95% CI | p |
 |---|---|---|---|
-| closed_loop | 1.339 | 1.039 to 1.726 | 0.0243 |
-| static_personalized | 1.595 | 1.248 to 2.040 | 0.000196 |
+| closed_loop | 1.298 | 1.018 to 1.654 | 0.0351 |
+| static_personalized | 1.667 | 1.297 to 2.144 | 6.71e-05 |
 
 ## H4: normalised learning gain (pre/post test)
 
 | arm | learners | mean gain | 95% CI |
 |---|---|---|---|
-| closed_loop | 30 | 0.190 | 0.138 to 0.237 |
-| generic | 30 | 0.099 | 0.020 to 0.179 |
-| static_personalized | 30 | 0.105 | 0.017 to 0.188 |
+| closed_loop | 30 | 0.223 | 0.176 to 0.274 |
+| generic | 30 | 0.110 | 0.025 to 0.186 |
+| static_personalized | 30 | 0.118 | 0.041 to 0.186 |
 
 | vs. generic | difference | 95% CI | Cohen's d |
 |---|---|---|---|
-| closed_loop | +0.091 | +0.003 to +0.188 | +0.49 |
-| static_personalized | +0.007 | -0.112 to +0.119 | +0.03 |
+| closed_loop | +0.113 | +0.019 to +0.199 | +0.61 |
+| static_personalized | +0.008 | -0.101 to +0.114 | +0.04 |
 
 Pre-registered as underpowered: report the effect size and CI, not a significance claim.
 
@@ -58,7 +59,7 @@ Faithfulness is checked automatically in CI: every counterfactual is carried out
 | generic | 1500 | 100% | 99% | 0.000 | 0 | — |
 | static_personalized | 1500 | 100% | 100% | 0.000 | 0 | — |
 
-Decision rules behind the recommendations: DIAGNOSTIC 425, MISCONCEPTION_DETECTED 1662, MISCONCEPTION_SUSPECTED 2, PREREQ_GAP 12, READY_FOR_NEXT 2032, REVIEW_DUE 367.
+Decision rules behind the recommendations: DIAGNOSTIC 424, MISCONCEPTION_DETECTED 1655, MISCONCEPTION_SUSPECTED 2, PREREQ_GAP 15, READY_FOR_NEXT 2043, REVIEW_DUE 361.
 
 'Why this?' panel events (`why_opened`, `why_rated`) come from Mit's UI (M10); they are empty until it exists. The three survey items are analysed separately.
 
@@ -78,10 +79,10 @@ A struggle run = two wrong answers in a row on one concept. A detector warns **e
 
 | detector | struggle runs | early-warning recall | precision | median lead | alarms / 100 answers |
 |---|---|---|---|---|---|
-| naive (last answer wrong) | 575 | 0.630 | 0.305 | 3.0 | 15.8 |
-| drift (CUSUM) | 575 | 0.160 | 0.285 | 2.5 | 4.0 |
-| resonance (R < 0.6) | 575 | 0.541 | 0.363 | 2.0 | 11.0 |
+| naive (last answer wrong) | 575 | 0.623 | 0.291 | 3.0 | 15.7 |
+| drift (CUSUM) | 575 | 0.130 | 0.253 | 2.0 | 3.6 |
+| resonance (R < 0.6) | 575 | 0.597 | 0.372 | 2.0 | 11.8 |
 
 A detector is only useful if it beats the naive baseline on lead time *and* precision; resonance and drift may drive live decisions only if this holds on pilot data (decision D10).
 
-_Analysis time 2.9 s._
+_Analysis time 2.7 s._
