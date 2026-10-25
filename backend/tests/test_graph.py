@@ -36,7 +36,7 @@ def test_seed_is_idempotent(db: Session) -> None:
     counts = _counts(db)
     seed(db, bundle)
     assert _counts(db) == counts
-    assert counts == (first["concepts"], first["edges"], first["misconceptions"], 1)
+    assert counts == (first["concepts"], first["edges"], first["misconceptions"], first["items"])
 
     snapshot = GraphSnapshot.from_db(db)
     assert len(snapshot.concept_ids) == first["concepts"]

@@ -29,6 +29,7 @@ from app.planner.service import Planner
 DEMO_DOMAIN = "@demo.invalid"
 NO_LOGIN = "!demo-account-no-login"
 PLACEHOLDER_PREFIX = "demo-placeholder-"
+DONT_KNOW = "(no answer)"
 START = datetime(2026, 11, 2, 9, 0, tzinfo=UTC)
 
 
@@ -111,7 +112,13 @@ class DemoLearner:
         item = self.graph.items_for_concept(concept_id)[0]
         wrong = [o for o in item.options if o != item.answer]
         mapped = [o for o in wrong if o in item.distractor_misconceptions]
-        response = item.answer if correct else (mapped or wrong)[0] if misconception else wrong[-1]
+        unmapped = [o for o in wrong if o not in item.distractor_misconceptions]
+        if correct:
+            response = item.answer
+        elif misconception:
+            response = (mapped or wrong)[0]
+        else:  # a slip, not a misconception: real items map every distractor
+            response = unmapped[-1] if unmapped else DONT_KNOW
         self.model.apply_attempt(
             AttemptRecord(
                 id=uuid.uuid4(),

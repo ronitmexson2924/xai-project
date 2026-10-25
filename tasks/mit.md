@@ -136,7 +136,7 @@
   parallel post-test (not used in sessions).
 - **Acceptance:**
   - [ ] ≥180 approved items; every concept has ≥1 approved micro-check
-  - [ ] A test checks that answers are among the options and that every
+  - [x] A test checks that answers are among the options and that every
         distractor maps to a real misconception
 - [ ] **M5 done**
 

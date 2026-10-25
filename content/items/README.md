@@ -20,3 +20,16 @@ items:
 `pretest-` / `posttest-`: the graph never serves those items in sessions, and the analysis (R8)
 recognises them by the prefix. Store answers with `LearnerModel.record_test_attempt(...)`, never
 `apply_attempt`, so tests measure learning without changing the learner model.
+
+## Current bank (M5 draft)
+
+One file per cluster plus `pretest.yaml` / `posttest.yaml`: 282 MCQs in total. Every concept in
+`concepts.yaml` has 3 practice items (`<concept>-p1..p3`, rising difficulty) and 1 micro-check
+(`<concept>-mc`). Every wrong option maps to a misconception **of the item's own concept**, so a wrong
+answer always tells the learner model which misconception it points to. Items whose stem ends with
+"What does this print?" are graded by running their code (`backend/tests/test_items.py`), so their
+answer keys cannot drift from Python's real output.
+
+All items are `review_status: draft`. Only `approved` items are served, so the reviewer (Ronit, S3)
+must set each item to `approved` or `rejected` before the pilot. `pretest-NN` and `posttest-NN` are
+parallel: same concept, same difficulty, different surface details.
