@@ -1,11 +1,10 @@
 """Export the pilot logs as analysis-ready, pseudonymised data frames.
 
-Learner ids are replaced by salted SHA-256 pseudonyms; emails and names are never read.
+Learner ids are replaced by keyed (HMAC-SHA256) pseudonyms; emails and names are never read.
 The predicted P(correct) for every attempt is recovered from the live model's own audit log
 (state_updates: mastery *before* the attempt), so analyses use exactly what the system believed.
 """
 
-import hashlib
 from dataclasses import dataclass, field
 
 import pandas as pd
@@ -16,6 +15,7 @@ from app.contracts.graph import Item
 from app.db import models as m
 from app.graph.service import GraphSnapshot, is_test_item
 from app.learner_model import bkt
+from app.pseudonyms import pseudonym
 
 
 @dataclass
@@ -39,10 +39,6 @@ class Frames:
             "xai_events",
         ):
             getattr(self, name).to_csv(directory / f"{name}.csv", index=False)
-
-
-def pseudonym(user_id, salt: str) -> str:
-    return hashlib.sha256(f"{salt}:{user_id}".encode()).hexdigest()[:12]
 
 
 def load_frames(
