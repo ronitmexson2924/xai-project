@@ -112,13 +112,14 @@ def load_frames(
         )
 
     feedback = {
-        str(r.explanation_id): r.summary for r in session.scalars(select(m.ExplanationFeedbackRow))
+        str(r.explanation_id): (r.summary, r.applied_at)
+        for r in session.scalars(select(m.ExplanationFeedbackRow))
     }
     explanations = []
     for e in session.scalars(select(m.ExplanationRow).order_by(m.ExplanationRow.created_at)):
         if e.user_id not in ids:
             continue
-        s = feedback.get(str(e.id), {})
+        s, feedback_at = feedback.get(str(e.id), ({}, None))
         explanations.append(
             {
                 "learner": ids[e.user_id],
@@ -130,6 +131,7 @@ def load_frames(
                 "length": e.style.get("length"),
                 "depth": e.style.get("depth"),
                 "has_feedback": bool(s),
+                "feedback_at": feedback_at,  # when the summary was final (applied)
                 "dwell_ms": s.get("effective_dwell_ms"),
                 "expanded": s.get("expanded"),
                 "replays": s.get("replays"),

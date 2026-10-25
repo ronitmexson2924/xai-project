@@ -85,3 +85,64 @@ def test_pipeline_end_to_end_on_simulated_logs(db: Session) -> None:
     }
     assert all(r["with_rationale"] == 1.0 for r in rx["per_arm"].values())  # every decision
     assert all(r["with_counterfactual"] > 0 for r in rx["per_arm"].values())
+
+
+def _frames(attempts: list[dict], explanations: list[dict], learners: list[str]) -> "h.Frames":
+    from analysis.export import Frames
+
+    return Frames(
+        learners=pd.DataFrame({"learner": learners, "arm": "generic"}),
+        attempts=pd.DataFrame(attempts),
+        explanations=pd.DataFrame(explanations),
+        questionnaire=pd.DataFrame(columns=["learner", "item_id", "value"]),
+    )
+
+
+def _attempt(learner: str, minute: int, **kw) -> dict:
+    t0 = pd.Timestamp("2026-01-01", tz="UTC")
+    return {
+        "learner": learner,
+        "concept_id": "c",
+        "created_at": t0 + pd.Timedelta(minutes=minute),
+        "correct": kw.get("correct", True),
+        "p_hat": 0.6,
+        "is_microcheck": kw.get("is_microcheck", False),
+        "test_phase": kw.get("test_phase"),
+    }
+
+
+def test_learners_with_fewer_than_five_practice_answers_are_excluded() -> None:
+    attempts = [_attempt("a", i) for i in range(5)]
+    attempts += [_attempt("b", i) for i in range(4)]
+    attempts += [_attempt("b", 10 + i, is_microcheck=True) for i in range(3)]  # not practice
+    attempts += [_attempt("b", 20, test_phase="pretest")]  # not practice either
+    frames = _frames(attempts, [], ["a", "b"])
+    core, excluded = h.exclude_sparse(frames)
+    assert excluded == ["b"]
+    assert set(core.learners.learner) == {"a"} and set(core.attempts.learner) == {"a"}
+    assert set(frames.learners.learner) == {"a", "b"}  # the original frames are untouched
+
+
+def test_h1_ignores_feedback_that_was_final_only_after_the_answer() -> None:
+    t0 = pd.Timestamp("2026-01-01", tz="UTC")
+    expl = {
+        "learner": "a",
+        "explanation_id": "e1",
+        "concept_id": "c",
+        "created_at": t0,  # shown before the answer at minute 5...
+        "has_feedback": True,
+        "dwell_ms": 30_000,
+        "expanded": True,
+        "replays": 0,
+        "clarity": 4,
+        "followup_correct": True,
+        "dismissed": False,
+    }
+    answer = [_attempt("a", 5)]
+    late = _frames(answer, [{**expl, "feedback_at": t0 + pd.Timedelta(minutes=9)}], ["a"])
+    assert h.h1_dataset(late).empty  # ...but its summary was only final at minute 9
+    early = _frames(answer, [{**expl, "feedback_at": t0 + pd.Timedelta(minutes=2)}], ["a"])
+    data = h.h1_dataset(early)
+    assert len(data) == 1 and data.prior_explanation_id[0] == "e1"
+    unknown = _frames(answer, [{**expl, "feedback_at": None}], ["a"])
+    assert h.h1_dataset(unknown).empty  # no timestamp: never assume it was available

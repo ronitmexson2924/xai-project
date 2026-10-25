@@ -12,7 +12,6 @@ research/reports/results_simulated.md. The two are never mixed (EVALUATION_PLAN.
 
 import argparse
 import os
-import secrets
 import sys
 import time
 from pathlib import Path
@@ -36,9 +35,10 @@ def f3(x: float) -> str:
 def render(frames: Frames, source: str, n_boot: int) -> str:
     started = time.perf_counter()
     items = load_content(CONTENT).questionnaire
-    r1 = h.h1(frames, n_boot=n_boot)
-    r2 = h.h2(frames)
-    r4 = h.h4(frames, n_boot=n_boot)
+    core, excluded = h.exclude_sparse(frames)  # preregistration.md §4: applies to H1, H2, H4
+    r1 = h.h1(core, n_boot=n_boot)
+    r2 = h.h2(core)
+    r4 = h.h4(core, n_boot=n_boot)
     alpha = h.reliability(frames, items)
     rx = h.xai(frames, n_boot=n_boot)
     cfg = BacktestConfig()
@@ -59,6 +59,8 @@ def render(frames: Frames, source: str, n_boot: int) -> str:
         f"{int(att.is_microcheck.sum())} micro-check, {int(att.test_phase.notna().sum())} "
         f"pre/post-test. Explanations shown: {len(frames.explanations)} "
         f"({int(frames.explanations.has_feedback.sum())} with a feedback summary).",
+        f"- Excluded from H1, H2 and H4 (fewer than {h.MIN_PRACTICE} practice answers, "
+        f"pre-registered): {len(excluded)} learner(s).",
         "",
         "## H1: explanation-interaction features improve next-answer prediction",
         "",
@@ -215,7 +217,8 @@ def main() -> int:
                 )
                 simulate(session, cfg)
                 graph = GraphSnapshot.from_db(session, include_drafts=True)
-                frames = load_frames(session, graph, salt=secrets.token_hex(8), email_like="%@sim")
+                # a fixed salt keeps the learner order, and so the CV folds, the same every run
+                frames = load_frames(session, graph, salt="simulated", email_like="%@sim")
                 source = (
                     f"SIMULATED validation run: {args.learners} learners per arm, "
                     f"{args.steps} steps, self-report gap 0.2. Not pilot data"
