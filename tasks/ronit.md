@@ -100,9 +100,12 @@
   3. `research/reliability.py`: computes Cronbach's α per trait from an
      export.
 - **Acceptance:**
-  - [ ] Tests: reverse scoring, all-3s gives means of 0.5, the bandit prior
+  - [x] Tests: reverse scoring, all-3s gives means of 0.5, the bandit prior
         is built correctly
-- [ ] **R3 done**
+- [x] **R3 done**
+  - _Questionnaire items are custom, modelled on the cited scales (not copied). Ronit: compare
+    them with the originals and check licences before the pilot. Theta parameterisation changed;
+    see MODEL_SPEC §2.2 "Changed in R3"._
 
 ## R4: Planner (weeks 4–5)
 - **Depends on:** R1c, R2
@@ -130,8 +133,9 @@
   4. Idempotent per `explanation_id`, with an optimistic `version` check
      (retry once on conflict).
 - **Acceptance:**
-  - [ ] Test: a synthetic learner who prefers example-first (true
-        θ_abs = −0.8) → after 60 updates, `abstraction_preference.mean < 0.35`
+  - [ ] Test: a synthetic learner who strongly prefers example-first (true
+        `abstraction_preference` = 0.1, starting from a neutral questionnaire)
+        → after 60 updates, `abstraction_preference.mean < 0.35`
   - [ ] Test: exploration rate stays ≥ ε_min over 1,000 draws
   - [ ] Test: the arm gating works
 - [ ] **R5 done**
@@ -178,6 +182,15 @@
 
 ## Asks for Mit
 _(add items here when you need something from Mit's side)_
+- **Questionnaire API (M1):** `GET /onboarding/questionnaire` should return
+  `list[QuestionnaireItemPublic]` from `app/psychometrics/questionnaire.py`
+  (id + text only; never send trait, reverse flag or source). Load the items with
+  `LearnerModel.questionnaire_items()`. If you'd rather have this model in
+  `contracts/`, open a `contract` PR and I'll approve it.
+- **Wiring (M1):** `LearnerModel(session, graph)` needs a `GraphSnapshot`. Build it once at
+  startup with `GraphSnapshot.from_db(session)` (pass `include_drafts=True` in dev until items
+  are approved) and reuse it. `apply_*` methods flush but don't commit: commit in the request.
+- **Users table:** R0 added `users.is_admin` (bool, default false) for the `/admin/*` guard.
 
 ## Notes / decisions log
 _(date: decision, and why)_

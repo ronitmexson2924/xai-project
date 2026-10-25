@@ -2,8 +2,8 @@
 
     python -m app.graph.seed ../content          (from backend/)
 
-Concepts and items are upserted but never deleted (learner state and attempts reference them);
-edges and misconceptions are synced to exactly what the files say.
+Concepts, items and questionnaire items are upserted but never deleted (learner state, attempts and
+responses reference them); edges and misconceptions are synced to exactly what the files say.
 """
 
 import argparse
@@ -21,7 +21,7 @@ from app.graph.content import ContentBundle, load_content, validate
 def _upsert(session: Session, model: type[m.Base], rows: list[dict], key: list[str]) -> None:
     if not rows:
         return
-    stmt = insert(model).values(rows)
+    stmt = insert(model.__table__).values(rows)  # Core table: dict keys are column names
     updates = {c: stmt.excluded[c] for c in rows[0] if c not in key}
     session.execute(stmt.on_conflict_do_update(index_elements=key, set_=updates))
 
@@ -56,6 +56,9 @@ def seed(session: Session, bundle: ContentBundle) -> dict[str, int]:
 
     _upsert(session, m.ItemRow, [i.model_dump() for i in bundle.items], ["id"])
 
+    questionnaire_rows = [q.model_dump() for q in bundle.questionnaire]
+    _upsert(session, m.QuestionnaireItemRow, questionnaire_rows, ["id"])
+
     known = set(session.scalars(select(m.ConceptRow.id)))
     orphans = known - {c.id for c in bundle.concepts}
     if orphans:
@@ -65,6 +68,7 @@ def seed(session: Session, bundle: ContentBundle) -> dict[str, int]:
         "edges": len(bundle.edges),
         "misconceptions": len(misconception_ids),
         "items": len(bundle.items),
+        "questionnaire_items": len(questionnaire_rows),
     }
 
 

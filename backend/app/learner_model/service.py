@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.contracts.explanation import ExplanationFeedbackSummary
 from app.contracts.learner import (
+    TRAIT_NAMES,
     AffectiveState,
     AttemptRecord,
     ConceptMastery,
@@ -19,11 +20,14 @@ from app.contracts.learner import (
     LearnerTraits,
     StateDelta,
     StateUpdateSource,
+    TraitEstimate,
 )
 from app.db import models as m
 from app.graph.service import GraphSnapshot
 from app.learner_model import bkt
-from app.learner_model.traits import neutral_traits
+from app.learner_model.bandit import BanditPosterior
+from app.learner_model.traits import PRIOR_VARIANCE, neutral_traits
+from app.psychometrics.questionnaire import QuestionnaireItem, score
 
 MISCONCEPTION_CLEAR_STREAK = 2  # consecutive correct attempts that clear a misconception flag
 DEFAULT_ARM: ExperimentArm = "generic"  # used only if a user somehow has no assignment
@@ -189,8 +193,73 @@ class LearnerModel:
         )
         return self._record(delta)
 
+    def questionnaire_items(self) -> list[QuestionnaireItem]:
+        return [
+            QuestionnaireItem(
+                id=r.id,
+                trait=r.trait,
+                text=r.item_text,
+                reverse_scored=r.reverse_scored,
+                source=r.source,
+            )
+            for r in self.session.scalars(select(m.QuestionnaireItemRow))
+        ]
+
     def init_from_questionnaire(self, user_id: UUID, answers: dict[str, int]) -> StateDelta:
-        raise NotImplementedError("task R3")
+        """Store answers and set the trait prior (MODEL_SPEC §2.1) and bandit prior (§2.2).
+        Taken once per learner: a second submission returns the first result unchanged."""
+        source_id = str(user_id)
+        if (done := self._already_applied("questionnaire", source_id)) is not None:
+            return done
+
+        scores = score(self.questionnaire_items(), answers)
+        before = self.get_state(user_id).traits
+        for item_id, value in answers.items():
+            self.session.merge(
+                m.QuestionnaireResponseRow(user_id=user_id, item_id=item_id, value=value)
+            )
+
+        priors = dict(before.traits)
+        for trait, trait_score in scores.items():
+            priors[trait] = TraitEstimate(mean=trait_score.mean, variance=PRIOR_VARIANCE)
+        posterior = BanditPosterior.from_trait_priors(priors)
+        traits = LearnerTraits(
+            traits={**priors, **posterior.reported_traits()}, version=before.version + 1
+        )
+        self._save_traits(user_id, traits, posterior)
+        if self.session.get(m.LearnerAffectRow, user_id) is None:
+            self.session.add(m.LearnerAffectRow(user_id=user_id))
+
+        delta = StateDelta(
+            user_id=user_id,
+            source="questionnaire",
+            source_id=source_id,
+            trait_changes={
+                t: (before.traits[t].mean, traits.traits[t].mean) for t in traits.traits
+            },
+            notes=[f"traits not scored (too few answers): {', '.join(missing)}"]
+            if (missing := sorted(set(TRAIT_NAMES) - set(scores)))
+            else [],
+        )
+        return self._record(delta)
+
+    def _save_traits(
+        self, user_id: UUID, traits: LearnerTraits, posterior: BanditPosterior
+    ) -> None:
+        payload = {t: e.model_dump() for t, e in traits.traits.items()}
+        row = self.session.get(m.LearnerTraitsRow, user_id)
+        if row is None:
+            self.session.add(
+                m.LearnerTraitsRow(
+                    user_id=user_id,
+                    traits=payload,
+                    bandit=posterior.to_json(),
+                    version=traits.version,
+                )
+            )
+        else:
+            row.traits, row.bandit, row.version = payload, posterior.to_json(), traits.version
+        self.session.flush()
 
     def apply_explanation_feedback(self, summary: ExplanationFeedbackSummary) -> StateDelta:
         raise NotImplementedError("task R5")

@@ -65,33 +65,51 @@ y = 0.6·(followup_correct − p̂_correct)      # mastery-adjusted, so weak con
   + 0.1·(−1 if dismissed_quickly else 0)
 ```
 
-Model: `y = θ·x(s) + ε`, with `ε ~ N(0, σ²=0.25)` *(tune)*. The per-learner
-posterior is `θ ~ N(μ, Λ⁻¹)`. `Λ` (4×4) and `b` (4) are stored in
-`learner_traits.bandit`.
+Model (θ measured in **trait units**, so a trait τ ∈ [0,1] corresponds to
+`θ_k = κ(2τ_k − 1)`):
 
-- Prior: `μ0 = [0, κ(2q_abs−1), κ(2q_load−1), κ(2q_depth−1)]`, with `κ = 0.3`
-  and `q` = questionnaire means. `Λ0 = I / 0.25`.
-- Update: `Λ ← Λ + x xᵀ/σ²`, `b ← b + x·y/σ²`, `μ = Λ⁻¹ b`.
-- Reported trait: `mean_k = (clip(μ_k, −1, 1) + 1) / 2`.
-  `variance_k = (Λ⁻¹)_kk / 4`.
+```
+y = θ·x(s) − c·x_load² + ε,   ε ~ N(0, σ² = 0.25)  (tune)
+κ = 0.3   (largest effect of one style feature on y)  (tune)
+c = κ/2   (fixed curvature: `medium` wins while 0.25 < τ_load < 0.75)
+```
+
+The per-learner posterior is `θ ~ N(μ, Λ⁻¹)`. `Λ` (4×4), `b` (4) and the
+observation count `n` are stored in `learner_traits.bandit`. Code:
+`backend/app/learner_model/bandit.py`.
+
+- **Prior from the questionnaire:** `μ0 = [0, κ(2q_abs−1), κ(2q_load−1), κ(2q_depth−1)]`.
+  Variances: `[0.25, 4κ²·v_abs, 4κ²·v_load, 4κ²·v_depth]`, where `v = 0.04` is
+  the questionnaire trait variance. `Λ0 = diag(1/variances)`.
+- **Update:** `Λ ← Λ + x xᵀ/σ²`, `b ← b + x·(y + c·x_load²)/σ²`, `μ = Λ⁻¹ b`.
+- **Reported trait:** `mean_k = (clip(μ_k/κ, −1, 1) + 1) / 2`,
+  `variance_k = min(0.25, (Λ⁻¹)_kk / 4κ²)`. At the prior, these equal the
+  questionnaire mean and variance exactly.
+
+> *Changed in R3 (from v0):* v0 reported `(μ+1)/2` while the prior was
+> `κ(2q−1)`, which squashed questionnaire scores toward 0.5 (q = 1 was
+> reported as 0.65). v0's linear model also could never choose `medium`
+> length. Both are fixed by the trait-unit scaling and the curvature term.
 
 **Style choice in the `closed_loop` arm (R5).**
 
 1. With probability `ε_min = 0.1`, pick one of the 12 (example_first ×
    length × depth) combinations at random. Set `style_source="exploration"`.
 2. Otherwise, sample `θ̃ ~ N(μ, Λ⁻¹)` and pick the style that maximises
-   `θ̃·x(s)`. Set `style_source="thompson"`.
+   `θ̃·x(s) − c·x_load²`. Set `style_source="thompson"`.
 3. Affect constraints are applied *before* choosing, by shrinking the
    candidate set: `fatigue > 0.7` allows only `short`.
 4. `tone = "encouraging"` if `self_efficacy.mean < 0.4` or
    `frustration > 0.6`. `include_diagram = concept card has a diagram and
    x_abs = −1`.
 
-**`static_personalized` arm.** Map the questionnaire means directly
-(`style_source="trait_mapped"`), with no updates from feedback:
-- `example_first = abstraction < 0.5`
-- `length`: short if `load < 0.35`, long if `load > 0.7`, medium otherwise
-- `depth = why` if `depth ≥ 0.5`
+**`static_personalized` arm.** Pick the style that maximises the **prior
+mean** (no sampling, no updates from feedback; `style_source="trait_mapped"`).
+This is the same rule the bandit uses, so the arms differ only in learning.
+It works out to:
+- `example_first` if `abstraction < 0.5` (ties go to example-first)
+- `length`: short if `load < 0.25`, long if `load > 0.75`, medium otherwise
+- `depth = why` if `depth > 0.5`
 
 **`generic` arm.** Always `example_first=True, length=medium, depth=how,
 tone=neutral, include_diagram=card has diagram`, with

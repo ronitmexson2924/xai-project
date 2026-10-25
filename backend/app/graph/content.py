@@ -7,6 +7,8 @@ import yaml
 from pydantic import BaseModel
 
 from app.contracts.graph import Concept, ConceptEdge, Item, Misconception
+from app.contracts.learner import TRAIT_NAMES
+from app.psychometrics.questionnaire import QuestionnaireItem, load_questionnaire
 
 ReviewStatus = Literal["draft", "approved", "rejected"]
 
@@ -33,6 +35,7 @@ class ContentBundle(BaseModel):
     concepts: list[ConceptSpec]
     misconceptions: list[Misconception]
     items: list[ItemSpec] = []
+    questionnaire: list[QuestionnaireItem] = []
 
     @property
     def edges(self) -> list[ConceptEdge]:
@@ -53,6 +56,7 @@ def load_content(content_dir: Path) -> ContentBundle:
         concepts=_read(content_dir / "concepts.yaml", "concepts"),
         misconceptions=_read(content_dir / "misconceptions.yaml", "misconceptions"),
         items=items,
+        questionnaire=load_questionnaire(content_dir / "questionnaire.yaml"),
     )
 
 
@@ -125,4 +129,15 @@ def validate(bundle: ContentBundle) -> list[str]:
                 errors.append(f"item {item.id}: distractor {option!r} is not an option")
             if mid not in misconception_ids:
                 errors.append(f"item {item.id}: unknown misconception {mid}")
+
+    if bundle.questionnaire:
+        q_ids = [q.id for q in bundle.questionnaire]
+        if len(set(q_ids)) != len(q_ids):
+            errors.append("duplicate questionnaire item ids")
+        for trait in TRAIT_NAMES:
+            trait_items = [q for q in bundle.questionnaire if q.trait == trait]
+            if len(trait_items) < 3:
+                errors.append(f"questionnaire: {trait} needs at least 3 items")
+            if not any(q.reverse_scored for q in trait_items):
+                errors.append(f"questionnaire: {trait} needs a reverse-scored item")
     return errors
