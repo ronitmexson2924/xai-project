@@ -1,7 +1,7 @@
 # Mit: Explanation & Product Lane
 
 > **For the coding agent:** you are working for **Mit**. Read `AGENTS.md`
-> first. Work only on the `mit` branch (or `mit/<task>` sub-branches). Pick
+> first. Work only on the `mit` branch (or `mit-<task>` sub-branches). Pick
 > the **first unchecked task whose dependencies are done**, plan it,
 > implement it, test it, tick its box in this file, and prepare a PR to
 > `dev`. Do not edit Ronit's directories (see `docs/ARCHITECTURE.md`
