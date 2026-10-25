@@ -28,6 +28,13 @@ from app.contracts.learner import (
 )
 from app.contracts.planning import Recommendation
 from app.contracts.reasons import ReasonCode, ReasonEvidence
+from app.contracts.xai import (
+    BeliefExplanation,
+    ChangeNotice,
+    Rationale,
+    RecommendationWhy,
+    StyleRationale,
+)
 
 _CONCEPTS = [
     Concept(
@@ -265,3 +272,34 @@ class FakeFeedbackAnalyzer:
             followup_correct=followup,
             dismissed_quickly=dwell_ms < 3000 and types <= {"shown", "hidden", "dismissed"},
         )
+
+
+class FakeExplainability:
+    """Fixed, plausible explanations so the "Why this?" UI can be built before R9/R10 merge."""
+
+    def why(self, recommendation_id: UUID) -> RecommendationWhy:
+        return RecommendationWhy(
+            rationale=Rationale(
+                recommendation_id=recommendation_id,
+                rule=ReasonCode.READY_FOR_NEXT,
+                summary="You know the topics this one builds on, so it is the next step.",
+                evidence=[ReasonEvidence(code=ReasonCode.READY_FOR_NEXT, concept_id="loops")],
+            ),
+            style=StyleRationale(
+                source="generic",
+                summary="This is the app's standard explanation style.",
+                confidence="tentative",
+            ),
+        )
+
+    def explain_belief(self, user_id: UUID, subject: str) -> BeliefExplanation:
+        return BeliefExplanation(
+            subject=subject,
+            label=subject,
+            value=0.5,
+            confidence="tentative",
+            summary="We don't have enough of your answers yet to say much.",
+        )
+
+    def explain_change(self, delta: StateDelta) -> ChangeNotice:
+        return ChangeNotice(source=delta.source, messages=[])

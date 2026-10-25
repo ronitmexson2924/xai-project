@@ -1,7 +1,7 @@
 # Mit: Explanation & Product Lane
 
 > **For the coding agent:** you are working for **Mit**. Read `AGENTS.md`
-> first. Work only on the `mit` branch (or `mit/<task>` sub-branches). Pick
+> first. Work only on the `mit` branch (or `mit-<task>` sub-branches). Pick
 > the **first unchecked task whose dependencies are done**, plan it,
 > implement it, test it, tick its box in this file, and prepare a PR to
 > `dev`. Do not edit Ronit's directories (see `docs/ARCHITECTURE.md`
@@ -178,6 +178,25 @@
   ship hotfixes (PR → dev → main hotfix), record a demo video, and write the
   system/implementation chapter.
 - [x] **M8 done**
+
+## M9: XAI API (proposed by Ronit, see docs/XAI_DESIGN.md; confirm before starting)
+- **Depends on:** the `contract` PR adding `contracts/xai.py` (approve it with Ronit)
+- **Do:**
+  - Add `GET /recommendations/{id}/why` → `Rationale` + `StyleRationale`.
+  - Add `GET /learners/me/explain?subject=` → `BeliefExplanation`.
+  - Return the E5 change notice in the `POST /attempts` and feedback responses.
+- [ ] **M9 done**
+
+## M10: XAI UI (proposed by Ronit)
+- **Do:**
+  - "Why this?" panel on every recommendation (E1 + E2), with a 1-tap "Did this make sense?"
+    prompt on about 1 in 5.
+  - "Why this style?" line under each explanation (E3).
+  - Dashboard: a "Why we think this" drawer per concept/trait, with confidence badges (E4).
+  - A small notice when feedback changed something (E5).
+- **Faithfulness:** when the LLM rephrases a rationale, a validator must keep every number
+  and concept name (XAI_DESIGN §3, rule 4).
+- [ ] **M10 done**
 
 ---
 

@@ -21,7 +21,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.6"]
+dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.6", "pandas>=2.2", "statsmodels>=0.14"]
+research = ["matplotlib>=3.8"]
 
 [build-system]
 requires = ["setuptools>=69"]
@@ -39,3 +40,8 @@ select = ["E", "F", "I", "B", "UP"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = [".", "../research"]  # research/simulator is smoke-tested from tests/
+
+[tool.ruff.lint.isort]
+known-third-party = ["alembic"]  # the local alembic/ migrations folder is not the package
+known-first-party = ["app", "simulator"]  # simulator lives in ../research
