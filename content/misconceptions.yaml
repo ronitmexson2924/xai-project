@@ -1,0 +1,116 @@
+# Misconceptions per concept (task R1). DRAFTED BY AGENT, needs Ronit's review.
+# Rule: >= 1 per concept, >= 2 for core concepts (recursion, references, complexity).
+# Item distractors (content/items/, Mit) map wrong options to these IDs.
+misconceptions:
+  # basics
+  - {id: vars-assignment-links-names, concept_id: variables-and-types, description: "Believes y = x permanently links y to x, so later changes to x (a number) change y.", remediation_hint: "Trace x and y line by line in a table after x = x + 1."}
+  - {id: cond-all-branches-checked, concept_id: conditionals, description: "Believes every true branch of an if/elif chain runs, not just the first true one.", remediation_hint: "Run grade(95) with the conditions reordered and see which single branch fires."}
+  - {id: loops-off-by-one, concept_id: loops, description: "Believes range(a, b) includes b.", remediation_hint: "Print list(range(1, 4)) and count the elements."}
+  - {id: loops-while-never-ends, concept_id: loops, description: "Writes while loops whose condition can never become false (the loop variable is not updated).", remediation_hint: "Ask which line in the body moves the condition towards false."}
+  - {id: func-print-is-return, concept_id: functions, description: "Believes printing a value inside a function returns it to the caller.", remediation_hint: "Assign the result of a print-only function to a variable and print that variable (None)."}
+  - {id: func-code-after-return, concept_id: functions, description: "Believes code after a return statement still runs.", remediation_hint: "Add a print after return and observe that it never appears."}
+  - {id: bigo-measures-seconds, concept_id: big-o-notation, description: "Believes Big-O gives the actual running time, so O(n) is always faster than O(n^2).", remediation_hint: "Compare 1000n with n^2 for n = 10 and n = 10,000."}
+  - {id: bigo-keeps-constants, concept_id: big-o-notation, description: "Keeps constants and lower-order terms, writing O(3n + 5) instead of O(n).", remediation_hint: "Double n and see that 3n + 5 roughly doubles, just like n."}
+  - {id: loopcx-two-loops-quadratic, concept_id: loop-complexity-analysis, description: "Believes any code with two loops is O(n^2), even when the loops are sequential, not nested.", remediation_hint: "Count iterations of two sequential loops for n = 4: 4 + 4, not 4 x 4."}
+  - {id: loopcx-inner-bound-ignored, concept_id: loop-complexity-analysis, description: "Believes a nested loop whose inner loop runs a constant number of times is O(n^2).", remediation_hint: "Count the work when the inner loop is range(3): 3n operations."}
+  - {id: log-needs-log-call, concept_id: logarithmic-complexity, description: "Believes O(log n) only arises when code calls a logarithm function.", remediation_hint: "Count the iterations of a halving loop for n = 8, 16, 32."}
+  - {id: log-same-as-linear-half, concept_id: logarithmic-complexity, description: "Confuses halving the problem each step (O(log n)) with doing n/2 work (O(n)).", remediation_hint: "Compare n/2 with log2(n) for n = 1,000,000."}
+  - {id: space-o1-means-no-memory, concept_id: space-complexity, description: "Believes O(1) extra space means the algorithm uses no memory, or that it may not create any variables.", remediation_hint: "List the variables reverse_in_place creates and check that their number does not depend on n."}
+  - {id: space-ignores-recursion-stack, concept_id: space-complexity, description: "Believes a recursive function with no lists uses O(1) extra space, ignoring call-stack frames.", remediation_hint: "Count frames alive at the deepest point of fact(n)."}
+
+  # arrays & strings
+  - {id: arr-last-index-is-len, concept_id: arrays-indexing, description: "Believes the last element is at index len(a).", remediation_hint: "List the indices of a 3-element list: 0, 1, 2."}
+  - {id: arr-index-starts-at-one, concept_id: arrays-indexing, description: "Believes the first element is at index 1.", remediation_hint: "Print a[0] and a[1] for a = [10, 20, 30]."}
+  - {id: trav-max-init-zero, concept_id: array-traversal, description: "Initialises a running maximum to 0, which fails for all-negative arrays.", remediation_hint: "Run the function on [-5, -2, -9]."}
+  - {id: dyn-every-op-constant, concept_id: dynamic-arrays, description: "Believes every list operation (including insert at the front) is O(1).", remediation_hint: "Draw what happens to every element when inserting at index 0."}
+  - {id: dyn-append-always-copies, concept_id: dynamic-arrays, description: "Believes every append copies the whole list, so append is O(n).", remediation_hint: "Count copies when capacity doubles: 1 + 2 + 4 + ... < 2n over n appends."}
+  - {id: str-mutable, concept_id: strings-as-sequences, description: "Believes a character of a string can be changed in place (s[0] = 'x').", remediation_hint: "Try it and read the TypeError; build a new string instead."}
+  - {id: tp-works-unsorted, concept_id: two-pointers, description: "Applies the pair-sum two-pointer rule to an unsorted array.", remediation_hint: "Run it on [9, 1, 6] with target 7 and see it miss the pair."}
+  - {id: sw-recompute-window, concept_id: sliding-window, description: "Recomputes the whole window sum at each step, believing that is still a sliding window.", remediation_hint: "Count additions for n = 6, k = 3 both ways."}
+  - {id: ps-range-off-by-one, concept_id: prefix-sums, description: "Uses P[r] - P[l] for the inclusive range a[l..r], missing a[r].", remediation_hint: "Check the formula on a single-element range l = r."}
+  - {id: hash-any-key, concept_id: hash-maps, description: "Believes any value, including a list, can be a dictionary key.", remediation_hint: "Try {[1, 2]: 'x'} and convert the key to a tuple."}
+  - {id: hash-ordered-by-key, concept_id: hash-maps, description: "Believes a hash map keeps keys sorted.", remediation_hint: "Insert keys 3, 1, 2 and print the dict: insertion order, not sorted order."}
+  - {id: coll-always-constant, concept_id: hash-collisions, description: "Believes hash-map lookups are O(1) in every case, even with many collisions.", remediation_hint: "Put every key in one chain and count comparisons for a lookup."}
+
+  # linked structures
+  - {id: ref-assignment-copies, concept_id: references, description: "Believes b = a creates a copy of a list.", remediation_hint: "Append through b, then print a."}
+  - {id: ref-is-vs-equals, concept_id: references, description: "Confuses identity (is) with equality (==): believes two equal lists are the same object.", remediation_hint: "Compare [1] == [1] with [1] is [1]."}
+  - {id: ref-param-rebind-changes-caller, concept_id: references, description: "Believes rebinding a parameter inside a function (lst = [...]) changes the caller's list.", remediation_hint: "Contrast lst.append(x) with lst = [x] inside a function."}
+  - {id: sll-random-access, concept_id: singly-linked-list, description: "Believes a linked list supports O(1) access to the k-th element.", remediation_hint: "Count the next hops needed to reach the 5th node."}
+  - {id: sll-skip-last-node, concept_id: singly-linked-list, description: "Traverses with while node.next is not None and misses the last node.", remediation_hint: "Trace the loop on a two-node list."}
+  - {id: lli-wrong-update-order, concept_id: linked-list-insert-delete, description: "Overwrites prev.next before saving it, losing the rest of the list.", remediation_hint: "Draw the arrows before and after each assignment."}
+  - {id: lli-insert-is-free, concept_id: linked-list-insert-delete, description: "Believes inserting at position k is O(1) overall, forgetting the O(k) walk to find the node.", remediation_hint: "Separate 'find the node' from 'rewire the links' and cost each."}
+  - {id: dll-one-direction-only, concept_id: doubly-linked-list, description: "Updates only next links when removing a node, leaving stale prev links.", remediation_hint: "Walk the list backwards after the removal."}
+  - {id: rev-lose-rest, concept_id: linked-list-reversal, description: "Sets current.next = prev before saving current.next, so the loop cannot continue.", remediation_hint: "Add the nxt variable and trace three nodes."}
+  - {id: rev-return-old-head, concept_id: linked-list-reversal, description: "Returns the old head as the head of the reversed list.", remediation_hint: "After reversal, ask which node has no predecessor."}
+  - {id: stack-fifo, concept_id: stack, description: "Believes a stack returns elements in the order they were added (FIFO).", remediation_hint: "Push 1, 2, 3 and pop three times."}
+  - {id: stack-pop-empty, concept_id: stack, description: "Pops without checking for an empty stack.", remediation_hint: "Run balanced(')') and read the error."}
+  - {id: queue-list-pop0-cheap, concept_id: queue, description: "Believes list.pop(0) is O(1), so a list is a fine queue.", remediation_hint: "Count element shifts for pop(0) on a list of 5."}
+  - {id: queue-lifo, concept_id: queue, description: "Confuses a queue with a stack: expects the newest element to leave first.", remediation_hint: "Model a ticket line: who is served first?"}
+  - {id: fs-check-only-next, concept_id: fast-slow-pointers, description: "Checks fast.next but not fast before advancing, crashing on even-length lists.", remediation_hint: "Trace has_cycle on a two-node list without a cycle."}
+
+  # recursion (core: >= 2 each)
+  - {id: recursion-no-base-case, concept_id: recursion-base-case, description: "Believes recursion stops on its own without a base case.", remediation_hint: "Trace fact(2) by hand and point at the line where it stops."}
+  - {id: rbc-unreachable-base, concept_id: recursion-base-case, description: "Writes a base case that some inputs skip over (e.g. n == 0 when n can be negative or odd steps jump past it).", remediation_hint: "List the sequence of arguments for fact(-1) or a step of 2 from 5."}
+  - {id: rbc-base-case-wrong-value, concept_id: recursion-base-case, description: "Returns the wrong value in the base case (e.g. fact(0) = 0), corrupting every result.", remediation_hint: "Compute fact(1) from fact(0) = 0 and see why every answer becomes 0."}
+  - {id: rc-no-progress, concept_id: recursive-case, description: "Makes the recursive call on an input that does not get smaller.", remediation_hint: "Write the argument of each call in a column and check it shrinks."}
+  - {id: rc-must-trace-everything, concept_id: recursive-case, description: "Believes you must mentally trace every recursive call to trust the function, instead of assuming the smaller call is correct.", remediation_hint: "Verify total([2, 3, 5]) assuming total([3, 5]) = 8 is correct."}
+  - {id: cs-shared-locals, concept_id: call-stack, description: "Believes all recursive calls share one copy of local variables.", remediation_hint: "Draw a separate box (frame) per call with its own n."}
+  - {id: cs-code-after-call-skipped, concept_id: call-stack, description: "Believes statements after a recursive call never run.", remediation_hint: "Run countdown(2) and match each 'up' line to its frame."}
+  - {id: trace-depth-is-cost, concept_id: recursion-tracing, description: "Believes the running time equals the recursion depth, even when each call branches.", remediation_hint: "Count the nodes of fib(5)'s call tree."}
+  - {id: trace-top-down-values, concept_id: recursion-tracing, description: "Tries to compute return values from the root downwards instead of from base cases upwards.", remediation_hint: "Fill in return values starting at the leaves."}
+  - {id: rvi-recursion-faster, concept_id: recursion-vs-iteration, description: "Believes recursion is asymptotically faster (or always slower) than the equivalent loop.", remediation_hint: "Count operations of recursive and iterative factorial: both n."}
+  - {id: rvi-no-depth-limit, concept_id: recursion-vs-iteration, description: "Believes recursion depth in Python is unlimited.", remediation_hint: "Call a linear recursive function with n = 5000."}
+  - {id: bt-missing-unchoose, concept_id: backtracking, description: "Forgets to undo a choice after exploring it, so later branches see stale state.", remediation_hint: "Remove current.pop() and print the result for [1, 2]."}
+  - {id: bt-store-reference, concept_id: backtracking, description: "Stores the mutable partial solution itself instead of a copy.", remediation_hint: "Print id() of the stored lists."}
+  - {id: dc-overlapping-split, concept_id: divide-and-conquer, description: "Splits into overlapping halves (lo..mid and mid..hi), double-counting or never shrinking.", remediation_hint: "Trace max_dc on a two-element range."}
+  - {id: dc-combine-free, concept_id: divide-and-conquer, description: "Ignores the cost of the combine step when estimating running time.", remediation_hint: "Compare merge sort's O(n) merge with max_dc's O(1) combine."}
+  - {id: rr-halving-means-linear, concept_id: recurrence-relations, description: "Believes T(n) = 2T(n/2) + O(n) is O(n) because the input halves.", remediation_hint: "Add up the work level by level in the recursion tree."}
+  - {id: rr-count-levels-only, concept_id: recurrence-relations, description: "Counts only the number of levels (log n) and forgets the work per level.", remediation_hint: "Write the work at each level next to the tree."}
+
+  # sorting & searching
+  - {id: ls-return-early-miss, concept_id: linear-search, description: "Returns 'not found' after the first mismatch, inside the loop.", remediation_hint: "Trace index_of([7, 3, 9], 9) with the return inside the loop."}
+  - {id: bs-unsorted-ok, concept_id: binary-search, description: "Believes binary search works on unsorted arrays.", remediation_hint: "Search for 1 in [5, 1, 9, 3, 7]."}
+  - {id: bs-linear-time, concept_id: binary-search, description: "Believes binary search is O(n) because it may need to look at many elements.", remediation_hint: "Count comparisons for n = 1024."}
+  - {id: bsb-mixed-convention, concept_id: binary-search-boundaries, description: "Mixes closed and half-open interval conventions, causing skipped elements or infinite loops.", remediation_hint: "Write the meaning of lo and hi as a comment before coding."}
+  - {id: es-all-quadratic-same, concept_id: elementary-sorts, description: "Believes insertion sort is O(n^2) even on already-sorted input.", remediation_hint: "Count shifts when sorting [1, 2, 3, 4]."}
+  - {id: stab-all-sorts-stable, concept_id: sort-stability, description: "Believes every sorting algorithm preserves the order of equal elements.", remediation_hint: "Selection-sort [(2,'a'), (2,'b'), (1,'c')] by the number and watch 'a' and 'b'."}
+  - {id: ms-forget-leftovers, concept_id: merge-sort, description: "Forgets to append the remaining elements after one half runs out during the merge.", remediation_hint: "Merge [1, 2] with [3, 4, 5] by hand."}
+  - {id: ms-in-place-free, concept_id: merge-sort, description: "Believes merge sort needs only O(1) extra memory.", remediation_hint: "Point at the out list created during each merge."}
+  - {id: qs-always-nlogn, concept_id: quick-sort, description: "Believes quick sort is O(n log n) in every case.", remediation_hint: "Partition sorted input using the first element as pivot."}
+  - {id: cs-any-range, concept_id: counting-sort, description: "Believes counting sort is efficient for any integers, regardless of their range.", remediation_hint: "Estimate the counts array size for values up to 10^9."}
+
+  # trees
+  - {id: tree-has-cycles, concept_id: tree-terminology, description: "Believes a node in a tree can have more than one parent or that trees can contain cycles.", remediation_hint: "Count edges: a tree with n nodes has n - 1."}
+  - {id: bt-leaf-base-case-only, concept_id: binary-tree, description: "Uses leaves as the only base case and crashes on nodes with one child.", remediation_hint: "Run size() on a node with only a right child."}
+  - {id: trav-inorder-is-levels, concept_id: tree-dfs-traversals, description: "Believes in-order traversal visits nodes level by level.", remediation_hint: "Write the in-order sequence of a 3-level tree."}
+  - {id: trav-preorder-postorder-swap, concept_id: tree-dfs-traversals, description: "Confuses pre-order (node first) with post-order (node last).", remediation_hint: "Move the visit line and compare outputs."}
+  - {id: lo-stack-for-levels, concept_id: tree-level-order, description: "Uses a stack for level-order traversal.", remediation_hint: "Trace both versions on a 3-level tree."}
+  - {id: height-conventions, concept_id: tree-height, description: "Mixes the edge-counting and node-counting conventions for height.", remediation_hint: "State the height of a single node under each convention."}
+  - {id: bst-local-check, concept_id: binary-search-tree, description: "Believes the BST property only needs to hold between a node and its direct children.", remediation_hint: "Check the tree 5 -> left 3 -> right 7."}
+  - {id: bst-always-logn, concept_id: binary-search-tree, description: "Believes BST search is always O(log n), even for a degenerate (chain) tree.", remediation_hint: "Insert 1, 2, 3, 4, 5 in order and draw the tree."}
+  - {id: bstd-two-children-delete, concept_id: bst-insert-delete, description: "Deletes a node with two children by attaching one subtree arbitrarily, breaking the BST order.", remediation_hint: "Replace the key with its in-order successor instead."}
+  - {id: bal-perfectly-full, concept_id: balanced-trees, description: "Believes a balanced tree must be perfectly full or complete.", remediation_hint: "Check the AVL condition (heights differ by at most 1) on a small unbalanced-looking tree."}
+  - {id: heap-array-sorted, concept_id: heaps, description: "Believes a heap's array is fully sorted.", remediation_hint: "Push 5, 1, 8, 3 and print the heap list."}
+  - {id: heap-search-fast, concept_id: heaps, description: "Believes a heap can find an arbitrary element in O(log n).", remediation_hint: "Ask where the value 8 could be in the heap: anywhere below the root."}
+
+  # graphs
+  - {id: gr-undirected-one-way, concept_id: graph-representation, description: "Stores only one direction of each edge in an undirected graph.", remediation_hint: "Run BFS from 'c' on the one-way adjacency list."}
+  - {id: bfs-mark-on-dequeue, concept_id: graph-bfs, description: "Marks vertices visited when dequeued, allowing duplicates in the queue.", remediation_hint: "Count queue insertions on a square graph."}
+  - {id: bfs-weighted-shortest, concept_id: graph-bfs, description: "Believes BFS finds shortest paths in weighted graphs.", remediation_hint: "Find a path where two cheap edges beat one expensive edge."}
+  - {id: dfs-no-visited, concept_id: graph-dfs, description: "Runs DFS without a visited set on a graph with cycles.", remediation_hint: "Trace DFS on a triangle a-b-c."}
+  - {id: cc-single-start, concept_id: connected-components, description: "Believes one traversal from any vertex visits the whole graph.", remediation_hint: "Run DFS from 'a' on a graph with two separate pieces."}
+  - {id: topo-unique, concept_id: topological-sort, description: "Believes a DAG has exactly one topological order.", remediation_hint: "Find two valid orders for a -> c, b -> c."}
+  - {id: topo-cycles-ok, concept_id: topological-sort, description: "Believes a topological order exists for graphs with cycles.", remediation_hint: "Try to order a -> b -> a."}
+  - {id: dij-negative-weights, concept_id: dijkstra, description: "Believes Dijkstra handles negative edge weights.", remediation_hint: "Run it on a graph with an edge of weight -5 after a settled vertex."}
+  - {id: uf-link-nodes-not-roots, concept_id: union-find, description: "Links a to b directly in union instead of linking their roots.", remediation_hint: "Union(0, 1), union(0, 2) with parent[a] = b, then check find(1) == find(2)."}
+
+  # dynamic programming
+  - {id: ovl-dc-is-dp, concept_id: overlapping-subproblems, description: "Believes every recursive divide-and-conquer algorithm benefits from caching.", remediation_hint: "Count repeated subproblems in merge sort (none) versus fib."}
+  - {id: memo-fresh-cache, concept_id: memoization, description: "Creates a new cache inside each call, so nothing is reused.", remediation_hint: "Count calls with the cache created inside fib."}
+  - {id: memo-mutable-default, concept_id: memoization, description: "Uses a mutable default argument (memo={}) without realising it persists between unrelated top-level calls.", remediation_hint: "Call a memoised function for two different problems and inspect the cache."}
+  - {id: tab-wrong-order, concept_id: tabulation, description: "Fills the table in an order that reads entries before they are computed.", remediation_hint: "Mark each entry's dependencies with arrows and check they point backwards."}
+  - {id: dps-vague-state, concept_id: dp-state-design, description: "Defines the DP state vaguely ('best so far') without a precise meaning.", remediation_hint: "Write dp[i] = ... as a full sentence before coding."}
+  - {id: ks-upward-loop, concept_id: knapsack-01, description: "Loops capacity upwards in the one-row 0/1 knapsack, allowing items to be reused.", remediation_hint: "Trace one item of weight 1 with W = 3 in both directions."}
+  - {id: ks-greedy-by-ratio, concept_id: knapsack-01, description: "Believes picking items by highest value/weight ratio always solves 0/1 knapsack.", remediation_hint: "Try items (weight 1, value 2), (weight 3, value 4), W = 3."}
+  - {id: lcs-substring, concept_id: lcs, description: "Confuses longest common subsequence with longest common substring (contiguous).", remediation_hint: "Compare 'ABC' and 'AXBXC': subsequence ABC, but no common substring longer than 1."}

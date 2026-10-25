@@ -63,10 +63,12 @@
      plus `GraphService` from `contracts/services.py` (graph, prerequisites,
      items) with helpers for ancestors and the frontier.
 - **Acceptance:**
-  - [ ] Test: the graph is a DAG, has no orphan edges, and every concept has a
+  - [x] Test: the graph is a DAG, has no orphan edges, and every concept has a
         complete card and ≥1 misconception
-  - [ ] Seeding is idempotent (running it twice gives the same database)
-- [ ] **R1a first 3 concepts** · [ ] **R1b all concepts** · [ ] **R1c GraphService**
+  - [x] Seeding is idempotent (running it twice gives the same database)
+- [ ] **R1a first 3 concepts** · [ ] **R1b all concepts** · [x] **R1c GraphService**
+  - _Agent drafted all 63 concepts + 97 misconceptions; every worked example is executed by
+    `tests/test_content.py`. R1a/R1b get ticked once Ronit has reviewed the cards (then Mit cross-reviews, S3)._
 
 ## R2: Mastery model (BKT) (weeks 2–3)
 - **Depends on:** R0

@@ -1,0 +1,1266 @@
+# DSA concept graph (task R1). DRAFTED BY AGENT, every card needs Ronit's review before the pilot.
+# Format: content/concepts.example.yaml. IDs are permanent slugs. `prerequisites` must form a DAG.
+# Code examples are Python. Cards are the ONLY factual source the explainer may use (decision D6).
+concepts:
+  # ---------------------------------------------------------------- basics
+  - id: variables-and-types
+    name: Variables and types
+    cluster: basics
+    difficulty: 1
+    description: Naming values and the kinds of values a program works with.
+    prerequisites: []
+    card:
+      definition: "A variable is a name bound to a value; the value's type (int, float, str, bool, list...) decides which operations are allowed on it."
+      key_idea: "Assignment binds a name to a value; it does not copy the value or create a permanent link between two names."
+      worked_example: |
+        x = 5
+        y = x      # y is bound to the same value 5
+        x = x + 1  # x is rebound to 6; y is still 5
+        print(x, y)  # 6 5
+      pitfall: "Reading = as mathematical equality: after y = x, changing x later does not change y for numbers."
+
+  - id: conditionals
+    name: Conditionals
+    cluster: basics
+    difficulty: 1
+    description: Choosing between code paths with if / elif / else.
+    prerequisites: [variables-and-types]
+    card:
+      definition: "A conditional runs a block only when its boolean condition is true; elif and else give alternatives that are checked in order."
+      key_idea: "Exactly one branch of an if / elif / else chain runs: the first one whose condition is true, or else if none is."
+      worked_example: |
+        def grade(score):
+            if score >= 90:
+                return "A"
+            elif score >= 75:   # only checked when score < 90
+                return "B"
+            else:
+                return "C"
+        print(grade(80))  # B
+      pitfall: "Ordering conditions badly: if score >= 75 were checked first, a score of 95 would get B."
+
+  - id: loops
+    name: Loops
+    cluster: basics
+    difficulty: 1
+    description: Repeating a block of code.
+    prerequisites: [conditionals]
+    card:
+      definition: "A loop runs a block of code repeatedly: a for loop runs once per element of a sequence, a while loop runs while its condition holds."
+      key_idea: "Every while loop needs a condition that eventually becomes false; range(a, b) covers a up to b - 1."
+      worked_example: |
+        total = 0
+        for i in range(1, 4):   # i = 1, 2, 3
+            total += i
+        print(total)  # 6
+      pitfall: "Off-by-one: range(1, 4) stops before 4, so the loop body runs 3 times, not 4."
+
+  - id: functions
+    name: Functions
+    cluster: basics
+    difficulty: 1
+    description: Named, reusable blocks of code with parameters and return values.
+    prerequisites: [variables-and-types]
+    card:
+      definition: "A function is a named block of code that takes parameters, runs when called, and gives back a value with return (None if there is no return)."
+      key_idea: "Parameters are local names; return ends the function immediately and hands a value back to the caller."
+      worked_example: |
+        def square(n):
+            return n * n
+            print("never runs")   # code after return is unreachable
+
+        result = square(4)
+        print(result)  # 16
+      pitfall: "Printing a value inside a function is not the same as returning it: the caller of a function that only prints receives None."
+
+  - id: big-o-notation
+    name: Big-O notation
+    cluster: basics
+    difficulty: 2
+    description: Describing how running time or memory grows with input size.
+    prerequisites: [loops, functions]
+    card:
+      definition: "Big-O gives an upper bound on how a cost (time or memory) grows as the input size n grows, ignoring constant factors and lower-order terms."
+      key_idea: "Only the growth rate matters: 3n + 20 is O(n), and n^2 + n is O(n^2)."
+      worked_example: |
+        def has_value(items, target):     # O(n): may look at every element once
+            for x in items:
+                if x == target:
+                    return True
+            return False
+      pitfall: "Big-O does not measure seconds: an O(n) algorithm can be slower than an O(n^2) one for small n because constants are ignored."
+
+  - id: loop-complexity-analysis
+    name: Analysing loop complexity
+    cluster: basics
+    difficulty: 2
+    description: Counting how many times loop bodies run.
+    prerequisites: [big-o-notation]
+    card:
+      definition: "The time complexity of loop code is found by counting how many times the innermost statement runs as a function of n."
+      key_idea: "Sequential loops add (O(n) + O(n) = O(n)); nested loops multiply (n iterations of an O(n) loop = O(n^2))."
+      worked_example: |
+        def count_pairs(items):
+            n = len(items)
+            count = 0
+            for i in range(n):            # n times
+                for j in range(i + 1, n): # up to n - 1 times
+                    count += 1            # runs n(n-1)/2 times -> O(n^2)
+            return count
+      pitfall: "Assuming two loops always mean O(n^2): two loops one after the other are still O(n)."
+
+  - id: logarithmic-complexity
+    name: Logarithmic complexity
+    cluster: basics
+    difficulty: 2
+    description: Why halving the problem each step gives O(log n).
+    prerequisites: [loop-complexity-analysis]
+    card:
+      definition: "An algorithm is O(log n) when each step shrinks the remaining problem by a constant factor, for example by half."
+      key_idea: "Halving n repeatedly reaches 1 after about log2(n) steps: 1,000,000 needs only about 20 halvings."
+      worked_example: |
+        def halvings(n):
+            steps = 0
+            while n > 1:
+                n //= 2       # problem size halves each iteration
+                steps += 1
+            return steps
+        print(halvings(1024))  # 10
+      pitfall: "Thinking O(log n) needs a literal log call: it comes from the shrinking pattern, not from the math library."
+
+  - id: space-complexity
+    name: Space complexity
+    cluster: basics
+    difficulty: 2
+    description: How much extra memory an algorithm needs as n grows.
+    prerequisites: [big-o-notation]
+    card:
+      definition: "Space complexity is the extra memory an algorithm uses as a function of input size, usually not counting the input itself."
+      key_idea: "A few variables are O(1) extra space; building a new list of size n is O(n); recursion uses stack space proportional to its depth."
+      worked_example: |
+        def reversed_copy(items):   # O(n) extra space: a new list of size n
+            return items[::-1]
+
+        def reverse_in_place(items):  # O(1) extra space: two indices
+            i, j = 0, len(items) - 1
+            while i < j:
+                items[i], items[j] = items[j], items[i]
+                i, j = i + 1, j - 1
+      pitfall: "Forgetting that recursion depth costs memory: a recursive function that goes n calls deep uses O(n) stack space."
+
+  # ---------------------------------------------------------------- arrays & strings
+  - id: arrays-indexing
+    name: Arrays and indexing
+    cluster: arrays-strings
+    difficulty: 1
+    description: Contiguous sequences accessed by position.
+    prerequisites: [loops]
+    card:
+      definition: "An array (a Python list) stores elements in order; each element is reached by its index, starting at 0."
+      key_idea: "Indexing is O(1): the position of element i is computed directly. Valid indices are 0 to len - 1."
+      worked_example: |
+        a = [10, 20, 30]
+        print(a[0])    # 10
+        print(a[2])    # 30, the last element is at len(a) - 1
+        print(a[-1])   # 30, negative indices count from the end
+      pitfall: "Using a[len(a)] for the last element: it raises IndexError because the last valid index is len(a) - 1."
+
+  - id: array-traversal
+    name: Array traversal
+    cluster: arrays-strings
+    difficulty: 1
+    description: Visiting every element of an array in order.
+    prerequisites: [arrays-indexing]
+    card:
+      definition: "Traversal visits each element of an array once, usually to compute something such as a sum, maximum or count."
+      key_idea: "Keep a running result variable, initialise it correctly before the loop, and update it once per element; the whole pass is O(n)."
+      worked_example: |
+        def maximum(a):
+            best = a[0]          # start from a real element, not 0
+            for x in a[1:]:
+                if x > best:
+                    best = x
+            return best
+        print(maximum([-5, -2, -9]))  # -2
+      pitfall: "Initialising a maximum to 0: for an all-negative array the answer would wrongly be 0."
+
+  - id: dynamic-arrays
+    name: Dynamic arrays and amortised cost
+    cluster: arrays-strings
+    difficulty: 3
+    description: How a list grows and why append is O(1) on average.
+    prerequisites: [arrays-indexing, big-o-notation]
+    card:
+      definition: "A dynamic array keeps spare capacity; when it is full it allocates a larger block (for example double the size) and copies the elements over."
+      key_idea: "One append may cost O(n) for the copy, but because capacity grows geometrically the average (amortised) cost per append is O(1)."
+      worked_example: |
+        a = []
+        for i in range(8):
+            a.append(i)   # amortised O(1); occasionally triggers a resize + copy
+        a.insert(0, -1)   # O(n): every element shifts one place right
+      pitfall: "Assuming every list operation is O(1): inserting or deleting at the front is O(n) because elements must shift."
+
+  - id: strings-as-sequences
+    name: Strings as sequences
+    cluster: arrays-strings
+    difficulty: 1
+    description: Indexing, slicing and immutability of strings.
+    prerequisites: [arrays-indexing]
+    card:
+      definition: "A string is an immutable sequence of characters: it supports indexing and slicing like a list, but its characters cannot be changed in place."
+      key_idea: "Any 'modification' builds a new string, so repeatedly concatenating in a loop can cost O(n^2); collect parts in a list and join once."
+      worked_example: |
+        s = "graph"
+        print(s[0], s[-1], s[1:4])   # g h rap
+        parts = []
+        for ch in s:
+            parts.append(ch.upper())
+        print("".join(parts))        # GRAPH
+      pitfall: "Trying s[0] = 'G': strings are immutable, so this raises TypeError."
+
+  - id: two-pointers
+    name: Two pointers
+    cluster: arrays-strings
+    difficulty: 2
+    description: Moving two indices through an array to avoid nested loops.
+    prerequisites: [array-traversal]
+    card:
+      definition: "The two-pointer technique keeps two indices (often one at each end) and moves one of them each step according to a rule."
+      key_idea: "Each step discards possibilities that can't be the answer, so the pair search on a sorted array takes O(n) instead of O(n^2)."
+      worked_example: |
+        def pair_with_sum(sorted_a, target):
+            i, j = 0, len(sorted_a) - 1
+            while i < j:
+                s = sorted_a[i] + sorted_a[j]
+                if s == target:
+                    return i, j
+                if s < target:
+                    i += 1      # need a bigger sum
+                else:
+                    j -= 1      # need a smaller sum
+            return None
+        print(pair_with_sum([1, 3, 4, 6, 9], 10))  # (0, 4)
+      pitfall: "Using this pair-sum version on an unsorted array: moving a pointer is only justified when the array is sorted."
+
+  - id: sliding-window
+    name: Sliding window
+    cluster: arrays-strings
+    difficulty: 3
+    description: Maintaining a moving range over a sequence.
+    prerequisites: [two-pointers]
+    card:
+      definition: "A sliding window keeps a contiguous range [left, right] and updates a summary of it as the window moves, instead of recomputing from scratch."
+      key_idea: "When the window slides by one, add the element entering and remove the element leaving: each element is added and removed at most once, so O(n)."
+      worked_example: |
+        def max_window_sum(a, k):
+            window = sum(a[:k])
+            best = window
+            for right in range(k, len(a)):
+                window += a[right] - a[right - k]   # add new, drop old
+                best = max(best, window)
+            return best
+        print(max_window_sum([2, 1, 5, 1, 3, 2], 3))  # 9
+      pitfall: "Recomputing sum(a[i:i+k]) for every window: that is O(n*k), which defeats the purpose."
+
+  - id: prefix-sums
+    name: Prefix sums
+    cluster: arrays-strings
+    difficulty: 2
+    description: Precomputing running totals for O(1) range sums.
+    prerequisites: [array-traversal]
+    card:
+      definition: "A prefix-sum array P has P[i] = a[0] + ... + a[i-1], with P[0] = 0, so it has one more element than a."
+      key_idea: "After an O(n) precomputation, the sum of a[l..r] (inclusive) is P[r + 1] - P[l], in O(1)."
+      worked_example: |
+        a = [3, 1, 4, 1, 5]
+        P = [0]
+        for x in a:
+            P.append(P[-1] + x)      # P = [0, 3, 4, 8, 9, 14]
+        l, r = 1, 3
+        print(P[r + 1] - P[l])       # 1 + 4 + 1 = 6
+      pitfall: "Off-by-one in the formula: P[r] - P[l] misses a[r]; the inclusive range needs P[r + 1] - P[l]."
+
+  - id: hash-maps
+    name: Hash maps
+    cluster: arrays-strings
+    difficulty: 2
+    description: Key-value lookup in expected O(1) time.
+    prerequisites: [arrays-indexing, big-o-notation]
+    card:
+      definition: "A hash map (Python dict) stores key-value pairs; a hash function turns each key into an array position, so lookup, insert and delete take O(1) time on average."
+      key_idea: "Trade memory for speed: remembering what you have seen in a dict turns repeated O(n) searches into O(1) lookups."
+      worked_example: |
+        def first_repeat(items):
+            seen = {}
+            for i, x in enumerate(items):
+                if x in seen:            # O(1) average
+                    return x
+                seen[x] = i
+            return None
+        print(first_repeat([4, 2, 7, 2, 4]))  # 2
+      pitfall: "Assuming dict keys can be anything: keys must be hashable, so a list cannot be a key (use a tuple)."
+
+  - id: hash-collisions
+    name: Hash collisions
+    cluster: arrays-strings
+    difficulty: 3
+    description: What happens when two keys hash to the same slot.
+    prerequisites: [hash-maps]
+    card:
+      definition: "A collision happens when two different keys map to the same slot; tables resolve it with chaining (a list per slot) or open addressing (probing other slots)."
+      key_idea: "O(1) is an average that relies on a good hash function and a low load factor; with many collisions a lookup degrades towards O(n)."
+      worked_example: |
+        table_size = 8
+        def slot(key):
+            return hash(key) % table_size
+        # Chaining: each slot holds a list of (key, value) pairs.
+        table = [[] for _ in range(table_size)]
+        table[slot(17)].append((17, "a"))
+        table[slot(25)].append((25, "b"))   # 17 % 8 == 25 % 8 == 1: same slot
+      pitfall: "Believing hash-map lookups are always O(1): the worst case is O(n) when many keys collide."
+
+  # ---------------------------------------------------------------- linked structures
+  - id: references
+    name: References and aliasing
+    cluster: linked-structures
+    difficulty: 2
+    description: Names that refer to the same mutable object.
+    prerequisites: [variables-and-types]
+    card:
+      definition: "In Python, variables hold references to objects; assigning one variable to another makes both refer to the same object, not a copy."
+      key_idea: "With mutable objects (lists, dicts, nodes), a change made through one reference is visible through every other reference to that object."
+      worked_example: |
+        a = [1, 2, 3]
+        b = a          # alias: same list object
+        b.append(4)
+        print(a)       # [1, 2, 3, 4]
+        c = a.copy()   # a new list
+        c.append(5)
+        print(a)       # [1, 2, 3, 4], unchanged
+      pitfall: "Expecting b = a to copy a list: both names change together until you make an explicit copy."
+
+  - id: singly-linked-list
+    name: Singly linked list
+    cluster: linked-structures
+    difficulty: 2
+    description: Nodes connected by next references.
+    prerequisites: [references]
+    card:
+      definition: "A singly linked list is a chain of nodes; each node holds a value and a reference to the next node, and the last node's next is None."
+      key_idea: "There is no O(1) indexing: reaching the k-th node means following k next references from the head, which is O(k)."
+      worked_example: |
+        class Node:
+            def __init__(self, val, next=None):
+                self.val, self.next = val, next
+
+        head = Node(1, Node(2, Node(3)))
+        node = head
+        while node is not None:     # traversal
+            print(node.val)         # 1, 2, 3
+            node = node.next
+      pitfall: "Writing while node.next is not None when every node must be visited: that loop skips the last node."
+
+  - id: linked-list-insert-delete
+    name: Linked list insertion and deletion
+    cluster: linked-structures
+    difficulty: 3
+    description: Rewiring next references to add or remove nodes.
+    prerequisites: [singly-linked-list]
+    card:
+      definition: "Inserting or deleting a node in a linked list is done by changing next references; no other elements move."
+      key_idea: "Given a reference to the previous node, insertion and deletion are O(1); finding that node is what costs O(n)."
+      worked_example: |
+        def delete_after(prev):
+            # remove prev.next from the list
+            if prev.next is not None:
+                prev.next = prev.next.next
+
+        def insert_after(prev, val):
+            prev.next = Node(val, prev.next)   # new node points at old successor first
+      pitfall: "Updating references in the wrong order: setting prev.next = new_node before saving the old prev.next loses the rest of the list."
+
+  - id: doubly-linked-list
+    name: Doubly linked list
+    cluster: linked-structures
+    difficulty: 3
+    description: Nodes with both next and prev references.
+    prerequisites: [linked-list-insert-delete]
+    card:
+      definition: "A doubly linked list node holds references to both its next and previous nodes, so the list can be walked in both directions."
+      key_idea: "Given a node, it can be removed in O(1) without knowing its predecessor, but every update must fix both prev and next links."
+      worked_example: |
+        def unlink(node):
+            if node.prev is not None:
+                node.prev.next = node.next
+            if node.next is not None:
+                node.next.prev = node.prev
+            node.prev = node.next = None
+      pitfall: "Updating only the next references: the prev links still point at the removed node, so walking backwards finds it again."
+
+  - id: linked-list-reversal
+    name: Reversing a linked list
+    cluster: linked-structures
+    difficulty: 3
+    description: Reversing next references in one pass.
+    prerequisites: [linked-list-insert-delete]
+    card:
+      definition: "Reversing a singly linked list makes every node's next point to its previous node; the old tail becomes the new head."
+      key_idea: "Keep three references (prev, current, next) and save current.next before overwriting it; one pass, O(n) time, O(1) space."
+      worked_example: |
+        def reverse(head):
+            prev = None
+            current = head
+            while current is not None:
+                nxt = current.next      # save before overwriting
+                current.next = prev
+                prev = current
+                current = nxt
+            return prev                 # the new head
+      pitfall: "Overwriting current.next before saving it: the rest of the list becomes unreachable."
+
+  - id: stack
+    name: Stack
+    cluster: linked-structures
+    difficulty: 2
+    description: Last-in, first-out collection.
+    prerequisites: [dynamic-arrays]
+    card:
+      definition: "A stack is a collection where the last element pushed is the first one popped (LIFO); push and pop both happen at the top."
+      key_idea: "With a Python list, append and pop at the end are O(1) amortised; stacks fit problems that need the most recent unfinished item."
+      worked_example: |
+        def balanced(s):
+            pairs = {")": "(", "]": "["}
+            stack = []
+            for ch in s:
+                if ch in "([":
+                    stack.append(ch)
+                elif not stack or stack.pop() != pairs[ch]:
+                    return False
+            return not stack
+        print(balanced("([])"), balanced("(]"))  # True False
+      pitfall: "Popping from an empty stack: always check that the stack is non-empty first, or it raises IndexError."
+
+  - id: queue
+    name: Queue
+    cluster: linked-structures
+    difficulty: 2
+    description: First-in, first-out collection.
+    prerequisites: [dynamic-arrays]
+    card:
+      definition: "A queue is a collection where elements leave in the order they arrived (FIFO): enqueue at the back, dequeue at the front."
+      key_idea: "Use collections.deque: append and popleft are O(1). list.pop(0) is O(n) because every remaining element shifts."
+      worked_example: |
+        from collections import deque
+        q = deque()
+        q.append("a")
+        q.append("b")
+        print(q.popleft())  # a, the first one in
+      pitfall: "Using list.pop(0) as a dequeue: it is O(n), so a loop of n dequeues becomes O(n^2)."
+
+  - id: fast-slow-pointers
+    name: Fast and slow pointers
+    cluster: linked-structures
+    difficulty: 3
+    description: Two references moving at different speeds through a list.
+    prerequisites: [singly-linked-list, two-pointers]
+    card:
+      definition: "The fast/slow technique moves one reference one step and another two steps per iteration through a linked list."
+      key_idea: "If the list has a cycle the fast pointer eventually meets the slow one inside it; if not, fast reaches None. When fast reaches the end of a list without a cycle, slow is at the middle."
+      worked_example: |
+        def has_cycle(head):
+            slow = fast = head
+            while fast is not None and fast.next is not None:
+                slow = slow.next
+                fast = fast.next.next
+                if slow is fast:
+                    return True
+            return False
+      pitfall: "Checking only fast.next before advancing: fast itself can be None, so check both fast and fast.next."
+
+  # ---------------------------------------------------------------- recursion
+  - id: recursion-base-case
+    name: "Recursion: base case"
+    cluster: recursion
+    difficulty: 2
+    description: The stopping condition of a recursive function.
+    prerequisites: [functions, conditionals]
+    card:
+      definition: "A base case is an input that a recursive function answers directly, without calling itself."
+      key_idea: "Every chain of recursive calls must reach a base case; without one the calls never stop and Python raises RecursionError."
+      worked_example: |
+        def fact(n):
+            if n == 0:          # base case
+                return 1
+            return n * fact(n - 1)
+        print(fact(4))  # 24
+      pitfall: "A base case that can be skipped: fact(-1) with only `if n == 0` never reaches it and recurses until RecursionError."
+      diagram: |
+        flowchart TD
+          A["fact(2)"] --> B["2 * fact(1)"] --> C["1 * fact(0)"] --> D["base case: 1"]
+
+  - id: recursive-case
+    name: "Recursion: recursive case and progress"
+    cluster: recursion
+    difficulty: 2
+    description: Solving a problem by calling the function on a smaller input.
+    prerequisites: [recursion-base-case]
+    card:
+      definition: "The recursive case solves the problem by calling the same function on a smaller input and combining that result with a little extra work."
+      key_idea: "Trust the smaller call: assume it returns the right answer for the smaller input, and only check that you combine it correctly and that the input shrinks."
+      worked_example: |
+        def total(a):
+            if not a:                    # base case: empty list
+                return 0
+            return a[0] + total(a[1:])   # smaller input: the rest of the list
+        print(total([2, 3, 5]))  # 10
+      pitfall: "Calling the function on an input that does not shrink, such as total(a) instead of total(a[1:]), which recurses forever."
+
+  - id: call-stack
+    name: The call stack
+    cluster: recursion
+    difficulty: 3
+    description: How the computer keeps track of active function calls.
+    prerequisites: [functions, stack]
+    card:
+      definition: "The call stack holds one frame per active function call, containing that call's parameters and local variables; a frame is pushed when a call starts and popped when it returns."
+      key_idea: "Each recursive call has its own frame with its own local variables; results are combined as frames pop, in the reverse order of the calls."
+      worked_example: |
+        def countdown(n):
+            if n == 0:
+                return
+            print("down", n)
+            countdown(n - 1)
+            print("up", n)       # runs as each frame is popped
+        countdown(2)  # down 2, down 1, up 1, up 2
+      pitfall: "Thinking recursive calls share one copy of local variables: each frame has its own n."
+
+  - id: recursion-tracing
+    name: Tracing recursion
+    cluster: recursion
+    difficulty: 3
+    description: Following recursive calls as a call tree.
+    prerequisites: [recursive-case, call-stack]
+    card:
+      definition: "Tracing recursion means drawing the tree of calls a function makes, then computing return values from the leaves (base cases) back up to the root."
+      key_idea: "A function with two recursive calls makes a call tree that branches; its number of nodes, not its depth, gives the running time."
+      worked_example: |
+        def fib(n):
+            if n < 2:
+                return n
+            return fib(n - 1) + fib(n - 2)
+        # fib(4) calls fib(3) and fib(2); fib(3) calls fib(2) and fib(1) ...
+        # fib(2) is computed twice: the call tree has 9 nodes.
+        print(fib(4))  # 3
+      pitfall: "Counting only the depth of the tree: fib(n) is only about n levels deep but makes an exponential number of calls."
+      diagram: |
+        flowchart TD
+          F4["fib(4)"] --> F3["fib(3)"] & F2a["fib(2)"]
+          F3 --> F2b["fib(2)"] & F1a["fib(1)"]
+          F2a --> F1b["fib(1)"] & F0a["fib(0)"]
+          F2b --> F1c["fib(1)"] & F0b["fib(0)"]
+
+  - id: recursion-vs-iteration
+    name: Recursion versus iteration
+    cluster: recursion
+    difficulty: 3
+    description: When a recursive solution can be written as a loop, and the trade-offs.
+    prerequisites: [recursion-tracing, loops]
+    card:
+      definition: "Any recursive algorithm can be written iteratively, often with an explicit stack; simple linear recursion becomes a plain loop."
+      key_idea: "Recursion is often clearer for tree-shaped problems; loops avoid call overhead and Python's recursion depth limit (about 1000 frames by default)."
+      worked_example: |
+        def fact_iter(n):
+            result = 1
+            for k in range(2, n + 1):
+                result *= k
+            return result
+        print(fact_iter(5))   # 120, no recursion depth limit
+      pitfall: "Assuming recursion is always slower or always better: the asymptotic cost is usually the same; the differences are constant factors and stack depth."
+
+  - id: backtracking
+    name: Backtracking
+    cluster: recursion
+    difficulty: 4
+    description: Exploring choices recursively and undoing them.
+    prerequisites: [recursion-tracing]
+    card:
+      definition: "Backtracking builds a solution step by step; at each step it tries every valid choice recursively and undoes the choice before trying the next one."
+      key_idea: "The pattern is choose, explore, un-choose; pruning invalid partial solutions early is what keeps it fast enough."
+      worked_example: |
+        def subsets(items):
+            result, current = [], []
+            def explore(i):
+                if i == len(items):
+                    result.append(current.copy())   # copy, since current keeps changing
+                    return
+                current.append(items[i])   # choose
+                explore(i + 1)             # explore
+                current.pop()              # un-choose
+                explore(i + 1)
+            explore(0)
+            return result
+        print(subsets([1, 2]))  # [[1, 2], [1], [2], []]
+      pitfall: "Appending current instead of current.copy(): every stored solution is the same list object, which ends up empty."
+
+  - id: divide-and-conquer
+    name: Divide and conquer
+    cluster: recursion
+    difficulty: 3
+    description: Splitting a problem into independent subproblems.
+    prerequisites: [recursion-tracing]
+    card:
+      definition: "Divide and conquer splits a problem into smaller independent subproblems of the same kind, solves them recursively, and combines their answers."
+      key_idea: "The three steps are divide, conquer, combine; the total cost depends on how many subproblems there are, their size, and the cost of combining."
+      worked_example: |
+        def max_dc(a, lo, hi):          # maximum of a[lo..hi]
+            if lo == hi:
+                return a[lo]
+            mid = (lo + hi) // 2
+            left = max_dc(a, lo, mid)
+            right = max_dc(a, mid + 1, hi)
+            return max(left, right)     # combine in O(1)
+        print(max_dc([3, 8, 2, 5], 0, 3))  # 8
+      pitfall: "Splitting into mid and mid with overlapping ranges, such as (lo, mid) and (mid, hi): an element is processed twice or the recursion never shrinks."
+
+  - id: recurrence-relations
+    name: Recurrence relations
+    cluster: recursion
+    difficulty: 4
+    description: Writing and solving the running time of recursive algorithms.
+    prerequisites: [divide-and-conquer, logarithmic-complexity]
+    card:
+      definition: "A recurrence expresses the running time T(n) of a recursive algorithm in terms of T on smaller inputs plus the non-recursive work."
+      key_idea: "T(n) = 2T(n/2) + O(n) solves to O(n log n): log n levels, each doing O(n) total work. T(n) = T(n/2) + O(1) solves to O(log n)."
+      worked_example: |
+        # merge sort: two halves + linear merge
+        # T(n) = 2T(n/2) + cn
+        # level 0: cn, level 1: 2 * c(n/2) = cn, ... about log2(n) levels
+        # total: cn * log2(n) -> O(n log n)
+      pitfall: "Reading T(n) = 2T(n/2) + O(n) as O(n) because the input halves: the halves are both solved, and every level costs O(n)."
+
+  # ---------------------------------------------------------------- sorting & searching
+  - id: linear-search
+    name: Linear search
+    cluster: sorting-searching
+    difficulty: 1
+    description: Checking elements one by one.
+    prerequisites: [array-traversal]
+    card:
+      definition: "Linear search checks each element in turn until it finds the target or reaches the end."
+      key_idea: "It works on any array, sorted or not, and costs O(n) in the worst case."
+      worked_example: |
+        def index_of(a, target):
+            for i, x in enumerate(a):
+                if x == target:
+                    return i
+            return -1
+        print(index_of([7, 3, 9], 9))  # 2
+      pitfall: "Returning -1 inside the loop on the first mismatch: the function gives up after checking a single element."
+
+  - id: binary-search
+    name: Binary search
+    cluster: sorting-searching
+    difficulty: 2
+    description: Halving a sorted search range each step.
+    prerequisites: [linear-search, logarithmic-complexity]
+    card:
+      definition: "Binary search finds a target in a sorted array by comparing it with the middle element and discarding the half that cannot contain it."
+      key_idea: "Each comparison halves the remaining range, so it takes O(log n) comparisons, but only if the array is sorted."
+      worked_example: |
+        def binary_search(a, target):
+            lo, hi = 0, len(a) - 1
+            while lo <= hi:
+                mid = (lo + hi) // 2
+                if a[mid] == target:
+                    return mid
+                if a[mid] < target:
+                    lo = mid + 1
+                else:
+                    hi = mid - 1
+            return -1
+        print(binary_search([1, 4, 6, 9, 12], 9))  # 3
+      pitfall: "Running binary search on an unsorted array: it can report 'not found' for elements that are present."
+
+  - id: binary-search-boundaries
+    name: Binary search boundaries
+    cluster: sorting-searching
+    difficulty: 3
+    description: Getting lo, hi and the loop condition exactly right.
+    prerequisites: [binary-search]
+    card:
+      definition: "Boundary variants of binary search find positions such as the first index whose value is >= target (lower bound) instead of any match."
+      key_idea: "Pick one interval convention and keep it: with a half-open range [lo, hi), loop while lo < hi and set hi = mid, never mid - 1, when a[mid] could still be the answer."
+      worked_example: |
+        def lower_bound(a, target):     # first i with a[i] >= target
+            lo, hi = 0, len(a)          # half-open [lo, hi)
+            while lo < hi:
+                mid = (lo + hi) // 2
+                if a[mid] < target:
+                    lo = mid + 1
+                else:
+                    hi = mid            # a[mid] may be the answer
+            return lo
+        print(lower_bound([1, 3, 3, 5], 3))  # 1
+      pitfall: "Mixing conventions, for example hi = len(a) - 1 with while lo < hi, which never examines the last element, or lo = mid, which can loop forever."
+
+  - id: elementary-sorts
+    name: Elementary sorts
+    cluster: sorting-searching
+    difficulty: 2
+    description: Selection sort and insertion sort.
+    prerequisites: [array-traversal, loop-complexity-analysis]
+    card:
+      definition: "Selection sort repeatedly moves the smallest remaining element to the front; insertion sort grows a sorted prefix by inserting each new element into place."
+      key_idea: "Both are O(n^2) in the worst case. Insertion sort is O(n) on already-sorted input, because each element needs no shifting."
+      worked_example: |
+        def insertion_sort(a):
+            for i in range(1, len(a)):
+                key = a[i]
+                j = i - 1
+                while j >= 0 and a[j] > key:
+                    a[j + 1] = a[j]     # shift larger elements right
+                    j -= 1
+                a[j + 1] = key
+            return a
+        print(insertion_sort([5, 2, 4, 1]))  # [1, 2, 4, 5]
+      pitfall: "Assuming every O(n^2) sort behaves the same: insertion sort is fast on nearly sorted data, while selection sort always does about n^2/2 comparisons."
+
+  - id: sort-stability
+    name: Sort stability
+    cluster: sorting-searching
+    difficulty: 3
+    description: Whether equal elements keep their original order.
+    prerequisites: [elementary-sorts]
+    card:
+      definition: "A sort is stable if elements that compare equal keep the same relative order they had in the input."
+      key_idea: "Stability matters when sorting by one key after another: sort by the secondary key first, then stably by the primary key. Python's sorted is stable."
+      worked_example: |
+        people = [("ana", 30), ("raj", 25), ("li", 30)]
+        by_age = sorted(people, key=lambda p: p[1])
+        print(by_age)  # [('raj', 25), ('ana', 30), ('li', 30)], ana stays before li
+      pitfall: "Assuming every sort is stable: the textbook versions of selection sort and quick sort are not."
+
+  - id: merge-sort
+    name: Merge sort
+    cluster: sorting-searching
+    difficulty: 3
+    description: Sorting by splitting in half and merging sorted halves.
+    prerequisites: [divide-and-conquer, elementary-sorts]
+    card:
+      definition: "Merge sort splits the array in half, sorts each half recursively, and merges the two sorted halves into one sorted array."
+      key_idea: "Merging two sorted lists takes linear time; with log n levels of splitting the total is O(n log n) in every case, using O(n) extra space."
+      worked_example: |
+        def merge_sort(a):
+            if len(a) <= 1:
+                return a
+            mid = len(a) // 2
+            left, right = merge_sort(a[:mid]), merge_sort(a[mid:])
+            out, i, j = [], 0, 0
+            while i < len(left) and j < len(right):
+                if left[i] <= right[j]:      # <= keeps it stable
+                    out.append(left[i]); i += 1
+                else:
+                    out.append(right[j]); j += 1
+            return out + left[i:] + right[j:]
+        print(merge_sort([5, 1, 4, 2]))  # [1, 2, 4, 5]
+      pitfall: "Forgetting the leftovers after the merge loop: when one half runs out, the rest of the other half must still be appended."
+
+  - id: quick-sort
+    name: Quick sort
+    cluster: sorting-searching
+    difficulty: 4
+    description: Sorting by partitioning around a pivot.
+    prerequisites: [divide-and-conquer, elementary-sorts]
+    card:
+      definition: "Quick sort picks a pivot, partitions the array into elements less than the pivot and elements greater than or equal to it, and sorts each part recursively."
+      key_idea: "With balanced partitions it runs in O(n log n) on average; consistently bad pivots, such as always the first element of sorted input, give O(n^2)."
+      worked_example: |
+        def quick_sort(a):
+            if len(a) <= 1:
+                return a
+            pivot = a[len(a) // 2]
+            less = [x for x in a if x < pivot]
+            equal = [x for x in a if x == pivot]
+            greater = [x for x in a if x > pivot]
+            return quick_sort(less) + equal + quick_sort(greater)
+        print(quick_sort([3, 6, 1, 3, 2]))  # [1, 2, 3, 3, 6]
+      pitfall: "Believing quick sort is always O(n log n): its worst case is O(n^2) when the pivot repeatedly splits off only one element."
+
+  - id: counting-sort
+    name: Counting sort
+    cluster: sorting-searching
+    difficulty: 3
+    description: Sorting small integer keys without comparisons.
+    prerequisites: [elementary-sorts, arrays-indexing]
+    card:
+      definition: "Counting sort sorts integers in a known range 0..k by counting how many times each value occurs and then writing the values out in order."
+      key_idea: "It makes no comparisons and runs in O(n + k), which beats O(n log n) only when the range k is not much larger than n."
+      worked_example: |
+        def counting_sort(a, k):         # values in 0..k
+            counts = [0] * (k + 1)
+            for x in a:
+                counts[x] += 1
+            out = []
+            for value, c in enumerate(counts):
+                out.extend([value] * c)
+            return out
+        print(counting_sort([3, 0, 2, 3, 1], 3))  # [0, 1, 2, 3, 3]
+      pitfall: "Using counting sort for values spread over a huge range, such as 0 to 10^9: the counts array becomes enormous."
+
+  # ---------------------------------------------------------------- trees
+  - id: tree-terminology
+    name: Tree terminology
+    cluster: trees
+    difficulty: 2
+    description: Roots, parents, children, leaves, subtrees.
+    prerequisites: [references]
+    card:
+      definition: "A tree is a set of nodes connected by edges with one root and no cycles; every node except the root has exactly one parent, and nodes with no children are leaves."
+      key_idea: "Every node is the root of its own subtree, which is why tree algorithms are naturally recursive."
+      worked_example: |
+        class TreeNode:
+            def __init__(self, val, children=None):
+                self.val = val
+                self.children = children or []
+
+        root = TreeNode("A", [TreeNode("B"), TreeNode("C", [TreeNode("D")])])
+        # A is the root; B and D are leaves; C is D's parent
+      pitfall: "Confusing a tree with a general graph: a tree with n nodes has exactly n - 1 edges and no cycles."
+
+  - id: binary-tree
+    name: Binary tree
+    cluster: trees
+    difficulty: 2
+    description: Trees where each node has at most two children.
+    prerequisites: [tree-terminology]
+    card:
+      definition: "A binary tree is a tree in which every node has at most two children, called left and right."
+      key_idea: "Recursive functions on binary trees follow one shape: handle the empty tree (None), then combine results from the left and right subtrees."
+      worked_example: |
+        class BNode:
+            def __init__(self, val, left=None, right=None):
+                self.val, self.left, self.right = val, left, right
+
+        def size(node):
+            if node is None:              # empty subtree
+                return 0
+            return 1 + size(node.left) + size(node.right)
+        print(size(BNode(1, BNode(2), BNode(3, BNode(4)))))  # 4
+      pitfall: "Using a leaf as the base case and forgetting None: a node with only one child then crashes on the missing side."
+
+  - id: tree-dfs-traversals
+    name: Tree traversals (pre-, in-, post-order)
+    cluster: trees
+    difficulty: 3
+    description: Depth-first ways to visit every node.
+    prerequisites: [binary-tree, recursion-tracing]
+    card:
+      definition: "Depth-first traversals visit a node and its two subtrees recursively; they differ only in when the node itself is visited: before (pre-order), between (in-order) or after (post-order) its subtrees."
+      key_idea: "The recursion is identical in all three; moving the visit line changes the order. Each traversal is O(n) because every node is visited once."
+      worked_example: |
+        def inorder(node, out):
+            if node is None:
+                return
+            inorder(node.left, out)
+            out.append(node.val)       # visit between the subtrees
+            inorder(node.right, out)
+        #     2
+        #    / \
+        #   1   3
+        # pre-order: 2 1 3, in-order: 1 2 3, post-order: 1 3 2
+      pitfall: "Thinking in-order means left-to-right by level: it means left subtree, then node, then right subtree."
+
+  - id: tree-level-order
+    name: Level-order traversal
+    cluster: trees
+    difficulty: 3
+    description: Visiting a tree level by level with a queue.
+    prerequisites: [binary-tree, queue]
+    card:
+      definition: "Level-order traversal visits nodes by depth: the root, then all nodes at depth 1, then depth 2, and so on, left to right."
+      key_idea: "A queue gives the order: dequeue a node, visit it, enqueue its children. Every node enters and leaves the queue once, so O(n)."
+      worked_example: |
+        from collections import deque
+        def level_order(root):
+            if root is None:
+                return []
+            out, q = [], deque([root])
+            while q:
+                node = q.popleft()
+                out.append(node.val)
+                for child in (node.left, node.right):
+                    if child is not None:
+                        q.append(child)
+            return out
+      pitfall: "Using a stack instead of a queue: that produces a depth-first order, not level order."
+
+  - id: tree-height
+    name: Tree height and depth
+    cluster: trees
+    difficulty: 3
+    description: Measuring how deep a tree is.
+    prerequisites: [tree-dfs-traversals]
+    card:
+      definition: "The depth of a node is the number of edges from the root to it; the height of a tree is the largest depth of any node."
+      key_idea: "height(node) = 1 + max(height(left), height(right)); with height(None) = -1, a single node has height 0. Many tree operations cost O(height)."
+      worked_example: |
+        def height(node):
+            if node is None:
+                return -1          # convention: empty tree has height -1
+            return 1 + max(height(node.left), height(node.right))
+      pitfall: "Mixing conventions: some sources count nodes instead of edges, so a single node has height 1. State which convention you use."
+
+  - id: binary-search-tree
+    name: Binary search tree
+    cluster: trees
+    difficulty: 3
+    description: Binary trees ordered for fast search.
+    prerequisites: [binary-tree, binary-search]
+    card:
+      definition: "A binary search tree (BST) is a binary tree where every key in a node's left subtree is smaller than the node's key and every key in its right subtree is larger."
+      key_idea: "Search goes left or right at each node, so it costs O(height): O(log n) when the tree is balanced, O(n) when it degenerates into a chain. An in-order traversal lists the keys in sorted order."
+      worked_example: |
+        def bst_contains(node, key):
+            while node is not None:
+                if key == node.val:
+                    return True
+                node = node.left if key < node.val else node.right
+            return False
+      pitfall: "Checking only each node against its direct children: the ordering must hold for the whole subtree, not just the immediate child."
+
+  - id: bst-insert-delete
+    name: BST insertion and deletion
+    cluster: trees
+    difficulty: 4
+    description: Keeping the BST property while changing the tree.
+    prerequisites: [binary-search-tree]
+    card:
+      definition: "Insertion walks down like a search and attaches the new key as a leaf; deletion has three cases: a leaf, a node with one child, and a node with two children."
+      key_idea: "To delete a node with two children, replace its key with its in-order successor (the smallest key in its right subtree), then delete that successor, which has at most one child."
+      worked_example: |
+        def insert(node, key):
+            if node is None:
+                return BNode(key)
+            if key < node.val:
+                node.left = insert(node.left, key)
+            elif key > node.val:
+                node.right = insert(node.right, key)
+            return node          # return the (possibly new) subtree root
+      pitfall: "Inserting sorted keys one by one: the BST becomes a chain of height n - 1, so every operation becomes O(n)."
+
+  - id: balanced-trees
+    name: Balanced search trees
+    cluster: trees
+    difficulty: 4
+    description: Keeping height logarithmic with rotations.
+    prerequisites: [bst-insert-delete, tree-height]
+    card:
+      definition: "A balanced search tree (such as an AVL or red-black tree) restructures itself after insertions and deletions so that its height stays O(log n)."
+      key_idea: "Rotations locally re-link a few nodes to reduce height without breaking the BST ordering, guaranteeing O(log n) search, insert and delete."
+      worked_example: |
+        def rotate_right(y):
+            x = y.left
+            y.left = x.right     # x's right subtree moves under y
+            x.right = y
+            return x             # x is the new subtree root
+        # keys stay in BST order: x.left < x < x.right(old) < y < y.right
+      pitfall: "Thinking balancing makes the tree perfectly full: it only bounds the height by a constant times log n."
+
+  - id: heaps
+    name: Heaps and priority queues
+    cluster: trees
+    difficulty: 3
+    description: Fast access to the smallest (or largest) element.
+    prerequisites: [binary-tree, arrays-indexing]
+    card:
+      definition: "A binary min-heap is a complete binary tree, stored in an array, where every parent is less than or equal to its children; the minimum is always at index 0."
+      key_idea: "push and pop are O(log n) because they move one element up or down one path; peeking at the minimum is O(1). Python's heapq implements a min-heap."
+      worked_example: |
+        import heapq
+        h = []
+        for x in [5, 1, 8, 3]:
+            heapq.heappush(h, x)
+        print(heapq.heappop(h), heapq.heappop(h))  # 1 3
+        # children of index i are at 2i + 1 and 2i + 2
+      pitfall: "Assuming the heap array is sorted: only the parent-child order is guaranteed, so h[1] is not necessarily the second smallest."
+
+  # ---------------------------------------------------------------- graphs
+  - id: graph-representation
+    name: Graph representation
+    cluster: graphs
+    difficulty: 2
+    description: Adjacency lists and adjacency matrices.
+    prerequisites: [hash-maps, tree-terminology]
+    card:
+      definition: "A graph is a set of vertices connected by edges; it is usually stored as an adjacency list (each vertex maps to its neighbours) or an adjacency matrix (an n x n table)."
+      key_idea: "Adjacency lists use O(V + E) space and suit sparse graphs; a matrix uses O(V^2) space but answers 'is there an edge u-v?' in O(1)."
+      worked_example: |
+        edges = [("a", "b"), ("a", "c"), ("b", "c")]
+        adj = {}
+        for u, v in edges:                  # undirected: add both directions
+            adj.setdefault(u, []).append(v)
+            adj.setdefault(v, []).append(u)
+        print(adj["a"])  # ['b', 'c']
+      pitfall: "Adding only one direction for an undirected graph: traversals from v then cannot reach u."
+
+  - id: graph-bfs
+    name: Breadth-first search
+    cluster: graphs
+    difficulty: 3
+    description: Exploring a graph in layers with a queue.
+    prerequisites: [graph-representation, queue]
+    card:
+      definition: "Breadth-first search (BFS) explores a graph from a start vertex in layers: all vertices one edge away, then two edges away, and so on."
+      key_idea: "In an unweighted graph BFS finds shortest paths in number of edges. Mark a vertex visited when it is enqueued, so it is enqueued only once; the cost is O(V + E)."
+      worked_example: |
+        from collections import deque
+        def bfs_distances(adj, start):
+            dist = {start: 0}
+            q = deque([start])
+            while q:
+                u = q.popleft()
+                for v in adj.get(u, []):
+                    if v not in dist:          # mark when enqueued
+                        dist[v] = dist[u] + 1
+                        q.append(v)
+            return dist
+      pitfall: "Marking vertices visited only when dequeued: the same vertex can be enqueued many times."
+
+  - id: graph-dfs
+    name: Depth-first search
+    cluster: graphs
+    difficulty: 3
+    description: Exploring as deep as possible before backtracking.
+    prerequisites: [graph-representation, stack, recursion-tracing]
+    card:
+      definition: "Depth-first search (DFS) follows edges as far as possible from the current vertex before backtracking, using recursion or an explicit stack."
+      key_idea: "A visited set prevents infinite loops on cycles; every vertex and edge is processed a constant number of times, so DFS is O(V + E)."
+      worked_example: |
+        def dfs(adj, u, visited):
+            visited.add(u)
+            for v in adj.get(u, []):
+                if v not in visited:
+                    dfs(adj, v, visited)
+            return visited
+      pitfall: "Forgetting the visited set: on a graph with a cycle the recursion never ends."
+
+  - id: connected-components
+    name: Connected components
+    cluster: graphs
+    difficulty: 3
+    description: Grouping vertices that can reach each other.
+    prerequisites: [graph-bfs, graph-dfs]
+    card:
+      definition: "A connected component of an undirected graph is a maximal set of vertices in which every vertex can reach every other."
+      key_idea: "Start a BFS or DFS from every vertex that is not yet visited; each new start discovers exactly one new component. Total cost O(V + E)."
+      worked_example: |
+        def count_components(vertices, adj):
+            visited, count = set(), 0
+            for u in vertices:
+                if u not in visited:
+                    count += 1
+                    dfs(adj, u, visited)   # marks the whole component
+            return count
+      pitfall: "Running one traversal from a single start vertex: vertices in other components are never reached."
+
+  - id: topological-sort
+    name: Topological sort
+    cluster: graphs
+    difficulty: 4
+    description: Ordering tasks so every prerequisite comes first.
+    prerequisites: [graph-dfs, graph-bfs]
+    card:
+      definition: "A topological order of a directed acyclic graph (DAG) lists the vertices so that every edge u -> v has u before v."
+      key_idea: "Kahn's algorithm repeatedly removes a vertex with in-degree 0; if vertices remain that never reach in-degree 0, the graph has a cycle and no topological order exists."
+      worked_example: |
+        from collections import deque
+        def topo_order(vertices, edges):
+            indeg = {v: 0 for v in vertices}
+            out = {v: [] for v in vertices}
+            for u, v in edges:
+                out[u].append(v)
+                indeg[v] += 1
+            q = deque(v for v in vertices if indeg[v] == 0)
+            order = []
+            while q:
+                u = q.popleft()
+                order.append(u)
+                for v in out[u]:
+                    indeg[v] -= 1
+                    if indeg[v] == 0:
+                        q.append(v)
+            return order if len(order) == len(vertices) else None  # None: cycle
+      pitfall: "Expecting a unique answer: a DAG usually has several valid topological orders."
+
+  - id: dijkstra
+    name: Dijkstra's shortest paths
+    cluster: graphs
+    difficulty: 4
+    description: Shortest paths with non-negative edge weights.
+    prerequisites: [graph-bfs, heaps]
+    card:
+      definition: "Dijkstra's algorithm finds shortest-path distances from a source in a graph with non-negative edge weights, always settling the unsettled vertex with the smallest known distance."
+      key_idea: "A min-heap holds candidate distances; with an adjacency list the running time is O((V + E) log V). Negative edge weights break its correctness."
+      worked_example: |
+        import heapq
+        def dijkstra(adj, src):          # adj[u] = [(v, weight), ...]
+            dist = {src: 0}
+            heap = [(0, src)]
+            while heap:
+                d, u = heapq.heappop(heap)
+                if d > dist[u]:
+                    continue             # stale entry
+                for v, w in adj.get(u, []):
+                    nd = d + w
+                    if nd < dist.get(v, float("inf")):
+                        dist[v] = nd
+                        heapq.heappush(heap, (nd, v))
+            return dist
+      pitfall: "Using Dijkstra with negative edge weights: a vertex can be settled with a distance that a later negative edge would have improved."
+
+  - id: union-find
+    name: Union-find (disjoint sets)
+    cluster: graphs
+    difficulty: 4
+    description: Tracking which elements are in the same group.
+    prerequisites: [graph-representation, arrays-indexing]
+    card:
+      definition: "Union-find keeps elements in disjoint sets, each with a representative; find(x) returns x's representative and union(a, b) merges the sets of a and b."
+      key_idea: "With path compression and union by rank or size, a sequence of operations runs in nearly O(1) amortised time each."
+      worked_example: |
+        parent = list(range(5))
+        def find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]   # path compression (halving)
+                x = parent[x]
+            return x
+        def union(a, b):
+            parent[find(a)] = find(b)
+        union(0, 1); union(1, 2)
+        print(find(0) == find(2), find(3) == find(0))  # True False
+      pitfall: "Writing parent[a] = b in union instead of linking the roots: this can split a set apart instead of merging it."
+
+  # ---------------------------------------------------------------- dynamic programming
+  - id: overlapping-subproblems
+    name: Overlapping subproblems
+    cluster: dp
+    difficulty: 3
+    description: Recognising when recursion recomputes the same work.
+    prerequisites: [recursion-tracing, recurrence-relations]
+    card:
+      definition: "A problem has overlapping subproblems when a recursive solution solves the same smaller instance many times, as fib(n) does."
+      key_idea: "When the number of distinct subproblems is small but the call tree is huge, storing each answer once turns exponential time into roughly (number of subproblems) x (work per subproblem)."
+      worked_example: |
+        calls = 0
+        def fib(n):
+            global calls
+            calls += 1
+            return n if n < 2 else fib(n - 1) + fib(n - 2)
+        fib(20)
+        print(calls)   # 21891 calls for only 21 distinct values of n
+      pitfall: "Treating divide and conquer as dynamic programming: merge sort's subproblems are disjoint, so caching them gains nothing."
+
+  - id: memoization
+    name: Memoization
+    cluster: dp
+    difficulty: 3
+    description: Caching the results of recursive calls.
+    prerequisites: [overlapping-subproblems, hash-maps]
+    card:
+      definition: "Memoization (top-down dynamic programming) stores the result of each recursive call in a cache and returns the stored value when the same arguments come up again."
+      key_idea: "Check the cache first, compute only on a miss, and store before returning; the recursion structure stays the same."
+      worked_example: |
+        def fib(n, memo=None):
+            if memo is None:
+                memo = {}
+            if n < 2:
+                return n
+            if n not in memo:
+                memo[n] = fib(n - 1, memo) + fib(n - 2, memo)
+            return memo[n]
+        print(fib(50))  # 12586269025, with 49 cache entries instead of billions of calls
+      pitfall: "Creating a new empty cache inside every call: nothing is ever reused, so it is as slow as plain recursion."
+
+  - id: tabulation
+    name: Tabulation
+    cluster: dp
+    difficulty: 3
+    description: Filling a table bottom-up.
+    prerequisites: [memoization]
+    card:
+      definition: "Tabulation (bottom-up dynamic programming) fills a table of subproblem answers starting from the base cases, in an order where every entry's dependencies are already filled."
+      key_idea: "No recursion is needed, so there is no recursion-depth limit; if each entry depends only on the last few, the table can shrink to a few variables."
+      worked_example: |
+        def fib(n):
+            if n < 2:
+                return n
+            table = [0] * (n + 1)
+            table[1] = 1
+            for i in range(2, n + 1):
+                table[i] = table[i - 1] + table[i - 2]
+            return table[n]
+        print(fib(10))  # 55
+      pitfall: "Filling the table in the wrong order: an entry read before it is computed still holds its initial value."
+
+  - id: dp-state-design
+    name: Designing DP states and transitions
+    cluster: dp
+    difficulty: 4
+    description: Choosing what a subproblem means and how subproblems combine.
+    prerequisites: [tabulation]
+    card:
+      definition: "A dynamic programming solution is defined by its state (what dp[i] or dp[i][j] means, in words), its transition (how a state is computed from smaller states), base cases, and the final answer's location."
+      key_idea: "Write the meaning of the state in one sentence before coding; the transition usually considers the last choice made."
+      worked_example: |
+        # Climbing stairs: dp[i] = number of ways to reach step i taking 1 or 2 steps.
+        # Transition: the last step was a 1-step or a 2-step -> dp[i] = dp[i-1] + dp[i-2]
+        def ways(n):
+            dp = [0] * (n + 1)
+            dp[0] = 1                        # one way to stand at the start
+            for i in range(1, n + 1):
+                dp[i] = dp[i - 1] + (dp[i - 2] if i >= 2 else 0)
+            return dp[n]
+        print(ways(4))  # 5
+      pitfall: "Defining a state too vaguely, such as 'the answer so far': if you cannot say exactly what dp[i] means, the transition will be wrong."
+
+  - id: knapsack-01
+    name: 0/1 knapsack
+    cluster: dp
+    difficulty: 4
+    description: Choosing items under a weight limit.
+    prerequisites: [dp-state-design]
+    card:
+      definition: "In the 0/1 knapsack problem each item, with a weight and a value, is either taken once or not at all, to maximise total value without exceeding capacity W."
+      key_idea: "dp[w] = best value with capacity w using the items seen so far; for each item, update w from W down to its weight so the item is used at most once. O(nW) time."
+      worked_example: |
+        def knapsack(items, W):           # items = [(weight, value), ...]
+            dp = [0] * (W + 1)
+            for weight, value in items:
+                for w in range(W, weight - 1, -1):   # downwards: each item once
+                    dp[w] = max(dp[w], dp[w - weight] + value)
+            return dp[W]
+        print(knapsack([(1, 1), (3, 4), (4, 5)], 4))  # 5
+      pitfall: "Looping w upwards in the one-row version: an item can then be added several times, which solves the unbounded knapsack instead."
+
+  - id: lcs
+    name: Longest common subsequence
+    cluster: dp
+    difficulty: 4
+    description: A two-dimensional DP over two strings.
+    prerequisites: [dp-state-design, strings-as-sequences]
+    card:
+      definition: "The longest common subsequence (LCS) of two strings is the longest sequence of characters that appears in both in the same order, not necessarily contiguously."
+      key_idea: "dp[i][j] = LCS length of the first i characters of a and the first j of b; if a[i-1] == b[j-1] then dp[i-1][j-1] + 1, else max(dp[i-1][j], dp[i][j-1]). O(mn)."
+      worked_example: |
+        def lcs(a, b):
+            m, n = len(a), len(b)
+            dp = [[0] * (n + 1) for _ in range(m + 1)]
+            for i in range(1, m + 1):
+                for j in range(1, n + 1):
+                    if a[i - 1] == b[j - 1]:
+                        dp[i][j] = dp[i - 1][j - 1] + 1
+                    else:
+                        dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+            return dp[m][n]
+        print(lcs("ABCBDAB", "BDCABA"))  # 4
+      pitfall: "Confusing subsequence with substring: the characters of a subsequence do not have to be adjacent."
