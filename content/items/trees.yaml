@@ -1,0 +1,450 @@
+items:
+- id: binary-tree-traversal-preorder-1
+  concept_id: binary-tree-traversal-preorder
+  kind: mcq
+  stem: 'Which statement correctly characterizes the core invariant of Binary Tree:
+    Preorder Traversal?'
+  options:
+  - Useful for serializing or cloning tree hierarchies.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Useful for serializing or cloning tree hierarchies.
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: preorder-processes-leaves-first
+    It executes in reverse order without updating state.: preorder-processes-leaves-first
+  is_microcheck: false
+  review_status: approved
+- id: binary-tree-traversal-preorder-2
+  concept_id: binary-tree-traversal-preorder
+  kind: mcq
+  stem: 'Consider this concrete application of Binary Tree: Preorder Traversal:
+
+
+    ```python
+
+    visit(node); preorder(node.left); preorder(node.right)
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Preorder processes the current node before traversing left and right subtrees.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Preorder processes the current node before traversing left and right subtrees.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates the need for any base state or bounds.: preorder-processes-leaves-first
+    It executes an infinite loop that ignores input constraints.: preorder-processes-leaves-first
+  is_microcheck: false
+  review_status: approved
+- id: binary-tree-traversal-preorder-3
+  concept_id: binary-tree-traversal-preorder
+  kind: mcq
+  stem: 'When implementing Binary Tree: Preorder Traversal, which error represents
+    the most frequent pitfall?'
+  options:
+  - Visiting children before recording parent value.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Visiting children before recording parent value.
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: preorder-processes-leaves-first
+    Checking preconditions before accessing boundary values.: preorder-processes-leaves-first
+  is_microcheck: false
+  review_status: approved
+- id: binary-tree-traversal-preorder-mc
+  concept_id: binary-tree-traversal-preorder
+  kind: mcq
+  stem: 'Quick Check: True or False — for Binary Tree: Preorder Traversal, Useful
+    for serializing or cloning tree hierarchies.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': preorder-processes-leaves-first
+  is_microcheck: true
+  review_status: approved
+- id: binary-tree-traversal-inorder-1
+  concept_id: binary-tree-traversal-inorder
+  kind: mcq
+  stem: 'Which statement correctly characterizes the core invariant of Binary Tree:
+    Inorder Traversal?'
+  options:
+  - Inorder traversal of a Binary Search Tree (BST) visits nodes in sorted ascending
+    order.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Inorder traversal of a Binary Search Tree (BST) visits nodes in sorted ascending
+    order.
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: inorder-always-sorted-arbitrary-tree
+    It executes in reverse order without updating state.: inorder-always-sorted-arbitrary-tree
+  is_microcheck: false
+  review_status: approved
+- id: binary-tree-traversal-inorder-2
+  concept_id: binary-tree-traversal-inorder
+  kind: mcq
+  stem: 'Consider this concrete application of Binary Tree: Inorder Traversal:
+
+
+    ```python
+
+    inorder(node.left); visit(node); inorder(node.right)
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Inorder traverses the left subtree, processes the root, then traverses right.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Inorder traverses the left subtree, processes the root, then traverses right.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates the need for any base state or bounds.: inorder-always-sorted-arbitrary-tree
+    It executes an infinite loop that ignores input constraints.: inorder-always-sorted-arbitrary-tree
+  is_microcheck: false
+  review_status: approved
+- id: binary-tree-traversal-inorder-3
+  concept_id: binary-tree-traversal-inorder
+  kind: mcq
+  stem: 'When implementing Binary Tree: Inorder Traversal, which error represents
+    the most frequent pitfall?'
+  options:
+  - Assuming inorder gives sorted output for any arbitrary binary tree.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Assuming inorder gives sorted output for any arbitrary binary tree.
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: inorder-always-sorted-arbitrary-tree
+    Checking preconditions before accessing boundary values.: inorder-always-sorted-arbitrary-tree
+  is_microcheck: false
+  review_status: approved
+- id: binary-tree-traversal-inorder-mc
+  concept_id: binary-tree-traversal-inorder
+  kind: mcq
+  stem: 'Quick Check: True or False — for Binary Tree: Inorder Traversal, Inorder
+    traversal of a Binary Search Tree (BST) visits nodes in sorted ascending order.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': inorder-always-sorted-arbitrary-tree
+  is_microcheck: true
+  review_status: approved
+- id: binary-tree-traversal-postorder-1
+  concept_id: binary-tree-traversal-postorder
+  kind: mcq
+  stem: 'Which statement correctly characterizes the core invariant of Binary Tree:
+    Postorder Traversal?'
+  options:
+  - Ideal for bottom-up operations like tree deletion or calculating subtree heights.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Ideal for bottom-up operations like tree deletion or calculating subtree
+    heights.
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: postorder-root-first
+    It executes in reverse order without updating state.: postorder-root-first
+  is_microcheck: false
+  review_status: approved
+- id: binary-tree-traversal-postorder-2
+  concept_id: binary-tree-traversal-postorder
+  kind: mcq
+  stem: 'Consider this concrete application of Binary Tree: Postorder Traversal:
+
+
+    ```python
+
+    postorder(node.left); postorder(node.right); visit(node)
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Postorder processes both children before processing the parent node.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Postorder processes both children before processing the parent node.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates the need for any base state or bounds.: postorder-root-first
+    It executes an infinite loop that ignores input constraints.: postorder-root-first
+  is_microcheck: false
+  review_status: approved
+- id: binary-tree-traversal-postorder-3
+  concept_id: binary-tree-traversal-postorder
+  kind: mcq
+  stem: 'When implementing Binary Tree: Postorder Traversal, which error represents
+    the most frequent pitfall?'
+  options:
+  - Trying to delete parent before children have been freed.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Trying to delete parent before children have been freed.
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: postorder-root-first
+    Checking preconditions before accessing boundary values.: postorder-root-first
+  is_microcheck: false
+  review_status: approved
+- id: binary-tree-traversal-postorder-mc
+  concept_id: binary-tree-traversal-postorder
+  kind: mcq
+  stem: 'Quick Check: True or False — for Binary Tree: Postorder Traversal, Ideal
+    for bottom-up operations like tree deletion or calculating subtree heights.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': postorder-root-first
+  is_microcheck: true
+  review_status: approved
+- id: bst-search-property-1
+  concept_id: bst-search-property
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of BST Search Property?
+  options:
+  - Enables O(h) search by eliminating half of remaining search space per step.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Enables O(h) search by eliminating half of remaining search space per step.
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: bst-check-immediate-only
+    It executes in reverse order without updating state.: bst-check-immediate-only
+  is_microcheck: false
+  review_status: approved
+- id: bst-search-property-2
+  concept_id: bst-search-property
+  kind: mcq
+  stem: 'Consider this concrete application of BST Search Property:
+
+
+    ```python
+
+    if target < node.val: go left; elif target > node.val: go right.
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - 'Every node satisfies: max(left_subtree) < node.val < min(right_subtree).'
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: 'Every node satisfies: max(left_subtree) < node.val < min(right_subtree).'
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates the need for any base state or bounds.: bst-check-immediate-only
+    It executes an infinite loop that ignores input constraints.: bst-check-immediate-only
+  is_microcheck: false
+  review_status: approved
+- id: bst-search-property-3
+  concept_id: bst-search-property
+  kind: mcq
+  stem: When implementing BST Search Property, which error represents the most frequent
+    pitfall?
+  options:
+  - Only checking immediate children instead of the entire subtree invariant.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Only checking immediate children instead of the entire subtree invariant.
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: bst-check-immediate-only
+    Checking preconditions before accessing boundary values.: bst-check-immediate-only
+  is_microcheck: false
+  review_status: approved
+- id: bst-search-property-mc
+  concept_id: bst-search-property
+  kind: mcq
+  stem: 'Quick Check: True or False — for BST Search Property, Enables O(h) search
+    by eliminating half of remaining search space per step.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': bst-check-immediate-only
+  is_microcheck: true
+  review_status: approved
+- id: bst-insertion-1
+  concept_id: bst-insertion
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of BST Insertion?
+  options:
+  - New values in standard BST insertion are always added as leaf nodes.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: New values in standard BST insertion are always added as leaf nodes.
+  difficulty: 3
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: bst-insert-restructures-root
+    It executes in reverse order without updating state.: bst-insert-restructures-root
+  is_microcheck: false
+  review_status: approved
+- id: bst-insertion-2
+  concept_id: bst-insertion
+  kind: mcq
+  stem: 'Consider this concrete application of BST Insertion:
+
+
+    ```python
+
+    if val < curr.val: if curr.left: insert(curr.left) else: curr.left = Node(val)
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Insertion traverses search path to a leaf and attaches node preserving BST property.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Insertion traverses search path to a leaf and attaches node preserving BST
+    property.
+  difficulty: 3
+  distractor_misconceptions:
+    It eliminates the need for any base state or bounds.: bst-insert-restructures-root
+    It executes an infinite loop that ignores input constraints.: bst-insert-restructures-root
+  is_microcheck: false
+  review_status: approved
+- id: bst-insertion-3
+  concept_id: bst-insertion
+  kind: mcq
+  stem: When implementing BST Insertion, which error represents the most frequent
+    pitfall?
+  options:
+  - Inserting duplicates without a defined tie-breaker convention.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Inserting duplicates without a defined tie-breaker convention.
+  difficulty: 4
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: bst-insert-restructures-root
+    Checking preconditions before accessing boundary values.: bst-insert-restructures-root
+  is_microcheck: false
+  review_status: approved
+- id: bst-insertion-mc
+  concept_id: bst-insertion
+  kind: mcq
+  stem: 'Quick Check: True or False — for BST Insertion, New values in standard BST
+    insertion are always added as leaf nodes.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions:
+    'False': bst-insert-restructures-root
+  is_microcheck: true
+  review_status: approved
+- id: tree-height-depth-1
+  concept_id: tree-height-depth
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Tree Height
+    vs Depth?
+  options:
+  - Height of empty tree is -1 (or 0 depending on convention); root has depth 0.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Height of empty tree is -1 (or 0 depending on convention); root has depth
+    0.
+  difficulty: 2
+  distractor_misconceptions:
+    It operates without bounds and skips checking the termination condition.: tree-height-depth-confused
+    It executes in reverse order without updating state.: tree-height-depth-confused
+  is_microcheck: false
+  review_status: approved
+- id: tree-height-depth-2
+  concept_id: tree-height-depth
+  kind: mcq
+  stem: 'Consider this concrete application of Tree Height vs Depth:
+
+
+    ```python
+
+    height(node) = 1 + max(height(node.left), height(node.right))
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Depth is edges from root down to node; height is edges from node down to deepest
+    leaf.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Depth is edges from root down to node; height is edges from node down to
+    deepest leaf.
+  difficulty: 2
+  distractor_misconceptions:
+    It eliminates the need for any base state or bounds.: tree-height-depth-confused
+    It executes an infinite loop that ignores input constraints.: tree-height-depth-confused
+  is_microcheck: false
+  review_status: approved
+- id: tree-height-depth-3
+  concept_id: tree-height-depth
+  kind: mcq
+  stem: When implementing Tree Height vs Depth, which error represents the most frequent
+    pitfall?
+  options:
+  - Using depth when height calculation is required.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Using depth when height calculation is required.
+  difficulty: 3
+  distractor_misconceptions:
+    Using descriptive identifier names for local pointers.: tree-height-depth-confused
+    Checking preconditions before accessing boundary values.: tree-height-depth-confused
+  is_microcheck: false
+  review_status: approved
+- id: tree-height-depth-mc
+  concept_id: tree-height-depth
+  kind: mcq
+  stem: 'Quick Check: True or False — for Tree Height vs Depth, Height of empty tree
+    is -1 (or 0 depending on convention); root has depth 0.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions:
+    'False': tree-height-depth-confused
+  is_microcheck: true
+  review_status: approved
