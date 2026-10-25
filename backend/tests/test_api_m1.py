@@ -4,7 +4,7 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api.deps import reset_services
+from app.api.deps import get_graph_service, reset_services
 from app.api.learners import clear_audit_history
 from app.auth import auth_store
 from app.main import app
@@ -144,12 +144,13 @@ def test_full_closed_loop_api_workflow() -> None:
     assert get_exp.json()["id"] == exp_id
 
     # 9. Submit attempt for the micro-check item linked to the explanation
+    target_answer = get_graph_service().get_item(item["id"]).answer
     attempt_resp = client.post(
         "/api/v1/attempts",
         headers=headers,
         json={
             "item_id": item["id"],
-            "response": "3",  # Correct answer for loops-1
+            "response": target_answer,
             "latency_ms": 3500,
             "hints_used": 0,
             "confidence": 4,

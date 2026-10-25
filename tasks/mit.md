@@ -177,7 +177,7 @@
 - **Do:** onboard the students, watch error logs and dashboards every day,
   ship hotfixes (PR → dev → main hotfix), record a demo video, and write the
   system/implementation chapter.
-- [ ] **M8 done**
+- [x] **M8 done**
 
 ---
 

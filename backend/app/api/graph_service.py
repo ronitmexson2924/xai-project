@@ -104,8 +104,9 @@ class CurriculumGraphService:
             for yaml_file in items_dir.glob("*.yaml"):
                 try:
                     with open(yaml_file, encoding="utf-8") as f:
-                        items_data = yaml.safe_load(f) or []
-                    for raw in items_data:
+                        loaded = yaml.safe_load(f) or []
+                    items_list = loaded.get("items", []) if isinstance(loaded, dict) else loaded
+                    for raw in items_list:
                         it = Item(**raw)
                         self._items[it.id] = it
                         # Avoid duplicates
