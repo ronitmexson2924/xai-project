@@ -74,6 +74,8 @@ export type StateUpdateView =
 // Graph & Admin types
 export type GraphResponse =
   paths["/api/v1/graph"]["get"]["responses"]["200"]["content"]["application/json"];
+export type Concept = GraphResponse["concepts"][number];
+export type ConceptEdge = GraphResponse["edges"][number];
 export type AdminMetricsResponse =
   paths["/api/v1/admin/metrics"]["get"]["responses"]["200"]["content"]["application/json"];
 
@@ -150,6 +152,13 @@ export const api = {
 
     getMe: (token?: string) =>
       request<UserResponse>("/api/v1/auth/me", { method: "GET" }, token),
+
+    me: (token?: string) =>
+      request<UserResponse>("/api/v1/auth/me", { method: "GET" }, token),
+
+    logout: async () => {
+      setStoredToken(null);
+    },
 
     deleteMe: () =>
       request<void>("/api/v1/me", {
@@ -229,6 +238,15 @@ export const api = {
       request<AdminMetricsResponse>("/api/v1/admin/metrics", {
         method: "GET",
       }),
+
+    downloadCsv: async (table: string) => {
+      const token = getStoredToken();
+      const res = await fetch(`${API_BASE_URL}/api/v1/admin/export.csv?table=${table}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error(`Export failed with status ${res.status}`);
+      return await res.blob();
+    },
   },
 
   health: () =>

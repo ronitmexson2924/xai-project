@@ -119,14 +119,21 @@ export default function Home() {
                     href="/session"
                     className="rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2"
                   >
-                    <span>Launch Learning Session</span>
+                    <span>Adaptive Session</span>
                     <span>→</span>
                   </Link>
                   <Link
-                    href="/onboarding"
+                    href="/dashboard"
+                    className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-3 text-sm font-semibold shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2"
+                  >
+                    <span>Open Learner Model</span>
+                    <span>→</span>
+                  </Link>
+                  <Link
+                    href="/admin"
                     className="rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-3 text-sm font-medium border border-slate-700 transition-all"
                   >
-                    Intake Assessment
+                    Admin Analytics
                   </Link>
                 </div>
               )}

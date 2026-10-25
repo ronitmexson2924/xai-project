@@ -152,8 +152,8 @@
   2. **Admin page:** users per arm, sessions, p50/p95 latency, explanation
      source mix, clarity distribution, and CSV export.
 - **Acceptance:**
-  - [ ] Dashboards render for the demo-seed learners
-- [ ] **M6 done**
+  - [x] Dashboards render for the demo-seed learners
+- [x] **M6 done**
 
 ## M7: Experiment infra, deploy, audit (weeks 6–8)
 - **Depends on:** M1–M4

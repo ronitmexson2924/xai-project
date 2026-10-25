@@ -14,20 +14,66 @@ class UserNotFoundError(Exception):
     pass
 
 
+DEMO_NOVICE_ID = UUID("00000000-0000-0000-0000-000000000001")
+DEMO_INTERMEDIATE_ID = UUID("00000000-0000-0000-0000-000000000002")
+DEMO_ADVANCED_ID = UUID("00000000-0000-0000-0000-000000000003")
+
+# Pre-computed bcrypt hash for "Demo1234!" to keep initialization instantaneous
+DEMO_PASSWORD_HASH = "$2b$12$On16QgoFmP4QOzSOg.3THOwXNlCuQxLfi0rDD9VryTxgQr.JPifO6"
+
+
 class InMemoryUserStore:
-    def __init__(self) -> None:
+    def __init__(self, seed_demos: bool = True) -> None:
         self._lock = threading.Lock()
         self._users_by_id: dict[UUID, UserRecord] = {}
         self._users_by_email: dict[str, UUID] = {}
         self._assignments_by_user_id: dict[UUID, ExperimentAssignment] = {}
         self._arm_counts: dict[ExperimentArm, int] = {arm: 0 for arm in ALL_ARMS}
+        if seed_demos:
+            self.seed_demo_users()
 
-    def clear(self) -> None:
+    def clear(self, seed_demos: bool = True) -> None:
         with self._lock:
             self._users_by_id.clear()
             self._users_by_email.clear()
             self._assignments_by_user_id.clear()
             self._arm_counts = {arm: 0 for arm in ALL_ARMS}
+        if seed_demos:
+            self.seed_demo_users()
+
+    def seed_demo_users(self) -> None:
+        now = datetime.now(UTC)
+        demos = [
+            (DEMO_NOVICE_ID, "novice@example.com", "Ada Lovelace (Novice)", "closed_loop"),
+            (
+                DEMO_INTERMEDIATE_ID,
+                "intermediate@example.com",
+                "Alan Turing (Intermediate)",
+                "static_personalized",
+            ),
+            (DEMO_ADVANCED_ID, "advanced@example.com", "Grace Hopper (Advanced)", "generic"),
+        ]
+        with self._lock:
+            for user_id, email, name, arm in demos:
+                if email not in self._users_by_email:
+                    user = UserRecord(
+                        id=user_id,
+                        email=email,
+                        password_hash=DEMO_PASSWORD_HASH,
+                        display_name=name,
+                        created_at=now,
+                        consent_at=now,
+                        deleted_at=None,
+                    )
+                    assignment = ExperimentAssignment(
+                        user_id=user_id,
+                        arm=arm,  # type: ignore[arg-type]
+                        assigned_at=now,
+                    )
+                    self._users_by_id[user_id] = user
+                    self._users_by_email[email] = user_id
+                    self._assignments_by_user_id[user_id] = assignment
+                    self._arm_counts[arm] += 1  # type: ignore[index]
 
     def _choose_arm(self) -> ExperimentArm:
         min_count = min(self._arm_counts.values())

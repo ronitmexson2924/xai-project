@@ -17,12 +17,21 @@ from app.auth.security import (
     hash_password,
     verify_password,
 )
-from app.auth.store import InMemoryUserStore, auth_store
+from app.auth.store import (
+    DEMO_ADVANCED_ID,
+    DEMO_INTERMEDIATE_ID,
+    DEMO_NOVICE_ID,
+    InMemoryUserStore,
+    auth_store,
+)
 
 __all__ = [
     "ALL_ARMS",
     "AuthResponse",
     "ConsentResponse",
+    "DEMO_ADVANCED_ID",
+    "DEMO_INTERMEDIATE_ID",
+    "DEMO_NOVICE_ID",
     "ExperimentArm",
     "ExperimentAssignment",
     "InMemoryUserStore",

@@ -62,3 +62,10 @@ class AdminMetricsResponse(BaseModel):
     total_explanations: int
     p50_latency_ms: float
     p95_latency_ms: float
+    source_mix: dict[str, int] = Field(
+        default_factory=lambda: {"template": 0, "precomputed": 0, "llm": 0}
+    )
+    clarity_distribution: dict[int, int] = Field(
+        default_factory=lambda: {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    )
+    avg_dwell_ms: float = 0.0
