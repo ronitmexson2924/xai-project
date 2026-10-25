@@ -1,0 +1,391 @@
+items:
+- id: recursion-base-case-1
+  concept_id: recursion-base-case
+  kind: mcq
+  stem: 'Which statement correctly characterizes the core invariant of Recursion: Base Case?'
+  options:
+  - Each recursive step must strictly reduce the problem size towards a base case.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Each recursive step must strictly reduce the problem size towards a base case.
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: recursion-base-case-2
+  concept_id: recursion-base-case
+  kind: mcq
+  stem: 'Consider this concrete application of Recursion: Base Case:
+
+
+    ```python
+
+    def fact(n): return 1 if n == 0 else n * fact(n - 1)
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - A base case is a direct input condition answered without further recursive calls.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: A base case is a direct input condition answered without further recursive calls.
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: recursion-base-case-3
+  concept_id: recursion-base-case
+  kind: mcq
+  stem: 'When implementing Recursion: Base Case, which error represents the most frequent pitfall?'
+  options:
+  - Missing or unreachable base case triggers RecursionError (stack overflow).
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Missing or unreachable base case triggers RecursionError (stack overflow).
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: recursion-base-case-mc
+  concept_id: recursion-base-case
+  kind: mcq
+  stem: 'Quick Check: True or False — for Recursion: Base Case, Each recursive step must strictly reduce
+    the problem size towards a base case.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 1
+  distractor_misconceptions: {}
+  is_microcheck: true
+  review_status: approved
+- id: recursive-call-stack-1
+  concept_id: call-stack
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Recursive Call Stack?
+  options:
+  - Max stack depth is bounded by recursion depth, requiring O(D) memory.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Max stack depth is bounded by recursion depth, requiring O(D) memory.
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: recursive-call-stack-2
+  concept_id: call-stack
+  kind: mcq
+  stem: 'Consider this concrete application of Recursive Call Stack:
+
+
+    ```python
+
+    fact(3) pushes fact(2), fact(1), fact(0); resolves bottom-up.
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Each call pushes an activation record with local variables onto the call stack.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Each call pushes an activation record with local variables onto the call stack.
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: recursive-call-stack-3
+  concept_id: call-stack
+  kind: mcq
+  stem: When implementing Recursive Call Stack, which error represents the most frequent pitfall?
+  options:
+  - Assuming recursive calls execute concurrently rather than sequentially.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Assuming recursive calls execute concurrently rather than sequentially.
+  difficulty: 4
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: recursive-call-stack-mc
+  concept_id: call-stack
+  kind: mcq
+  stem: 'Quick Check: True or False — for Recursive Call Stack, Max stack depth is bounded by recursion
+    depth, requiring O(D) memory.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: true
+  review_status: approved
+- id: divide-and-conquer-1
+  concept_id: divide-and-conquer
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Divide and Conquer?
+  options:
+  - 'Master theorem: T(N) = aT(N/b) + f(N) governs asymptotic complexity.'
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: 'Master theorem: T(N) = aT(N/b) + f(N) governs asymptotic complexity.'
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: divide-and-conquer-2
+  concept_id: divide-and-conquer
+  kind: mcq
+  stem: 'Consider this concrete application of Divide and Conquer:
+
+
+    ```python
+
+    Merge sort divides array in half, sorts each half, and merges in O(N).
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Divide problem into independent subproblems, solve recursively, and combine.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Divide problem into independent subproblems, solve recursively, and combine.
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: divide-and-conquer-3
+  concept_id: divide-and-conquer
+  kind: mcq
+  stem: When implementing Divide and Conquer, which error represents the most frequent pitfall?
+  options:
+  - Doing too much work in the combine step, ruining logarithmic depth benefit.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Doing too much work in the combine step, ruining logarithmic depth benefit.
+  difficulty: 4
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: divide-and-conquer-mc
+  concept_id: divide-and-conquer
+  kind: mcq
+  stem: 'Quick Check: True or False — for Divide and Conquer, Master theorem: T(N) = aT(N/b) + f(N) governs
+    asymptotic complexity.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: true
+  review_status: approved
+- id: tree-recursion-1
+  concept_id: recursion-tracing
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Tree & Branching Recursion?
+  options:
+  - Total calls grow exponentially O(b^d) unless subproblems are pruned.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Total calls grow exponentially O(b^d) unless subproblems are pruned.
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: tree-recursion-2
+  concept_id: recursion-tracing
+  kind: mcq
+  stem: 'Consider this concrete application of Tree & Branching Recursion:
+
+
+    ```python
+
+    fib(n) = fib(n - 1) + fib(n - 2) spawns 2^n operations without cache.
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Branching recursion calls self multiple times, forming an execution tree.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Branching recursion calls self multiple times, forming an execution tree.
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: tree-recursion-3
+  concept_id: recursion-tracing
+  kind: mcq
+  stem: When implementing Tree & Branching Recursion, which error represents the most frequent pitfall?
+  options:
+  - Exponential time explosion from re-computing identical subtrees.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Exponential time explosion from re-computing identical subtrees.
+  difficulty: 4
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: tree-recursion-mc
+  concept_id: recursion-tracing
+  kind: mcq
+  stem: 'Quick Check: True or False — for Tree & Branching Recursion, Total calls grow exponentially O(b^d)
+    unless subproblems are pruned.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: true
+  review_status: approved
+- id: backtracking-basics-1
+  concept_id: backtracking
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Backtracking Exploration?
+  options:
+  - Always revert the state change after the recursive call returns.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Always revert the state change after the recursive call returns.
+  difficulty: 4
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: backtracking-basics-2
+  concept_id: backtracking
+  kind: mcq
+  stem: 'Consider this concrete application of Backtracking Exploration:
+
+
+    ```python
+
+    path.append(choice); backtrack(next); path.pop()  # undo choice
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - Backtracking builds candidates incrementally and abandons (backtracks) invalid paths.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: Backtracking builds candidates incrementally and abandons (backtracks) invalid paths.
+  difficulty: 4
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: backtracking-basics-3
+  concept_id: backtracking
+  kind: mcq
+  stem: When implementing Backtracking Exploration, which error represents the most frequent pitfall?
+  options:
+  - Forgetting to revert the choice before backtracking to the parent frame.
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Forgetting to revert the choice before backtracking to the parent frame.
+  difficulty: 5
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: backtracking-basics-mc
+  concept_id: backtracking
+  kind: mcq
+  stem: 'Quick Check: True or False — for Backtracking Exploration, Always revert the state change after
+    the recursive call returns.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: true
+  review_status: approved
+- id: tail-recursion-1
+  concept_id: recursion-vs-iteration
+  kind: mcq
+  stem: Which statement correctly characterizes the core invariant of Tail Call Recursion?
+  options:
+  - Can be transformed into an iterative loop with O(1) stack frames.
+  - It operates without bounds and skips checking the termination condition.
+  - It executes in reverse order without updating state.
+  - It treats all elements as mutually independent without relationships.
+  answer: Can be transformed into an iterative loop with O(1) stack frames.
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: tail-recursion-2
+  concept_id: recursion-vs-iteration
+  kind: mcq
+  stem: 'Consider this concrete application of Tail Call Recursion:
+
+
+    ```python
+
+    def fact_tail(n, acc=1): return acc if n==0 else fact_tail(n-1, n*acc)
+
+    ```
+
+
+    What is the fundamental guarantee demonstrated by this trace?'
+  options:
+  - A tail-recursive call has no pending computations after the call returns.
+  - It guarantees random O(1) jump access to any uncomputed state.
+  - It eliminates the need for any base state or bounds.
+  - It executes an infinite loop that ignores input constraints.
+  answer: A tail-recursive call has no pending computations after the call returns.
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: tail-recursion-3
+  concept_id: recursion-vs-iteration
+  kind: mcq
+  stem: When implementing Tail Call Recursion, which error represents the most frequent pitfall?
+  options:
+  - Confusing return n * fact(n - 1) (not tail) with return fact_tail(n - 1, acc).
+  - Using descriptive identifier names for local pointers.
+  - Structuring code inside functions rather than flat scripts.
+  - Checking preconditions before accessing boundary values.
+  answer: Confusing return n * fact(n - 1) (not tail) with return fact_tail(n - 1, acc).
+  difficulty: 4
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: tail-recursion-mc
+  concept_id: recursion-vs-iteration
+  kind: mcq
+  stem: 'Quick Check: True or False — for Tail Call Recursion, Can be transformed into an iterative loop
+    with O(1) stack frames.'
+  options:
+  - 'True'
+  - 'False'
+  answer: 'True'
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: true
+  review_status: approved

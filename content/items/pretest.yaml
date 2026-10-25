@@ -1,0 +1,211 @@
+items:
+- id: pretest-01
+  concept_id: loops
+  kind: mcq
+  stem: '[Pre-Assessment 1/15] What is the primary guarantee of Loops & Iteration?'
+  options:
+  - Every loop needs a condition that eventually changes state to terminate.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Every loop needs a condition that eventually changes state to terminate.
+  difficulty: 1
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-02
+  concept_id: loops
+  kind: mcq
+  stem: '[Pre-Assessment 2/15] What is the primary guarantee of Nested Loops?'
+  options:
+  - 'Total iterations multiply: outer iterations * inner iterations.'
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: 'Total iterations multiply: outer iterations * inner iterations.'
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-03
+  concept_id: big-o-notation
+  kind: mcq
+  stem: '[Pre-Assessment 3/15] What is the primary guarantee of Time Complexity Basics?'
+  options:
+  - Ignore constant multipliers and lower-order terms as N approaches infinity.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Ignore constant multipliers and lower-order terms as N approaches infinity.
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-04
+  concept_id: arrays-indexing
+  kind: mcq
+  stem: '[Pre-Assessment 4/15] What is the primary guarantee of Array Indexing & Bounds?'
+  options:
+  - Index arithmetic calculates memory offset in O(1) time.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Index arithmetic calculates memory offset in O(1) time.
+  difficulty: 1
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-05
+  concept_id: two-pointers
+  kind: mcq
+  stem: '[Pre-Assessment 5/15] What is the primary guarantee of Two Pointers Technique?'
+  options:
+  - Monotonic sorted order guarantees eliminating impossible candidate spaces.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Monotonic sorted order guarantees eliminating impossible candidate spaces.
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-06
+  concept_id: sliding-window
+  kind: mcq
+  stem: '[Pre-Assessment 6/15] What is the primary guarantee of Sliding Window?'
+  options:
+  - Reuses computation from overlapping subsegments to avoid O(N^2) recalculations.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Reuses computation from overlapping subsegments to avoid O(N^2) recalculations.
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-07
+  concept_id: singly-linked-list
+  kind: mcq
+  stem: '[Pre-Assessment 7/15] What is the primary guarantee of Singly Linked List Nodes?'
+  options:
+  - Nodes are scattered non-contiguously across memory connected by reference pointers.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Nodes are scattered non-contiguously across memory connected by reference pointers.
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-08
+  concept_id: singly-linked-list
+  kind: mcq
+  stem: '[Pre-Assessment 8/15] What is the primary guarantee of Linked List Traversal?'
+  options:
+  - Always verify current is not None before dereferencing current.next.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Always verify current is not None before dereferencing current.next.
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-09
+  concept_id: fast-slow-pointers
+  kind: mcq
+  stem: '[Pre-Assessment 9/15] What is the primary guarantee of Fast & Slow Pointers (Floyd''s Cycle)?'
+  options:
+  - In a cyclic list, the relative distance between fast and slow decreases by 1 each step.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: In a cyclic list, the relative distance between fast and slow decreases by 1 each step.
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-10
+  concept_id: recursion-base-case
+  kind: mcq
+  stem: '[Pre-Assessment 10/15] What is the primary guarantee of Recursion: Base Case?'
+  options:
+  - Each recursive step must strictly reduce the problem size towards a base case.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Each recursive step must strictly reduce the problem size towards a base case.
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-11
+  concept_id: call-stack
+  kind: mcq
+  stem: '[Pre-Assessment 11/15] What is the primary guarantee of Recursive Call Stack?'
+  options:
+  - Max stack depth is bounded by recursion depth, requiring O(D) memory.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Max stack depth is bounded by recursion depth, requiring O(D) memory.
+  difficulty: 3
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-12
+  concept_id: linear-search
+  kind: mcq
+  stem: '[Pre-Assessment 12/15] What is the primary guarantee of Linear Search?'
+  options:
+  - Works on unsorted collections in O(N) worst-case time.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Works on unsorted collections in O(N) worst-case time.
+  difficulty: 1
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-13
+  concept_id: binary-search-boundaries
+  kind: mcq
+  stem: '[Pre-Assessment 13/15] What is the primary guarantee of Binary Search Bounds?'
+  options:
+  - Update low = mid + 1 or high = mid - 1 to guarantee progress each iteration.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Update low = mid + 1 or high = mid - 1 to guarantee progress each iteration.
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-14
+  concept_id: tree-dfs-traversals
+  kind: mcq
+  stem: '[Pre-Assessment 14/15] What is the primary guarantee of Binary Tree: Preorder Traversal?'
+  options:
+  - Useful for serializing or cloning tree hierarchies.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Useful for serializing or cloning tree hierarchies.
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved
+- id: pretest-15
+  concept_id: graph-representation
+  kind: mcq
+  stem: '[Pre-Assessment 15/15] What is the primary guarantee of Graph Adjacency List?'
+  options:
+  - Space complexity is O(V + E), optimal for sparse graphs compared to O(V^2) matrix.
+  - It eliminates all resource constraints and halts in zero steps.
+  - It reverses all pointers unconditionally without bounds.
+  - It mutates globals outside the local scope arbitrarily.
+  answer: Space complexity is O(V + E), optimal for sparse graphs compared to O(V^2) matrix.
+  difficulty: 2
+  distractor_misconceptions: {}
+  is_microcheck: false
+  review_status: approved

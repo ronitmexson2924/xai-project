@@ -9,7 +9,7 @@ PostgreSQL. `jsonb` payloads must match the Pydantic models in
 
 | Table | Columns | Notes |
 |---|---|---|
-| `users` | `id uuid pk`, `email text unique`, `password_hash text`, `display_name text`, `is_admin bool default false`, `created_at timestamptz`, `consent_at timestamptz null`, `deleted_at timestamptz null` | Learning endpoints require consent. Deletion is soft, then purged. `is_admin` gates `/admin/*`. |
+| `users` | `id uuid pk`, `email text unique` (stored lower-case), `password_hash text`, `display_name text`, `is_admin bool default false`, `created_at timestamptz`, `consent_at timestamptz null`, `deleted_at timestamptz null`, `tokens_valid_after timestamptz null` | Learning endpoints require consent. Deletion is soft, then purged (`app.auth.purge` deletes the row; everything cascades). `is_admin` gates `/admin/*` and `/ops/*`. Tokens issued before `tokens_valid_after` are rejected (logout, withdrawal). |
 | `experiment_assignments` | `user_id uuid pk fk users`, `arm text check in ('generic','static_personalized','closed_loop')`, `assigned_at timestamptz` | Balanced randomisation at signup. |
 
 ## Concept graph & content (owner: Ronit, except `items` which is Mit)
@@ -37,9 +37,9 @@ PostgreSQL. `jsonb` payloads must match the Pydantic models in
 | Table | Columns | Notes |
 |---|---|---|
 | `recommendations` | `id uuid pk`, `user_id`, `kind text`, `target_concept_id`, `item_id null`, `reasons jsonb` (`list[ReasonEvidence]`), `policy_version text`, `created_at` | |
-| `attempts` | `id uuid pk`, `user_id`, `item_id`, `recommendation_id null`, `explanation_id null`, `response text`, `correct bool`, `latency_ms int`, `hints_used int`, `confidence smallint null`, `created_at` | `explanation_id` is set when the item is a micro-check. |
+| `attempts` | `id uuid pk`, `user_id`, `item_id`, `recommendation_id null`, `explanation_id null`, `response text`, `correct bool`, `latency_ms int`, `hints_used int`, `confidence smallint null`, `created_at` | `explanation_id` is set when the item is a micro-check. At most one attempt per recommendation (partial unique index `uq_attempts_recommendation`). |
 | `explanation_variants` | `id uuid pk`, `concept_id`, `style_key text`, `body_markdown text`, `prompt_version text`, `model text`, `validation jsonb`, `review_status text ('auto_ok','approved','rejected')`, `created_at`, unique `(concept_id, style_key, prompt_version)` | Precomputed explanations (D6). |
-| `explanations` | `id uuid pk`, `recommendation_id fk`, `user_id`, `concept_ids text[]`, `style jsonb` (`StyleParams`), `style_source text`, `body_markdown text`, `source text ('precomputed','llm','template')`, `variant_id null`, `followup_item_id null`, `prompt_version`, `model null`, `latency_ms int`, `created_at` | What was actually shown. |
+| `explanations` | `id uuid pk`, `recommendation_id fk`, `user_id`, `concept_ids text[]`, `style jsonb` (`StyleParams`), `style_source text`, `body_markdown text`, `source text ('precomputed','llm','template')`, `variant_id null`, `followup_item_id null`, `prompt_version`, `model null`, `latency_ms int`, `created_at` | What was actually shown. One per recommendation (`uq_explanations_recommendation`). |
 | `explanation_events` | `id bigserial pk`, `idempotency_key uuid unique`, `explanation_id fk`, `user_id`, `type text`, `payload jsonb`, `client_ts timestamptz`, `server_ts timestamptz default now()` | Append-only. |
 | `explanation_feedback` | `explanation_id pk`, `summary jsonb` (`ExplanationFeedbackSummary`), `applied_at timestamptz null` | Written by the telemetry analyzer, consumed once by the learner model. |
 

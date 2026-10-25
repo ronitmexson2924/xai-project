@@ -1,11 +1,15 @@
 # frontend/ (owner: Mit)
 
-Not scaffolded yet: task **M0** in `tasks/mit.md` creates the Next.js app here:
+Adaptive learning Next.js web application for the **Psychometric Concept-Graph Explanation-Feedback Engine**.
 
-```bash
-npx create-next-app@latest . --ts --tailwind --eslint --app --src-dir --use-npm
-npm i -D openapi-typescript
-# add "gen:api": "openapi-typescript http://localhost:8000/openapi.json -o src/lib/api.d.ts"
-```
+## Stack
+- Next.js (App Router, TypeScript)
+- Tailwind CSS
+- ESLint
+- OpenAPI TypeScript client (`openapi-typescript`)
 
-The CI frontend job starts running automatically once `package.json` exists.
+## Scripts
+- `npm run dev`: start local Next.js dev server on http://localhost:3000
+- `npm run build`: production build
+- `npm run lint`: run ESLint
+- `npm run gen:api`: regenerate `src/lib/api.d.ts` from backend `/openapi.json`

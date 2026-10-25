@@ -31,3 +31,7 @@ research/data/raw/
 .DS_Store
 .idea/
 .vscode/
+
+# pilot credentials written by app.auth.onboard
+*.roster.csv
+research/pilot_cohort_roster.csv

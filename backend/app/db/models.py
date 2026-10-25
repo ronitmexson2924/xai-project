@@ -57,6 +57,8 @@ class User(Base):
     created_at: Mapped[datetime] = _now()
     consent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # tokens issued before this instant are rejected (logout, account deletion)
+    tokens_valid_after: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class ExperimentAssignment(Base):
@@ -264,6 +266,7 @@ class ExplanationRow(Base):
     __tablename__ = "explanations"
     __table_args__ = (
         CheckConstraint("source IN ('precomputed','llm','template')", name="source_valid"),
+        Index("uq_explanations_recommendation", "recommendation_id", unique=True),
     )
 
     id: Mapped[uuid.UUID] = _uuid_pk()
@@ -286,7 +289,16 @@ class ExplanationRow(Base):
 
 class AttemptRow(Base):
     __tablename__ = "attempts"
-    __table_args__ = (Index("ix_attempts_user_created", "user_id", text("created_at DESC")),)
+    __table_args__ = (
+        Index("ix_attempts_user_created", "user_id", text("created_at DESC")),
+        # a recommendation is answered at most once: replays cannot farm mastery
+        Index(
+            "uq_attempts_recommendation",
+            "recommendation_id",
+            unique=True,
+            postgresql_where=text("recommendation_id IS NOT NULL"),
+        ),
+    )
 
     id: Mapped[uuid.UUID] = _uuid_pk()
     user_id: Mapped[uuid.UUID] = _user_fk()
