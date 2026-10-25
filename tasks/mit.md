@@ -135,10 +135,10 @@
   reviews and approves** (S3). Also build the 15-item pre-test and its
   parallel post-test (not used in sessions).
 - **Acceptance:**
-  - [x] ≥180 approved items; every concept has ≥1 approved micro-check
+  - [ ] ≥180 approved items; every concept has ≥1 approved micro-check
   - [x] A test checks that answers are among the options and that every
         distractor maps to a real misconception
-- [x] **M5 done**
+- [ ] **M5 done**
 
 ## M6: Dashboards (weeks 5–6)
 - **Depends on:** M1; R2 for real data

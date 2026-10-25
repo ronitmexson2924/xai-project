@@ -1,0 +1,681 @@
+# Draft items for the linked-structures cluster. Every item is review_status: draft until Ronit reviews it
+# (S3): set approved or rejected per item. Only approved items are served (GraphSnapshot).
+# Each distractor maps to a misconception of the item's own concept (content/misconceptions.yaml).
+items:
+- id: references-p1
+  concept_id: references
+  kind: mcq
+  stem: |-
+    ```python
+    a = [1, 2]
+    b = a
+    b.append(3)
+    print(a)
+    ```
+    What does this print?
+  options:
+  - '[3]'
+  - '[1, 2]'
+  - '[1, 2, 3]'
+  answer: '[1, 2, 3]'
+  difficulty: 2
+  distractor_misconceptions:
+    '[1, 2]': ref-assignment-copies
+    '[3]': ref-assignment-copies
+  is_microcheck: false
+  review_status: draft
+- id: references-p2
+  concept_id: references
+  kind: mcq
+  stem: |-
+    ```python
+    a = [1, 2]
+    b = [1, 2]
+    print(a == b, a is b)
+    ```
+    What does this print?
+  options:
+  - False False
+  - True True
+  - True False
+  answer: True False
+  difficulty: 2
+  distractor_misconceptions:
+    True True: ref-is-vs-equals
+    False False: ref-is-vs-equals
+  is_microcheck: false
+  review_status: draft
+- id: references-p3
+  concept_id: references
+  kind: mcq
+  stem: |-
+    ```python
+    def reset(lst):
+        lst = []
+
+    def clear(lst):
+        lst.clear()
+
+    x = [1, 2]
+    y = [3, 4]
+    reset(x)
+    clear(y)
+    print(x, y)
+    ```
+    What does this print?
+  options:
+  - '[] []'
+  - '[] [3, 4]'
+  - '[1, 2] []'
+  - '[1, 2] [3, 4]'
+  answer: '[1, 2] []'
+  difficulty: 3
+  distractor_misconceptions:
+    '[] []': ref-param-rebind-changes-caller
+    '[1, 2] [3, 4]': ref-assignment-copies
+    '[] [3, 4]': ref-param-rebind-changes-caller
+  is_microcheck: false
+  review_status: draft
+- id: references-mc
+  concept_id: references
+  kind: mcq
+  stem: |-
+    ```python
+    a = [5]
+    b = a
+    c = a.copy()
+    b.append(6)
+    print(c)
+    ```
+    What does this print?
+  options:
+  - '[6]'
+  - '[5]'
+  - '[5, 6]'
+  answer: '[5]'
+  difficulty: 2
+  distractor_misconceptions:
+    '[5, 6]': ref-assignment-copies
+    '[6]': ref-assignment-copies
+  is_microcheck: true
+  review_status: draft
+- id: singly-linked-list-p1
+  concept_id: singly-linked-list
+  kind: mcq
+  stem: What does it cost to reach the k-th node of a singly linked list from its head?
+  options:
+  - O(1), because each node stores its index
+  - 'O(k): follow k next references'
+  - O(1), like indexing a list
+  answer: 'O(k): follow k next references'
+  difficulty: 2
+  distractor_misconceptions:
+    O(1), like indexing a list: sll-random-access
+    O(1), because each node stores its index: sll-random-access
+  is_microcheck: false
+  review_status: draft
+- id: singly-linked-list-p2
+  concept_id: singly-linked-list
+  kind: mcq
+  stem: |-
+    ```python
+    class Node:
+        def __init__(self, val, next=None):
+            self.val, self.next = val, next
+
+    head = Node(1, Node(2, Node(3)))
+    out = []
+    node = head
+    while node.next is not None:
+        out.append(node.val)
+        node = node.next
+    print(out)
+    ```
+    What does this print?
+  options:
+  - '[1, 2, 3]'
+  - '[1, 2]'
+  - '[2, 3]'
+  answer: '[1, 2]'
+  difficulty: 2
+  distractor_misconceptions:
+    '[1, 2, 3]': sll-skip-last-node
+    '[2, 3]': sll-skip-last-node
+  is_microcheck: false
+  review_status: draft
+- id: singly-linked-list-p3
+  concept_id: singly-linked-list
+  kind: mcq
+  stem: Which loop condition visits every node of a list, including the last one, starting from `node
+    = head`?
+  options:
+  - 'while node.next is not None:'
+  - 'while node is not None:'
+  - 'while node.next.next is not None:'
+  answer: 'while node is not None:'
+  difficulty: 3
+  distractor_misconceptions:
+    'while node.next is not None:': sll-skip-last-node
+    'while node.next.next is not None:': sll-skip-last-node
+  is_microcheck: false
+  review_status: draft
+- id: singly-linked-list-mc
+  concept_id: singly-linked-list
+  kind: mcq
+  stem: Which operation is O(1) on a singly linked list with a head reference?
+  options:
+  - Reading the last value without a tail reference
+  - Reading the k-th value
+  - Inserting a new node at the front
+  answer: Inserting a new node at the front
+  difficulty: 2
+  distractor_misconceptions:
+    Reading the k-th value: sll-random-access
+    Reading the last value without a tail reference: sll-random-access
+  is_microcheck: true
+  review_status: draft
+- id: linked-list-insert-delete-p1
+  concept_id: linked-list-insert-delete
+  kind: mcq
+  stem: |-
+    ```python
+    class Node:
+        def __init__(self, val, next=None):
+            self.val, self.next = val, next
+
+    def insert_after(prev, val):
+        new = Node(val)
+        prev.next = new
+        new.next = prev.next
+
+    head = Node(1, Node(2, Node(3)))
+    insert_after(head, 9)
+    out, node, steps = [], head, 0
+    while node is not None and steps < 5:
+        out.append(node.val)
+        node, steps = node.next, steps + 1
+    print(out)
+    ```
+    What does this print?
+  options:
+  - '[1, 9, 2, 3]'
+  - '[1, 9]'
+  - '[1, 9, 9, 9, 9]'
+  answer: '[1, 9, 9, 9, 9]'
+  difficulty: 3
+  distractor_misconceptions:
+    '[1, 9, 2, 3]': lli-wrong-update-order
+    '[1, 9]': lli-wrong-update-order
+  is_microcheck: false
+  review_status: draft
+- id: linked-list-insert-delete-p2
+  concept_id: linked-list-insert-delete
+  kind: mcq
+  stem: To insert a new node after `prev`, which order of updates is correct?
+  options:
+  - prev.next = new only; new.next can stay None
+  - new.next = prev.next, then prev.next = new
+  - prev.next = new, then new.next = prev.next
+  answer: new.next = prev.next, then prev.next = new
+  difficulty: 3
+  distractor_misconceptions:
+    prev.next = new, then new.next = prev.next: lli-wrong-update-order
+    prev.next = new only; new.next can stay None: lli-wrong-update-order
+  is_microcheck: false
+  review_status: draft
+- id: linked-list-insert-delete-p3
+  concept_id: linked-list-insert-delete
+  kind: mcq
+  stem: You must insert a value at position k of a singly linked list, given only its head. What is the
+    total cost?
+  options:
+  - 'O(k): walking to position k dominates; the rewiring itself is O(1)'
+  - 'O(1): linked-list insertion is always constant time'
+  - O(1), because no elements shift
+  answer: 'O(k): walking to position k dominates; the rewiring itself is O(1)'
+  difficulty: 3
+  distractor_misconceptions:
+    'O(1): linked-list insertion is always constant time': lli-insert-is-free
+    O(1), because no elements shift: lli-insert-is-free
+  is_microcheck: false
+  review_status: draft
+- id: linked-list-insert-delete-mc
+  concept_id: linked-list-insert-delete
+  kind: mcq
+  stem: Given a reference to node `prev`, how do you delete the node after it?
+  options:
+  - prev.next = None
+  - prev.next = prev.next.next
+  - prev = prev.next
+  answer: prev.next = prev.next.next
+  difficulty: 3
+  distractor_misconceptions:
+    prev.next = None: lli-wrong-update-order
+    prev = prev.next: lli-wrong-update-order
+  is_microcheck: true
+  review_status: draft
+- id: doubly-linked-list-p1
+  concept_id: doubly-linked-list
+  kind: mcq
+  stem: To remove `node` from the middle of a doubly linked list, which updates are needed?
+  options:
+  - node.prev.next = node.next only
+  - node.next.prev = node.prev only
+  - node.prev.next = node.next and node.next.prev = node.prev
+  answer: node.prev.next = node.next and node.next.prev = node.prev
+  difficulty: 3
+  distractor_misconceptions:
+    node.prev.next = node.next only: dll-one-direction-only
+    node.next.prev = node.prev only: dll-one-direction-only
+  is_microcheck: false
+  review_status: draft
+- id: doubly-linked-list-p2
+  concept_id: doubly-linked-list
+  kind: mcq
+  stem: |-
+    ```python
+    class DNode:
+        def __init__(self, val):
+            self.val, self.prev, self.next = val, None, None
+
+    a, b, c = DNode("a"), DNode("b"), DNode("c")
+    a.next, b.prev, b.next, c.prev = b, a, c, b
+    a.next = c          # try to remove b
+    print(c.prev.val)
+    ```
+    What does this print?
+  options:
+  - c
+  - a
+  - b
+  answer: b
+  difficulty: 3
+  distractor_misconceptions:
+    a: dll-one-direction-only
+    c: dll-one-direction-only
+  is_microcheck: false
+  review_status: draft
+- id: doubly-linked-list-p3
+  concept_id: doubly-linked-list
+  kind: mcq
+  stem: After removing a node by fixing only the `next` links, what goes wrong?
+  options:
+  - Nothing, as long as forward traversal works
+  - Walking backwards with prev still reaches the removed node
+  - 'Nothing: prev links fix themselves'
+  answer: Walking backwards with prev still reaches the removed node
+  difficulty: 3
+  distractor_misconceptions:
+    'Nothing: prev links fix themselves': dll-one-direction-only
+    Nothing, as long as forward traversal works: dll-one-direction-only
+  is_microcheck: false
+  review_status: draft
+- id: doubly-linked-list-mc
+  concept_id: doubly-linked-list
+  kind: mcq
+  stem: What must every update to a doubly linked list keep consistent?
+  options:
+  - Both the next and the prev links of the affected nodes
+  - Only the next links; prev links are optional
+  - Only the prev links of the head and tail
+  answer: Both the next and the prev links of the affected nodes
+  difficulty: 3
+  distractor_misconceptions:
+    Only the next links; prev links are optional: dll-one-direction-only
+    Only the prev links of the head and tail: dll-one-direction-only
+  is_microcheck: true
+  review_status: draft
+- id: linked-list-reversal-p1
+  concept_id: linked-list-reversal
+  kind: mcq
+  stem: |-
+    ```python
+    class Node:
+        def __init__(self, val, next=None):
+            self.val, self.next = val, next
+
+    def reverse(head):
+        prev, current = None, head
+        while current is not None:
+            nxt = current.next
+            current.next = prev
+            prev = current
+            current = nxt
+        return head
+
+    new_head = reverse(Node(1, Node(2, Node(3))))
+    out = []
+    while new_head is not None:
+        out.append(new_head.val)
+        new_head = new_head.next
+    print(out)
+    ```
+    What does this print?
+  options:
+  - '[1, 2, 3]'
+  - '[1]'
+  - '[3, 2, 1]'
+  answer: '[1]'
+  difficulty: 3
+  distractor_misconceptions:
+    '[3, 2, 1]': rev-return-old-head
+    '[1, 2, 3]': rev-return-old-head
+  is_microcheck: false
+  review_status: draft
+- id: linked-list-reversal-p2
+  concept_id: linked-list-reversal
+  kind: mcq
+  stem: In the reversal loop, what must happen before `current.next = prev`?
+  options:
+  - Set prev = current
+  - Save current.next in a variable
+  - 'Nothing: current.next can be overwritten first'
+  answer: Save current.next in a variable
+  difficulty: 3
+  distractor_misconceptions:
+    'Nothing: current.next can be overwritten first': rev-lose-rest
+    Set prev = current: rev-lose-rest
+  is_microcheck: false
+  review_status: draft
+- id: linked-list-reversal-p3
+  concept_id: linked-list-reversal
+  kind: mcq
+  stem: After reversing a singly linked list, which node is the new head?
+  options:
+  - The second node of the old list
+  - The old head
+  - The old tail
+  answer: The old tail
+  difficulty: 3
+  distractor_misconceptions:
+    The old head: rev-return-old-head
+    The second node of the old list: rev-return-old-head
+  is_microcheck: false
+  review_status: draft
+- id: linked-list-reversal-mc
+  concept_id: linked-list-reversal
+  kind: mcq
+  stem: |-
+    ```python
+    class Node:
+        def __init__(self, val, next=None):
+            self.val, self.next = val, next
+
+    def reverse(head):
+        prev, current = None, head
+        while current is not None:
+            current.next = prev
+            prev = current
+            current = current.next
+        return prev
+
+    r = reverse(Node(1, Node(2, Node(3))))
+    out = []
+    while r is not None:
+        out.append(r.val)
+        r = r.next
+    print(out)
+    ```
+    What does this print?
+  options:
+  - '[1, 2, 3]'
+  - '[3, 2, 1]'
+  - '[1]'
+  answer: '[1]'
+  difficulty: 3
+  distractor_misconceptions:
+    '[3, 2, 1]': rev-lose-rest
+    '[1, 2, 3]': rev-return-old-head
+  is_microcheck: true
+  review_status: draft
+- id: stack-p1
+  concept_id: stack
+  kind: mcq
+  stem: |-
+    ```python
+    s = []
+    for x in "abc":
+        s.append(x)
+    print(s.pop() + s.pop())
+    ```
+    What does this print?
+  options:
+  - ba
+  - cb
+  - ab
+  answer: cb
+  difficulty: 2
+  distractor_misconceptions:
+    ab: stack-fifo
+    ba: stack-fifo
+  is_microcheck: false
+  review_status: draft
+- id: stack-p2
+  concept_id: stack
+  kind: mcq
+  stem: |-
+    ```python
+    s = []
+    try:
+        s.pop()
+        print("None")
+    except IndexError:
+        print("IndexError")
+    ```
+    What does this print?
+  options:
+  - None
+  - '[]'
+  - IndexError
+  answer: IndexError
+  difficulty: 2
+  distractor_misconceptions:
+    None: stack-pop-empty
+    '[]': stack-pop-empty
+  is_microcheck: false
+  review_status: draft
+- id: stack-p3
+  concept_id: stack
+  kind: mcq
+  stem: |-
+    ```python
+    def balanced(s):
+        pairs = {")": "(", "]": "["}
+        stack = []
+        for ch in s:
+            if ch in "([":
+                stack.append(ch)
+            elif not stack or stack.pop() != pairs[ch]:
+                return False
+        return not stack
+
+    print(balanced("([)]"), balanced("[()]"))
+    ```
+    What does this print?
+  options:
+  - True True
+  - False True
+  - IndexError
+  answer: False True
+  difficulty: 2
+  distractor_misconceptions:
+    True True: stack-fifo
+    IndexError: stack-pop-empty
+  is_microcheck: false
+  review_status: draft
+- id: stack-mc
+  concept_id: stack
+  kind: mcq
+  stem: You push 1, 2, 3 onto a stack, then pop once. What comes out?
+  options:
+  - '1'
+  - 1, because it went in first
+  - '3'
+  answer: '3'
+  difficulty: 2
+  distractor_misconceptions:
+    '1': stack-fifo
+    1, because it went in first: stack-fifo
+  is_microcheck: true
+  review_status: draft
+- id: queue-p1
+  concept_id: queue
+  kind: mcq
+  stem: |-
+    ```python
+    from collections import deque
+    q = deque()
+    for x in [1, 2, 3]:
+        q.append(x)
+    print(q.popleft(), q.popleft())
+    ```
+    What does this print?
+  options:
+  - 1 2
+  - 3 2
+  - 3 1
+  answer: 1 2
+  difficulty: 2
+  distractor_misconceptions:
+    3 2: queue-lifo
+    3 1: queue-lifo
+  is_microcheck: false
+  review_status: draft
+- id: queue-p2
+  concept_id: queue
+  kind: mcq
+  stem: What is the cost of `lst.pop(0)` on a Python list of length n?
+  options:
+  - O(1), the same as lst.pop()
+  - O(n), because every remaining element shifts left
+  - O(1) amortised
+  answer: O(n), because every remaining element shifts left
+  difficulty: 2
+  distractor_misconceptions:
+    O(1), the same as lst.pop(): queue-list-pop0-cheap
+    O(1) amortised: queue-list-pop0-cheap
+  is_microcheck: false
+  review_status: draft
+- id: queue-p3
+  concept_id: queue
+  kind: mcq
+  stem: A BFS dequeues n items using `list.pop(0)`. What is the total dequeue cost?
+  options:
+  - O(1)
+  - O(n^2)
+  - O(n)
+  answer: O(n^2)
+  difficulty: 3
+  distractor_misconceptions:
+    O(n): queue-list-pop0-cheap
+    O(1): queue-list-pop0-cheap
+  is_microcheck: false
+  review_status: draft
+- id: queue-mc
+  concept_id: queue
+  kind: mcq
+  stem: Which is the best choice for a FIFO queue in Python?
+  options:
+  - collections.deque with append and popleft
+  - A list with append and pop()
+  - A list with append and pop(0), both O(1)
+  answer: collections.deque with append and popleft
+  difficulty: 2
+  distractor_misconceptions:
+    A list with append and pop(0), both O(1): queue-list-pop0-cheap
+    A list with append and pop(): queue-lifo
+  is_microcheck: true
+  review_status: draft
+- id: fast-slow-pointers-p1
+  concept_id: fast-slow-pointers
+  kind: mcq
+  stem: Which loop condition is safe for advancing `fast = fast.next.next` on any list?
+  options:
+  - 'while fast is not None and fast.next is not None:'
+  - 'while fast.next.next is not None:'
+  - 'while fast.next is not None:'
+  answer: 'while fast is not None and fast.next is not None:'
+  difficulty: 3
+  distractor_misconceptions:
+    'while fast.next is not None:': fs-check-only-next
+    'while fast.next.next is not None:': fs-check-only-next
+  is_microcheck: false
+  review_status: draft
+- id: fast-slow-pointers-p2
+  concept_id: fast-slow-pointers
+  kind: mcq
+  stem: |-
+    ```python
+    class Node:
+        def __init__(self, val, next=None):
+            self.val, self.next = val, next
+
+    def middle(head):
+        slow = fast = head
+        while fast is not None and fast.next is not None:
+            slow = slow.next
+            fast = fast.next.next
+        return slow.val
+
+    print(middle(Node(1, Node(2, Node(3, Node(4, Node(5)))))))
+    ```
+    What does this print?
+  options:
+  - AttributeError
+  - '5'
+  - '3'
+  answer: '3'
+  difficulty: 3
+  distractor_misconceptions:
+    AttributeError: fs-check-only-next
+    '5': fs-check-only-next
+  is_microcheck: false
+  review_status: draft
+- id: fast-slow-pointers-p3
+  concept_id: fast-slow-pointers
+  kind: mcq
+  stem: |-
+    ```python
+    class Node:
+        def __init__(self, val, next=None):
+            self.val, self.next = val, next
+
+    def middle(head):
+        slow = fast = head
+        while fast.next is not None:
+            slow = slow.next
+            fast = fast.next.next
+        return slow.val
+
+    try:
+        print(middle(Node(1, Node(2, Node(3, Node(4))))))
+    except AttributeError:
+        print("AttributeError")
+    ```
+    What does this print?
+  options:
+  - '2'
+  - AttributeError
+  - '3'
+  answer: AttributeError
+  difficulty: 3
+  distractor_misconceptions:
+    '3': fs-check-only-next
+    '2': fs-check-only-next
+  is_microcheck: false
+  review_status: draft
+- id: fast-slow-pointers-mc
+  concept_id: fast-slow-pointers
+  kind: mcq
+  stem: In fast/slow cycle detection on a list without a cycle, how does the loop end?
+  options:
+  - fast or fast.next becomes None
+  - fast.next becomes None; fast itself never does
+  - slow and fast always meet
+  answer: fast or fast.next becomes None
+  difficulty: 3
+  distractor_misconceptions:
+    fast.next becomes None; fast itself never does: fs-check-only-next
+    slow and fast always meet: fs-check-only-next
+  is_microcheck: true
+  review_status: draft

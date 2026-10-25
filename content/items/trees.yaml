@@ -1,0 +1,709 @@
+# Draft items for the trees cluster. Every item is review_status: draft until Ronit reviews it
+# (S3): set approved or rejected per item. Only approved items are served (GraphSnapshot).
+# Each distractor maps to a misconception of the item's own concept (content/misconceptions.yaml).
+items:
+- id: tree-terminology-p1
+  concept_id: tree-terminology
+  kind: mcq
+  stem: How many edges does a tree with 10 nodes have?
+  options:
+  - '9'
+  - It depends on how many cycles it has
+  - '10'
+  answer: '9'
+  difficulty: 2
+  distractor_misconceptions:
+    '10': tree-has-cycles
+    It depends on how many cycles it has: tree-has-cycles
+  is_microcheck: false
+  review_status: draft
+- id: tree-terminology-p2
+  concept_id: tree-terminology
+  kind: mcq
+  stem: In a tree, how many parents can a non-root node have?
+  options:
+  - Any number, as long as it is reachable from the root
+  - Exactly one
+  - One or more
+  answer: Exactly one
+  difficulty: 2
+  distractor_misconceptions:
+    One or more: tree-has-cycles
+    Any number, as long as it is reachable from the root: tree-has-cycles
+  is_microcheck: false
+  review_status: draft
+- id: tree-terminology-p3
+  concept_id: tree-terminology
+  kind: mcq
+  stem: Vertices A, B, C have edges A-B, B-C and C-A. Is this a tree?
+  options:
+  - Yes, with A as the root
+  - 'Yes: every vertex is connected'
+  - 'No: it has a cycle, and 3 nodes would need only 2 edges'
+  answer: 'No: it has a cycle, and 3 nodes would need only 2 edges'
+  difficulty: 2
+  distractor_misconceptions:
+    'Yes: every vertex is connected': tree-has-cycles
+    Yes, with A as the root: tree-has-cycles
+  is_microcheck: false
+  review_status: draft
+- id: tree-terminology-mc
+  concept_id: tree-terminology
+  kind: mcq
+  stem: Which statement about trees is correct?
+  options:
+  - A node may have two parents if both are above it
+  - Every node except the root has exactly one parent, and there are no cycles
+  - A tree may contain a cycle if it has a root
+  answer: Every node except the root has exactly one parent, and there are no cycles
+  difficulty: 2
+  distractor_misconceptions:
+    A node may have two parents if both are above it: tree-has-cycles
+    A tree may contain a cycle if it has a root: tree-has-cycles
+  is_microcheck: true
+  review_status: draft
+- id: binary-tree-p1
+  concept_id: binary-tree
+  kind: mcq
+  stem: |-
+    ```python
+    class BNode:
+        def __init__(self, val, left=None, right=None):
+            self.val, self.left, self.right = val, left, right
+
+    def size(node):
+        if node.left is None and node.right is None:
+            return 1
+        return 1 + size(node.left) + size(node.right)
+
+    try:
+        print(size(BNode(1, BNode(2))))
+    except AttributeError:
+        print("AttributeError")
+    ```
+    What does this print?
+  options:
+  - '1'
+  - AttributeError
+  - '2'
+  answer: AttributeError
+  difficulty: 2
+  distractor_misconceptions:
+    '2': bt-leaf-base-case-only
+    '1': bt-leaf-base-case-only
+  is_microcheck: false
+  review_status: draft
+- id: binary-tree-p2
+  concept_id: binary-tree
+  kind: mcq
+  stem: What is the safest base case for a recursive function on a binary tree?
+  options:
+  - 'if node is None: handle the empty tree'
+  - 'if node.left is None: return'
+  - 'if node is a leaf: it covers every case'
+  answer: 'if node is None: handle the empty tree'
+  difficulty: 2
+  distractor_misconceptions:
+    'if node is a leaf: it covers every case': bt-leaf-base-case-only
+    'if node.left is None: return': bt-leaf-base-case-only
+  is_microcheck: false
+  review_status: draft
+- id: binary-tree-p3
+  concept_id: binary-tree
+  kind: mcq
+  stem: |-
+    ```python
+    class BNode:
+        def __init__(self, val, left=None, right=None):
+            self.val, self.left, self.right = val, left, right
+
+    def size(node):
+        if node is None:
+            return 0
+        return 1 + size(node.left) + size(node.right)
+
+    print(size(BNode(1, BNode(2, None, BNode(4)), BNode(3))))
+    ```
+    What does this print?
+  options:
+  - AttributeError
+  - '4'
+  - '3'
+  answer: '4'
+  difficulty: 3
+  distractor_misconceptions:
+    '3': bt-leaf-base-case-only
+    AttributeError: bt-leaf-base-case-only
+  is_microcheck: false
+  review_status: draft
+- id: binary-tree-mc
+  concept_id: binary-tree
+  kind: mcq
+  stem: A recursive tree function uses only `if node.left is None and node.right is None` as its base
+    case. Which tree makes it crash?
+  options:
+  - A node with exactly one child
+  - A single leaf
+  - A perfect tree with every leaf at the same depth
+  answer: A node with exactly one child
+  difficulty: 2
+  distractor_misconceptions:
+    A single leaf: bt-leaf-base-case-only
+    A perfect tree with every leaf at the same depth: bt-leaf-base-case-only
+  is_microcheck: true
+  review_status: draft
+- id: tree-dfs-traversals-p1
+  concept_id: tree-dfs-traversals
+  kind: mcq
+  stem: |-
+    ```text
+          4
+         / \
+        2   6
+       / \
+      1   3
+    ```
+    What is the in-order traversal of this tree?
+  options:
+  - 4 2 1 3 6
+  - 1 2 3 4 6
+  - 4 2 6 1 3
+  answer: 1 2 3 4 6
+  difficulty: 3
+  distractor_misconceptions:
+    4 2 6 1 3: trav-inorder-is-levels
+    4 2 1 3 6: trav-preorder-postorder-swap
+  is_microcheck: false
+  review_status: draft
+- id: tree-dfs-traversals-p2
+  concept_id: tree-dfs-traversals
+  kind: mcq
+  stem: |-
+    ```text
+          4
+         / \
+        2   6
+       / \
+      1   3
+    ```
+    What is the pre-order traversal of this tree?
+  options:
+  - 1 3 2 6 4
+  - 4 2 6 1 3
+  - 4 2 1 3 6
+  answer: 4 2 1 3 6
+  difficulty: 3
+  distractor_misconceptions:
+    1 3 2 6 4: trav-preorder-postorder-swap
+    4 2 6 1 3: trav-inorder-is-levels
+  is_microcheck: false
+  review_status: draft
+- id: tree-dfs-traversals-p3
+  concept_id: tree-dfs-traversals
+  kind: mcq
+  stem: |-
+    ```text
+          4
+         / \
+        2   6
+       / \
+      1   3
+    ```
+    What is the post-order traversal of this tree?
+  options:
+  - 4 2 1 3 6
+  - 1 3 2 6 4
+  - 1 2 3 4 6
+  answer: 1 3 2 6 4
+  difficulty: 3
+  distractor_misconceptions:
+    4 2 1 3 6: trav-preorder-postorder-swap
+    1 2 3 4 6: trav-preorder-postorder-swap
+  is_microcheck: false
+  review_status: draft
+- id: tree-dfs-traversals-mc
+  concept_id: tree-dfs-traversals
+  kind: mcq
+  stem: In which traversal is each node visited after both of its subtrees?
+  options:
+  - Pre-order
+  - Post-order
+  - In-order, which goes level by level
+  answer: Post-order
+  difficulty: 3
+  distractor_misconceptions:
+    Pre-order: trav-preorder-postorder-swap
+    In-order, which goes level by level: trav-inorder-is-levels
+  is_microcheck: true
+  review_status: draft
+- id: tree-level-order-p1
+  concept_id: tree-level-order
+  kind: mcq
+  stem: Which data structure gives level-order traversal?
+  options:
+  - A stack
+  - A queue
+  - A stack, popping from the end
+  answer: A queue
+  difficulty: 3
+  distractor_misconceptions:
+    A stack: lo-stack-for-levels
+    A stack, popping from the end: lo-stack-for-levels
+  is_microcheck: false
+  review_status: draft
+- id: tree-level-order-p2
+  concept_id: tree-level-order
+  kind: mcq
+  stem: |-
+    ```python
+    class BNode:
+        def __init__(self, val, left=None, right=None):
+            self.val, self.left, self.right = val, left, right
+
+    def order(root):
+        out, todo = [], [root]
+        while todo:
+            node = todo.pop()
+            out.append(node.val)
+            for child in (node.left, node.right):
+                if child is not None:
+                    todo.append(child)
+        return out
+
+    print(order(BNode(1, BNode(2, BNode(4)), BNode(3))))
+    ```
+    What does this print?
+  options:
+  - '[1, 2, 4, 3]'
+  - '[1, 3, 2, 4]'
+  - '[1, 2, 3, 4]'
+  answer: '[1, 3, 2, 4]'
+  difficulty: 3
+  distractor_misconceptions:
+    '[1, 2, 3, 4]': lo-stack-for-levels
+    '[1, 2, 4, 3]': lo-stack-for-levels
+  is_microcheck: false
+  review_status: draft
+- id: tree-level-order-p3
+  concept_id: tree-level-order
+  kind: mcq
+  stem: |-
+    ```python
+    class BNode:
+        def __init__(self, val, left=None, right=None):
+            self.val, self.left, self.right = val, left, right
+
+    from collections import deque
+    def level_order(root):
+        out, q = [], deque([root])
+        while q:
+            node = q.popleft()
+            out.append(node.val)
+            for child in (node.left, node.right):
+                if child is not None:
+                    q.append(child)
+        return out
+
+    print(level_order(BNode(1, BNode(2, BNode(4)), BNode(3))))
+    ```
+    What does this print?
+  options:
+  - '[1, 3, 2, 4]'
+  - '[1, 2, 4, 3]'
+  - '[1, 2, 3, 4]'
+  answer: '[1, 2, 3, 4]'
+  difficulty: 3
+  distractor_misconceptions:
+    '[1, 3, 2, 4]': lo-stack-for-levels
+    '[1, 2, 4, 3]': lo-stack-for-levels
+  is_microcheck: false
+  review_status: draft
+- id: tree-level-order-mc
+  concept_id: tree-level-order
+  kind: mcq
+  stem: In level-order traversal, after visiting a node, what do you do with its children?
+  options:
+  - Push them on a stack and pop the newest next
+  - Visit them immediately, depth first
+  - Add them to the back of a queue
+  answer: Add them to the back of a queue
+  difficulty: 3
+  distractor_misconceptions:
+    Push them on a stack and pop the newest next: lo-stack-for-levels
+    Visit them immediately, depth first: lo-stack-for-levels
+  is_microcheck: true
+  review_status: draft
+- id: tree-height-p1
+  concept_id: tree-height
+  kind: mcq
+  stem: |-
+    ```python
+    class BNode:
+        def __init__(self, val, left=None, right=None):
+            self.val, self.left, self.right = val, left, right
+
+    def height(node):
+        if node is None:
+            return -1
+        return 1 + max(height(node.left), height(node.right))
+
+    print(height(BNode(1)))
+    ```
+    What does this print?
+  options:
+  - '0'
+  - '1'
+  - '-1'
+  answer: '0'
+  difficulty: 3
+  distractor_misconceptions:
+    '1': height-conventions
+    '-1': height-conventions
+  is_microcheck: false
+  review_status: draft
+- id: tree-height-p2
+  concept_id: tree-height
+  kind: mcq
+  stem: |-
+    ```python
+    class BNode:
+        def __init__(self, val, left=None, right=None):
+            self.val, self.left, self.right = val, left, right
+
+    def height(node):
+        if node is None:
+            return -1
+        return 1 + max(height(node.left), height(node.right))
+
+    print(height(BNode(1, BNode(2, BNode(3)))))
+    ```
+    What does this print?
+  options:
+  - '3'
+  - '1'
+  - '2'
+  answer: '2'
+  difficulty: 3
+  distractor_misconceptions:
+    '3': height-conventions
+    '1': height-conventions
+  is_microcheck: false
+  review_status: draft
+- id: tree-height-p3
+  concept_id: tree-height
+  kind: mcq
+  stem: Using the edge-counting convention (height(None) = -1), what is the height of a chain of 5 nodes?
+  options:
+  - '6'
+  - '5'
+  - '4'
+  answer: '4'
+  difficulty: 3
+  distractor_misconceptions:
+    '5': height-conventions
+    '6': height-conventions
+  is_microcheck: false
+  review_status: draft
+- id: tree-height-mc
+  concept_id: tree-height
+  kind: mcq
+  stem: Under the edge-counting convention, what is the height of a tree with a single node?
+  options:
+  - '0'
+  - '1'
+  - '-1'
+  answer: '0'
+  difficulty: 3
+  distractor_misconceptions:
+    '1': height-conventions
+    '-1': height-conventions
+  is_microcheck: true
+  review_status: draft
+- id: binary-search-tree-p1
+  concept_id: binary-search-tree
+  kind: mcq
+  stem: |-
+    ```text
+          10
+         /  \
+        5    15
+         \
+          12
+    ```
+    Is this a valid binary search tree?
+  options:
+  - Yes, because 12 > 5
+  - 'No: 12 is in 10''s left subtree but is larger than 10'
+  - 'Yes: every node is correctly ordered with its direct children'
+  answer: 'No: 12 is in 10''s left subtree but is larger than 10'
+  difficulty: 3
+  distractor_misconceptions:
+    'Yes: every node is correctly ordered with its direct children': bst-local-check
+    Yes, because 12 > 5: bst-local-check
+  is_microcheck: false
+  review_status: draft
+- id: binary-search-tree-p2
+  concept_id: binary-search-tree
+  kind: mcq
+  stem: Keys 1, 2, 3, ..., n are inserted into an empty, unbalanced BST in that order. What does a search
+    cost?
+  options:
+  - O(log n)
+  - O(n)
+  - O(log n), as BST search always is
+  answer: O(n)
+  difficulty: 3
+  distractor_misconceptions:
+    O(log n): bst-always-logn
+    O(log n), as BST search always is: bst-always-logn
+  is_microcheck: false
+  review_status: draft
+- id: binary-search-tree-p3
+  concept_id: binary-search-tree
+  kind: mcq
+  stem: What does an in-order traversal of a valid BST produce?
+  options:
+  - The keys in sorted order
+  - The keys in insertion order
+  - The keys level by level
+  answer: The keys in sorted order
+  difficulty: 3
+  distractor_misconceptions:
+    The keys level by level: bst-local-check
+    The keys in insertion order: bst-local-check
+  is_microcheck: false
+  review_status: draft
+- id: binary-search-tree-mc
+  concept_id: binary-search-tree
+  kind: mcq
+  stem: What is the cost of searching a BST of height h?
+  options:
+  - O(log n) for every BST
+  - O(1) if each node is ordered with its children
+  - 'O(h): O(log n) if balanced, O(n) if it is a chain'
+  answer: 'O(h): O(log n) if balanced, O(n) if it is a chain'
+  difficulty: 3
+  distractor_misconceptions:
+    O(log n) for every BST: bst-always-logn
+    O(1) if each node is ordered with its children: bst-local-check
+  is_microcheck: true
+  review_status: draft
+- id: bst-insert-delete-p1
+  concept_id: bst-insert-delete
+  kind: mcq
+  stem: To delete a BST node with two children, which key replaces it?
+  options:
+  - Any leaf of the tree
+  - Its left child, with the right subtree attached anywhere
+  - 'Its in-order successor: the smallest key in its right subtree'
+  answer: 'Its in-order successor: the smallest key in its right subtree'
+  difficulty: 4
+  distractor_misconceptions:
+    Its left child, with the right subtree attached anywhere: bstd-two-children-delete
+    Any leaf of the tree: bstd-two-children-delete
+  is_microcheck: false
+  review_status: draft
+- id: bst-insert-delete-p2
+  concept_id: bst-insert-delete
+  kind: mcq
+  stem: |-
+    ```text
+           8
+          / \
+         3   10
+            /  \
+           9    14
+    ```
+    You delete 8 using the in-order successor. Which key becomes the root?
+  options:
+  - '9'
+  - '10'
+  - '3'
+  answer: '9'
+  difficulty: 4
+  distractor_misconceptions:
+    '10': bstd-two-children-delete
+    '3': bstd-two-children-delete
+  is_microcheck: false
+  review_status: draft
+- id: bst-insert-delete-p3
+  concept_id: bst-insert-delete
+  kind: mcq
+  stem: |-
+    ```python
+    class BNode:
+        def __init__(self, val, left=None, right=None):
+            self.val, self.left, self.right = val, left, right
+
+    def insert(node, key):
+        if node is None:
+            return BNode(key)
+        if key < node.val:
+            node.left = insert(node.left, key)
+        elif key > node.val:
+            node.right = insert(node.right, key)
+        return node
+
+    def inorder(node):
+        return [] if node is None else inorder(node.left) + [node.val] + inorder(node.right)
+
+    root = None
+    for k in [5, 2, 8, 6]:
+        root = insert(root, k)
+    print(inorder(root))
+    ```
+    What does this print?
+  options:
+  - '[2, 5, 6, 8]'
+  - '[2, 5, 8, 6]'
+  - '[5, 2, 8, 6]'
+  answer: '[2, 5, 6, 8]'
+  difficulty: 4
+  distractor_misconceptions:
+    '[5, 2, 8, 6]': bstd-two-children-delete
+    '[2, 5, 8, 6]': bstd-two-children-delete
+  is_microcheck: false
+  review_status: draft
+- id: bst-insert-delete-mc
+  concept_id: bst-insert-delete
+  kind: mcq
+  stem: Why is the in-order successor a safe replacement when deleting a node with two children?
+  options:
+  - Any child can replace the node; the subtrees can be reattached anywhere
+  - It is larger than everything in the left subtree and smaller than the rest of the right subtree
+  - Because it is always a leaf with no children
+  answer: It is larger than everything in the left subtree and smaller than the rest of the right subtree
+  difficulty: 4
+  distractor_misconceptions:
+    Any child can replace the node; the subtrees can be reattached anywhere: bstd-two-children-delete
+    Because it is always a leaf with no children: bstd-two-children-delete
+  is_microcheck: true
+  review_status: draft
+- id: balanced-trees-p1
+  concept_id: balanced-trees
+  kind: mcq
+  stem: What does a balanced search tree such as an AVL tree guarantee?
+  options:
+  - Every level is completely full
+  - All leaves are at the same depth
+  - Its height stays O(log n)
+  answer: Its height stays O(log n)
+  difficulty: 4
+  distractor_misconceptions:
+    Every level is completely full: bal-perfectly-full
+    All leaves are at the same depth: bal-perfectly-full
+  is_microcheck: false
+  review_status: draft
+- id: balanced-trees-p2
+  concept_id: balanced-trees
+  kind: mcq
+  stem: An AVL tree holds 6 keys. Must its last level be completely filled?
+  options:
+  - 'Yes: a balanced tree is always perfectly full'
+  - Yes, otherwise it must be rebuilt
+  - 'No: balance only bounds the height by a constant times log n'
+  answer: 'No: balance only bounds the height by a constant times log n'
+  difficulty: 4
+  distractor_misconceptions:
+    'Yes: a balanced tree is always perfectly full': bal-perfectly-full
+    Yes, otherwise it must be rebuilt: bal-perfectly-full
+  is_microcheck: false
+  review_status: draft
+- id: balanced-trees-p3
+  concept_id: balanced-trees
+  kind: mcq
+  stem: What does a rotation do?
+  options:
+  - Rebuilds the tree into a perfectly full shape
+  - Moves keys until every level is full
+  - Re-links a few nodes locally to reduce height while keeping BST order
+  answer: Re-links a few nodes locally to reduce height while keeping BST order
+  difficulty: 4
+  distractor_misconceptions:
+    Rebuilds the tree into a perfectly full shape: bal-perfectly-full
+    Moves keys until every level is full: bal-perfectly-full
+  is_microcheck: false
+  review_status: draft
+- id: balanced-trees-mc
+  concept_id: balanced-trees
+  kind: mcq
+  stem: Which statement about balanced BSTs is correct?
+  options:
+  - They are always complete, like a heap
+  - They keep height O(log n), but need not be perfectly full or complete
+  - They are always perfectly full
+  answer: They keep height O(log n), but need not be perfectly full or complete
+  difficulty: 4
+  distractor_misconceptions:
+    They are always perfectly full: bal-perfectly-full
+    They are always complete, like a heap: bal-perfectly-full
+  is_microcheck: true
+  review_status: draft
+- id: heaps-p1
+  concept_id: heaps
+  kind: mcq
+  stem: |-
+    ```python
+    import heapq
+    h = []
+    for x in [5, 1, 8, 3, 2]:
+        heapq.heappush(h, x)
+    print(h == sorted(h))
+    ```
+    What does this print?
+  options:
+  - True, because heappush keeps the list sorted
+  - 'True'
+  - 'False'
+  answer: 'False'
+  difficulty: 3
+  distractor_misconceptions:
+    'True': heap-array-sorted
+    True, because heappush keeps the list sorted: heap-array-sorted
+  is_microcheck: false
+  review_status: draft
+- id: heaps-p2
+  concept_id: heaps
+  kind: mcq
+  stem: How long does it take to check whether an arbitrary value is in a binary heap of n elements?
+  options:
+  - O(n)
+  - O(log n)
+  - O(1)
+  answer: O(n)
+  difficulty: 3
+  distractor_misconceptions:
+    O(log n): heap-search-fast
+    O(1): heap-search-fast
+  is_microcheck: false
+  review_status: draft
+- id: heaps-p3
+  concept_id: heaps
+  kind: mcq
+  stem: In a min-heap array `h`, which element is guaranteed to be the smallest?
+  options:
+  - h[0]
+  - h[0], and h[1] is guaranteed to be the second smallest
+  - h[-1]
+  answer: h[0]
+  difficulty: 3
+  distractor_misconceptions:
+    h[0], and h[1] is guaranteed to be the second smallest: heap-array-sorted
+    h[-1]: heap-array-sorted
+  is_microcheck: false
+  review_status: draft
+- id: heaps-mc
+  concept_id: heaps
+  kind: mcq
+  stem: Which statement about a binary min-heap is correct?
+  options:
+  - The array is fully sorted
+  - Any element can be found in O(log n)
+  - Each parent is <= its children; the minimum is at index 0
+  answer: Each parent is <= its children; the minimum is at index 0
+  difficulty: 3
+  distractor_misconceptions:
+    The array is fully sorted: heap-array-sorted
+    Any element can be found in O(log n): heap-search-fast
+  is_microcheck: true
+  review_status: draft
