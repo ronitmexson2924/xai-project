@@ -1,5 +1,5 @@
 items:
-- id: post-01
+- id: posttest-01
   concept_id: loops
   kind: mcq
   stem: '[Post-Assessment 1/15] Which invariant holds during the execution of Loops
@@ -17,7 +17,7 @@ items:
     It executes without any state transition or condition check.: loops-off-by-one
   is_microcheck: false
   review_status: approved
-- id: post-02
+- id: posttest-02
   concept_id: loops
   kind: mcq
   stem: '[Post-Assessment 2/15] Which invariant holds during the execution of Nested
@@ -36,7 +36,7 @@ items:
     It executes without any state transition or condition check.: loops-off-by-one
   is_microcheck: false
   review_status: approved
-- id: post-03
+- id: posttest-03
   concept_id: big-o-notation
   kind: mcq
   stem: '[Post-Assessment 3/15] Which invariant holds during the execution of Time
@@ -54,7 +54,7 @@ items:
     It executes without any state transition or condition check.: bigo-measures-seconds
   is_microcheck: false
   review_status: approved
-- id: post-04
+- id: posttest-04
   concept_id: arrays-indexing
   kind: mcq
   stem: '[Post-Assessment 4/15] Which invariant holds during the execution of Array
@@ -72,7 +72,7 @@ items:
     It executes without any state transition or condition check.: arr-last-index-is-len
   is_microcheck: false
   review_status: approved
-- id: post-05
+- id: posttest-05
   concept_id: two-pointers
   kind: mcq
   stem: '[Post-Assessment 5/15] Which invariant holds during the execution of Two
@@ -92,7 +92,7 @@ items:
     It executes without any state transition or condition check.: tp-works-unsorted
   is_microcheck: false
   review_status: approved
-- id: post-06
+- id: posttest-06
   concept_id: sliding-window
   kind: mcq
   stem: '[Post-Assessment 6/15] Which invariant holds during the execution of Sliding
@@ -112,7 +112,7 @@ items:
     It executes without any state transition or condition check.: sw-recompute-window
   is_microcheck: false
   review_status: approved
-- id: post-07
+- id: posttest-07
   concept_id: singly-linked-list
   kind: mcq
   stem: '[Post-Assessment 7/15] Which invariant holds during the execution of Singly
@@ -131,7 +131,7 @@ items:
     It executes without any state transition or condition check.: sll-random-access
   is_microcheck: false
   review_status: approved
-- id: post-08
+- id: posttest-08
   concept_id: singly-linked-list
   kind: mcq
   stem: '[Post-Assessment 8/15] Which invariant holds during the execution of Linked
@@ -149,7 +149,7 @@ items:
     It executes without any state transition or condition check.: sll-random-access
   is_microcheck: false
   review_status: approved
-- id: post-09
+- id: posttest-09
   concept_id: fast-slow-pointers
   kind: mcq
   stem: '[Post-Assessment 9/15] Which invariant holds during the execution of Fast
@@ -167,7 +167,7 @@ items:
     It executes without any state transition or condition check.: fs-check-only-next
   is_microcheck: false
   review_status: approved
-- id: post-10
+- id: posttest-10
   concept_id: recursion-base-case
   kind: mcq
   stem: '[Post-Assessment 10/15] Which invariant holds during the execution of Recursion:
@@ -186,7 +186,7 @@ items:
     It executes without any state transition or condition check.: rbc-base-case-wrong-value
   is_microcheck: false
   review_status: approved
-- id: post-11
+- id: posttest-11
   concept_id: call-stack
   kind: mcq
   stem: '[Post-Assessment 11/15] Which invariant holds during the execution of Recursive
@@ -205,7 +205,7 @@ items:
     It executes without any state transition or condition check.: cs-shared-locals
   is_microcheck: false
   review_status: approved
-- id: post-12
+- id: posttest-12
   concept_id: linear-search
   kind: mcq
   stem: '[Post-Assessment 12/15] Which invariant holds during the execution of Linear
@@ -225,7 +225,7 @@ items:
     It executes without any state transition or condition check.: ls-return-early-miss
   is_microcheck: false
   review_status: approved
-- id: post-13
+- id: posttest-13
   concept_id: binary-search-boundaries
   kind: mcq
   stem: '[Post-Assessment 13/15] Which invariant holds during the execution of Binary
@@ -243,7 +243,7 @@ items:
     It executes without any state transition or condition check.: bsb-mixed-convention
   is_microcheck: false
   review_status: approved
-- id: post-14
+- id: posttest-14
   concept_id: tree-dfs-traversals
   kind: mcq
   stem: '[Post-Assessment 14/15] Which invariant holds during the execution of Binary
@@ -261,7 +261,7 @@ items:
     It executes without any state transition or condition check.: trav-inorder-is-levels
   is_microcheck: false
   review_status: approved
-- id: post-15
+- id: posttest-15
   concept_id: graph-representation
   kind: mcq
   stem: '[Post-Assessment 15/15] Which invariant holds during the execution of Graph

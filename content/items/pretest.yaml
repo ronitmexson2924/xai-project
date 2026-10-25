@@ -1,5 +1,5 @@
 items:
-- id: pre-01
+- id: pretest-01
   concept_id: loops
   kind: mcq
   stem: '[Pre-Assessment 1/15] What is the primary guarantee of Loops & Iteration?'
@@ -16,7 +16,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: loops-off-by-one
   is_microcheck: false
   review_status: approved
-- id: pre-02
+- id: pretest-02
   concept_id: loops
   kind: mcq
   stem: '[Pre-Assessment 2/15] What is the primary guarantee of Nested Loops?'
@@ -33,7 +33,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: loops-off-by-one
   is_microcheck: false
   review_status: approved
-- id: pre-03
+- id: pretest-03
   concept_id: big-o-notation
   kind: mcq
   stem: '[Pre-Assessment 3/15] What is the primary guarantee of Time Complexity Basics?'
@@ -50,7 +50,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: bigo-measures-seconds
   is_microcheck: false
   review_status: approved
-- id: pre-04
+- id: pretest-04
   concept_id: arrays-indexing
   kind: mcq
   stem: '[Pre-Assessment 4/15] What is the primary guarantee of Array Indexing & Bounds?'
@@ -67,7 +67,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: arr-last-index-is-len
   is_microcheck: false
   review_status: approved
-- id: pre-05
+- id: pretest-05
   concept_id: two-pointers
   kind: mcq
   stem: '[Pre-Assessment 5/15] What is the primary guarantee of Two Pointers Technique?'
@@ -84,7 +84,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: tp-works-unsorted
   is_microcheck: false
   review_status: approved
-- id: pre-06
+- id: pretest-06
   concept_id: sliding-window
   kind: mcq
   stem: '[Pre-Assessment 6/15] What is the primary guarantee of Sliding Window?'
@@ -101,7 +101,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: sw-recompute-window
   is_microcheck: false
   review_status: approved
-- id: pre-07
+- id: pretest-07
   concept_id: singly-linked-list
   kind: mcq
   stem: '[Pre-Assessment 7/15] What is the primary guarantee of Singly Linked List
@@ -120,7 +120,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: sll-random-access
   is_microcheck: false
   review_status: approved
-- id: pre-08
+- id: pretest-08
   concept_id: singly-linked-list
   kind: mcq
   stem: '[Pre-Assessment 8/15] What is the primary guarantee of Linked List Traversal?'
@@ -137,7 +137,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: sll-random-access
   is_microcheck: false
   review_status: approved
-- id: pre-09
+- id: pretest-09
   concept_id: fast-slow-pointers
   kind: mcq
   stem: '[Pre-Assessment 9/15] What is the primary guarantee of Fast & Slow Pointers
@@ -157,7 +157,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: fs-check-only-next
   is_microcheck: false
   review_status: approved
-- id: pre-10
+- id: pretest-10
   concept_id: recursion-base-case
   kind: mcq
   stem: '[Pre-Assessment 10/15] What is the primary guarantee of Recursion: Base Case?'
@@ -175,7 +175,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: rbc-base-case-wrong-value
   is_microcheck: false
   review_status: approved
-- id: pre-11
+- id: pretest-11
   concept_id: call-stack
   kind: mcq
   stem: '[Pre-Assessment 11/15] What is the primary guarantee of Recursive Call Stack?'
@@ -192,7 +192,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: cs-shared-locals
   is_microcheck: false
   review_status: approved
-- id: pre-12
+- id: pretest-12
   concept_id: linear-search
   kind: mcq
   stem: '[Pre-Assessment 12/15] What is the primary guarantee of Linear Search?'
@@ -209,7 +209,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: ls-return-early-miss
   is_microcheck: false
   review_status: approved
-- id: pre-13
+- id: pretest-13
   concept_id: binary-search-boundaries
   kind: mcq
   stem: '[Pre-Assessment 13/15] What is the primary guarantee of Binary Search Bounds?'
@@ -226,7 +226,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: bsb-mixed-convention
   is_microcheck: false
   review_status: approved
-- id: pre-14
+- id: pretest-14
   concept_id: tree-dfs-traversals
   kind: mcq
   stem: '[Pre-Assessment 14/15] What is the primary guarantee of Binary Tree: Preorder
@@ -244,7 +244,7 @@ items:
     It mutates globals outside the local scope arbitrarily.: trav-inorder-is-levels
   is_microcheck: false
   review_status: approved
-- id: pre-15
+- id: pretest-15
   concept_id: graph-representation
   kind: mcq
   stem: '[Pre-Assessment 15/15] What is the primary guarantee of Graph Adjacency List?'
