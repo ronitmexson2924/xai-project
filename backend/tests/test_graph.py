@@ -21,7 +21,7 @@ def _counts(db: Session) -> tuple[int, ...]:
 
 def test_seed_is_idempotent(db: Session) -> None:
     bundle = load_content(CONTENT_DIR)
-    bundle.items.append(
+    bundle.items = [
         ItemSpec(
             id="t-1",
             concept_id="loops",
@@ -31,7 +31,7 @@ def test_seed_is_idempotent(db: Session) -> None:
             answer="a",
             review_status="approved",
         )
-    )
+    ]
     first = seed(db, bundle)
     counts = _counts(db)
     seed(db, bundle)
