@@ -82,3 +82,16 @@ def test_variant_key_ignores_wrapper_fields() -> None:
     a = StyleParams(example_first=True, length="short", depth="why", tone="encouraging")
     b = StyleParams(example_first=True, length="short", depth="why", include_diagram=True)
     assert a.variant_key() == b.variant_key() == "ex1-short-why"
+
+
+def test_explainability_fake_satisfies_the_contract() -> None:
+    from app.contracts.fakes import FakeExplainability
+    from app.contracts.learner import StateDelta
+    from app.contracts.xai import RecommendationWhy
+
+    fake = FakeExplainability()
+    why = fake.why(uuid4())
+    assert isinstance(why, RecommendationWhy) and why.rationale.summary
+    assert fake.explain_belief(uuid4(), "loops").confidence == "tentative"
+    delta = StateDelta(user_id=uuid4(), source="attempt", source_id="x")
+    assert fake.explain_change(delta).messages == []
