@@ -22,6 +22,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
+from app.api.session import PENDING_TTL
 from app.contracts.explanation import ExplanationFeedbackSummary, StyleParams
 from app.contracts.learner import AttemptRecord, ExperimentArm
 from app.db import models as m
@@ -149,6 +150,11 @@ class DemoLearner:
     def explanation_feedback(self, style: StyleParams, clarity: int, followup_correct: bool):
         state = self.model.get_state(self.user_id)
         rec = self.planner.next_step(state)
+        # a finished step: date it before the pending window, or /session would resume it and show
+        # the stub explanation below instead of planning a real step
+        self.session.get(m.RecommendationRow, rec.id).created_at = (
+            datetime.now(UTC) - PENDING_TTL - timedelta(minutes=1)
+        )
         explanation_id = uuid.uuid4()
         self.session.add(
             m.ExplanationRow(
