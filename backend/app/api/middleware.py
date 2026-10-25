@@ -84,8 +84,10 @@ def limit_auth_attempts(request: Request, email: str) -> None:
     accounts nor many clients trying one account gets far."""
     if not settings.rate_limit_enabled:
         return
-    limit = settings.auth_rate_limit_per_minute
-    for key in (f"ip:{client_ip(request)}", f"email:{email}"):
+    for key, limit in (
+        (f"ip:{client_ip(request)}", settings.auth_ip_rate_limit_per_minute),
+        (f"email:{email.strip().lower()}", settings.auth_rate_limit_per_minute),
+    ):
         if retry := auth_rate_limiter.hit(key, limit):
             raise _too_many(retry)
 

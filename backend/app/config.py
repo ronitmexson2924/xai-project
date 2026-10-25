@@ -27,7 +27,9 @@ class Settings(BaseSettings):
     rate_limit_enabled: bool = True
     rate_limit_requests_per_minute: int = 120
     # stricter limit for login/register, per client and per email, to slow password guessing
-    auth_rate_limit_per_minute: int = 10
+    auth_rate_limit_per_minute: int = 10  # per account
+    # per client IP: higher, since a whole classroom can share one address behind NAT
+    auth_ip_rate_limit_per_minute: int = 60
     # only trust X-Forwarded-For when a known proxy (e.g. Render, Fly) sets it
     trust_proxy_headers: bool = False
 

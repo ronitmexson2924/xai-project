@@ -517,6 +517,22 @@ def test_login_guessing_is_rate_limited(api: ApiClient) -> None:
     assert blocked.status_code == 429 and "Retry-After" in blocked.headers
 
 
+def test_one_client_cannot_try_many_accounts(api: ApiClient) -> None:
+    settings.rate_limit_enabled = True
+    old = settings.auth_ip_rate_limit_per_minute
+    settings.auth_ip_rate_limit_per_minute = 5
+    try:
+        codes = [
+            api.post(
+                f"{API}/auth/login", json={"email": f"victim{i}@example.com", "password": "x" * 9}
+            ).status_code
+            for i in range(8)
+        ]
+    finally:
+        settings.auth_ip_rate_limit_per_minute = old
+    assert codes[0] == 401 and codes[-1] == 429
+
+
 def test_spoofed_forwarded_for_does_not_bypass_rate_limits(api: ApiClient) -> None:
     settings.rate_limit_enabled = True
     old = settings.rate_limit_requests_per_minute
