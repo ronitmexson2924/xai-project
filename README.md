@@ -47,7 +47,7 @@ alembic upgrade head                         # schema
 python -m app.graph.seed ../content          # concepts, misconceptions, items, questionnaire
 python -m app.graph.demo_seed --password 'Demo-pass-1'   # optional: asha|ben|chen@demo.example.com
 python -m app.auth.onboard admin --email you@example.com # an admin for /admin (asks a password)
-uvicorn app.main:app --reload                # http://localhost:8000/health/ready
+INCLUDE_DRAFT_ITEMS=true uvicorn app.main:app --reload   # drafts until the bank is reviewed (S3)
 
 cd ../frontend && npm ci && npm run dev      # http://localhost:3000
 ```
@@ -71,4 +71,6 @@ hostile user would (forged tokens, other learners' ids, replays, injection, over
 - **Frontend:** Vercel (`frontend/vercel.json`) with `NEXT_PUBLIC_API_URL` set to the API URL.
 - **Pilot accounts:** `python -m app.auth.onboard cohort --count 45 --output-csv pilot.roster.csv`
   (the roster holds passwords: `*.roster.csv` is git-ignored; delete it after hand-out).
+- **Items:** only `approved` items are served. The bank (`content/items/`) is all `draft` until
+  reviewed; `INCLUDE_DRAFT_ITEMS=true` serves drafts for demos and is refused in production.
 - **Withdrawals:** run `python -m app.auth.purge` on a schedule to delete withdrawn accounts.
