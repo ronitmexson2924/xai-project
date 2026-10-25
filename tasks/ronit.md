@@ -78,10 +78,12 @@
   `distractor_misconceptions`, a `StateDelta` audit row in `state_updates`,
   and idempotency on `attempt.id`.
 - **Acceptance:**
-  - [ ] Unit tests check the BKT update against hand-computed values (3 cases)
-  - [ ] Replaying the same attempt twice changes nothing
-  - [ ] `get_state` for a user with 60 concepts runs in < 50 ms (one query)
-- [ ] **R2 done**
+  - [x] Unit tests check the BKT update against hand-computed values (3 cases)
+  - [x] Replaying the same attempt twice changes nothing
+  - [x] `get_state` for a user with 60 concepts runs in < 50 ms (one query)
+- [x] **R2 done**
+  - _`apply_attempt` also inserts the `attempts` row, so the attempt and its state change are
+    stored atomically. `get_state` uses 2 queries (profile join + mastery rows)._
 
 ## R3: Psychometric questionnaire (weeks 2–3)
 - **Depends on:** R0
