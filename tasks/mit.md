@@ -109,11 +109,11 @@
   7. Model names come from `.env` (`GEMINI_MODEL_EXPLAIN`). Never hard-code
      them.
 - **Acceptance:**
-  - [ ] Tests with a mocked Gemini client: valid output passes, an invalid
+  - [x] Tests with a mocked Gemini client: valid output passes, an invalid
         concept ID triggers the fallback, a timeout triggers the fallback
-  - [ ] The precompute run for 3 concepts produces 36 rows
-  - [ ] Runtime p95 < 50 ms when a variant exists
-- [ ] **M3 done**
+  - [x] The precompute run for 3 concepts produces 36 rows
+  - [x] Runtime p95 < 50 ms when a variant exists
+- [x] **M3 done**
 
 ## M4: Learning UI (weeks 3–5)
 - **Depends on:** M1, M2

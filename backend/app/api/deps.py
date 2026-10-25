@@ -11,7 +11,6 @@ from typing import Annotated
 from fastapi import Depends
 
 from app.contracts.fakes import (
-    FakeExplainer,
     FakeGraph,
     FakeLearnerModel,
     FakePlanner,
@@ -23,13 +22,14 @@ from app.contracts.services import (
     LearnerModelService,
     PlannerService,
 )
+from app.explainer import GroundedExplainerService
 from app.telemetry import TelemetryFeedbackAnalyzer
 
-# Singletons for development and testing: real TelemetryFeedbackAnalyzer (M2), fakes for others
+# Singletons: real Explainer (M3) and Telemetry Analyzer (M2), fakes for Ronit's modules
 _graph_service: GraphService = FakeGraph()
 _learner_model_service: LearnerModelService = FakeLearnerModel()
 _planner_service: PlannerService = FakePlanner(FakeGraph())
-_explainer_service: ExplainerService = FakeExplainer(FakeGraph())
+_explainer_service: ExplainerService = GroundedExplainerService(_graph_service)
 _feedback_analyzer: FeedbackAnalyzer = TelemetryFeedbackAnalyzer()
 
 
@@ -62,7 +62,7 @@ def reset_services() -> None:
     _graph_service = graph
     _learner_model_service = FakeLearnerModel()
     _planner_service = FakePlanner(graph)
-    _explainer_service = FakeExplainer(graph)
+    _explainer_service = GroundedExplainerService(graph)
     _feedback_analyzer = TelemetryFeedbackAnalyzer()
 
 
