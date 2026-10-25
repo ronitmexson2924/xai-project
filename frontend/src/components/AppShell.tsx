@@ -53,7 +53,7 @@ export function AppShell({ children, wide = false }: { children: React.ReactNode
         <div className={cn("mx-auto flex h-14 items-center justify-between gap-4 px-4 sm:px-6", wide ? "max-w-7xl" : "max-w-6xl")}>
           <div className="flex min-w-0 items-center gap-6">
             <Logo href={user?.onboarded ? "/dashboard" : "/"} />
-            <nav aria-label="Main" className="flex items-center gap-1 overflow-x-auto">
+            <nav aria-label="Main" className="hidden items-center gap-1 sm:flex">
               {links.map((l) => {
                 const active = pathname === l.href || (l.href !== "/dashboard" && pathname.startsWith(l.href));
                 return (
@@ -119,9 +119,30 @@ export function AppShell({ children, wide = false }: { children: React.ReactNode
           )}
         </div>
       </header>
-      <main id="main" className={cn("mx-auto px-4 py-8 sm:px-6 sm:py-10", wide ? "max-w-7xl" : "max-w-6xl")}>
+      <main id="main" className={cn("mx-auto px-4 pb-24 pt-8 sm:px-6 sm:py-10", wide ? "max-w-7xl" : "max-w-6xl")}>
         {children}
       </main>
+      {links.length > 0 && (
+        <nav
+          aria-label="Main"
+          className="fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl sm:hidden"
+        >
+          {links.map((l) => {
+            const active = pathname === l.href || (l.href !== "/dashboard" && pathname.startsWith(l.href));
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                aria-current={active ? "page" : undefined}
+                className={cn("flex flex-1 flex-col items-center gap-1 py-2.5 text-xs", active ? "text-accent" : "text-muted")}
+              >
+                <span className={cn("h-1 w-1 rounded-full", active ? "bg-accent" : "bg-transparent")} aria-hidden />
+                {l.label}
+              </Link>
+            );
+          })}
+        </nav>
+      )}
     </div>
   );
 }

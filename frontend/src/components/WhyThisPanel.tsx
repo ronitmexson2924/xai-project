@@ -105,10 +105,14 @@ export function WhyThisPanel({ recommendationId, recordEvent }: WhyThisPanelProp
                   {why.rationale.counterfactuals.length > 0 && (
                     <section className="space-y-1">
                       <h4 className="text-xs font-semibold uppercase tracking-wide text-subtle">What would change it</h4>
-                      <ul className="list-disc space-y-1 pl-5">
+                      <ul className="space-y-2">
                         {why.rationale.counterfactuals.map((cf, i) => (
-                          <li key={i}>
-                            If you {cf.condition}, {cf.outcome}.
+                          <li key={i} className="rounded-lg border border-line bg-surface px-3 py-2">
+                            <span className="text-fg">{cf.condition}</span>
+                            <span className="mx-1.5 text-subtle" aria-label="then">
+                              →
+                            </span>
+                            {cf.outcome}.
                           </li>
                         ))}
                       </ul>

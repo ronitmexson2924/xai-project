@@ -206,7 +206,7 @@ export default function SessionPage() {
               {!explanationFirst && showExplanation && <ExplanationCard explanation={step.explanation} concept={concept} />}
 
               {(result || !step.item) && (
-                <div className="sticky bottom-4 flex justify-end">
+                <div className="sticky bottom-20 flex justify-end sm:bottom-4">
                   <Button size="lg" onClick={next} className="shadow-pop">
                     Continue <span aria-hidden>→</span>
                   </Button>
