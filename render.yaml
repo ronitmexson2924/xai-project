@@ -1,0 +1,46 @@
+# Render blueprint: the API and its Postgres. The frontend deploys to Vercel (frontend/vercel.json)
+# with NEXT_PUBLIC_API_URL set to this service's URL; put that Vercel URL in CORS_ORIGINS here.
+services:
+  - type: web
+    name: pcg-engine-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install .
+    # migrate and load content/ (both idempotent) before serving
+    startCommand: >-
+      alembic upgrade head && python -m app.graph.seed ../content &&
+      uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health/ready
+    envVars:
+      - key: ENVIRONMENT
+        value: production  # refuses to start with a weak JWT secret or CORS "*"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pcg-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ANALYSIS_SALT  # fixed for the whole study: never regenerate it
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false  # e.g. https://your-frontend.vercel.app
+      - key: TRUST_FORWARDED_FOR
+        value: "true"  # Render's proxy sets X-Forwarded-For
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL_EXPLAIN
+        sync: false
+      - key: GEMINI_MODEL_OFFLINE
+        sync: false
+      - key: LLM_TIMEOUT_SECONDS
+        value: "4.0"
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+      - key: RATE_LIMIT_REQUESTS_PER_MINUTE
+        value: "120"
+
+databases:
+  - name: pcg-db
+    databaseName: pcg
+    user: pcg
+    plan: free

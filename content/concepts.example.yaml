@@ -1,0 +1,41 @@
+# Format reference for content/concepts.yaml (task R1). IDs are kebab-case slugs and never change.
+concepts:
+  - id: loops
+    name: Loops
+    cluster: basics
+    difficulty: 1
+    description: Repeating a block of code.
+    prerequisites: []
+    card:
+      definition: A loop runs a block of code repeatedly while a condition holds.
+      key_idea: Every loop needs a condition that eventually becomes false.
+      worked_example: |
+        for i in range(3):
+            print(i)   # prints 0, 1, 2
+      pitfall: "Off-by-one: range(3) stops before 3."
+
+  - id: recursion-base-case
+    name: "Recursion: base case"
+    cluster: recursion
+    difficulty: 2
+    description: The stopping condition of a recursive function.
+    prerequisites: [loops]
+    card:
+      definition: A base case is an input a recursive function answers without recursing.
+      key_idea: Each recursive call must move closer to a base case.
+      worked_example: |
+        def fact(n):
+            if n == 0:        # base case
+                return 1
+            return n * fact(n - 1)
+      pitfall: A missing or unreachable base case causes infinite recursion.
+      diagram: |
+        flowchart TD
+          A["fact(2)"] --> B["2 * fact(1)"] --> C["1 * fact(0)"] --> D["base case: 1"]
+
+# misconceptions.yaml format:
+# misconceptions:
+#   - id: recursion-no-base-case
+#     concept_id: recursion-base-case
+#     description: Believes recursion stops on its own without a base case.
+#     remediation_hint: Trace fact(2) by hand and point at the line where it stops.

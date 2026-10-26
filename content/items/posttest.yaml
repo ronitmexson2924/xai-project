@@ -1,0 +1,275 @@
+# Draft items for the posttest test (parallel forms: pretest-NN and posttest-NN test the same concept). Every item is review_status: draft until Ronit reviews it
+# (S3): set approved or rejected per item. Only approved items are served (GraphSnapshot).
+# Each distractor maps to a misconception of the item's own concept (content/misconceptions.yaml).
+items:
+- id: posttest-01
+  concept_id: loops
+  kind: mcq
+  stem: |-
+    ```python
+    total = 0
+    for i in range(2, 6):
+        total += i
+    print(total)
+    ```
+    What does this print?
+  options:
+  - '20'
+  - '18'
+  - '14'
+  answer: '14'
+  difficulty: 1
+  distractor_misconceptions:
+    '20': loops-off-by-one
+    '18': loops-off-by-one
+  is_microcheck: false
+  review_status: draft
+- id: posttest-02
+  concept_id: functions
+  kind: mcq
+  stem: |-
+    ```python
+    def triple(n):
+        print(n * 3)
+
+    y = triple(2)
+    print(y)
+    ```
+    What is the second line printed?
+  options:
+  - None
+  - '2'
+  - '6'
+  answer: None
+  difficulty: 1
+  distractor_misconceptions:
+    '6': func-print-is-return
+    '2': func-print-is-return
+  is_microcheck: false
+  review_status: draft
+- id: posttest-03
+  concept_id: big-o-notation
+  kind: mcq
+  stem: A function does `2n + 90` steps on an input of size n. What is its Big-O?
+  options:
+  - O(n), so it always takes n seconds
+  - O(n)
+  - O(2n + 90)
+  answer: O(n)
+  difficulty: 2
+  distractor_misconceptions:
+    O(2n + 90): bigo-keeps-constants
+    O(n), so it always takes n seconds: bigo-measures-seconds
+  is_microcheck: false
+  review_status: draft
+- id: posttest-04
+  concept_id: arrays-indexing
+  kind: mcq
+  stem: For `b = [6, 1, 8, 5]`, what is `b[3]`?
+  options:
+  - IndexError
+  - '8'
+  - '5'
+  answer: '5'
+  difficulty: 1
+  distractor_misconceptions:
+    '8': arr-index-starts-at-one
+    IndexError: arr-last-index-is-len
+  is_microcheck: false
+  review_status: draft
+- id: posttest-05
+  concept_id: hash-maps
+  kind: mcq
+  stem: Which of these values is allowed as a key in a Python dict?
+  options:
+  - (3, 4)
+  - '{3: 4}'
+  - '[3, 4]'
+  answer: (3, 4)
+  difficulty: 2
+  distractor_misconceptions:
+    '[3, 4]': hash-any-key
+    '{3: 4}': hash-any-key
+  is_microcheck: false
+  review_status: draft
+- id: posttest-06
+  concept_id: references
+  kind: mcq
+  stem: |-
+    ```python
+    x = ["p"]
+    y = x
+    y.append("q")
+    print(x, y)
+    ```
+    What does this print?
+  options:
+  - '[''p''] [''q'']'
+  - '[''p'', ''q''] [''p'', ''q'']'
+  - '[''p''] [''p'', ''q'']'
+  answer: '[''p'', ''q''] [''p'', ''q'']'
+  difficulty: 2
+  distractor_misconceptions:
+    '[''p''] [''p'', ''q'']': ref-assignment-copies
+    '[''p''] [''q'']': ref-assignment-copies
+  is_microcheck: false
+  review_status: draft
+- id: posttest-07
+  concept_id: stack
+  kind: mcq
+  stem: You push 'x', 'y', 'z' onto an empty stack and pop twice. What comes out, in order?
+  options:
+  - x, y
+  - z, y
+  - y, x
+  answer: z, y
+  difficulty: 2
+  distractor_misconceptions:
+    x, y: stack-fifo
+    y, x: stack-fifo
+  is_microcheck: false
+  review_status: draft
+- id: posttest-08
+  concept_id: queue
+  kind: mcq
+  stem: You enqueue 'x', 'y', 'z' into an empty queue and dequeue once. What comes out?
+  options:
+  - x
+  - y
+  - z
+  answer: x
+  difficulty: 2
+  distractor_misconceptions:
+    z: queue-lifo
+    y: queue-lifo
+  is_microcheck: false
+  review_status: draft
+- id: posttest-09
+  concept_id: recursion-base-case
+  kind: mcq
+  stem: |-
+    ```python
+    def summ(n):
+        if n == 0:
+            return 1
+        return n + summ(n - 1)
+
+    print(summ(3))
+    ```
+    What does this print?
+  options:
+  - '3'
+  - '6'
+  - '7'
+  answer: '7'
+  difficulty: 2
+  distractor_misconceptions:
+    '6': rbc-base-case-wrong-value
+    '3': rbc-base-case-wrong-value
+  is_microcheck: false
+  review_status: draft
+- id: posttest-10
+  concept_id: call-stack
+  kind: mcq
+  stem: |-
+    ```python
+    out = []
+    def g(n):
+        if n == 0:
+            return
+        g(n - 1)
+        out.append(n * 10)
+
+    g(3)
+    print(out)
+    ```
+    What does this print?
+  options:
+  - '[]'
+  - '[30, 30, 30]'
+  - '[10, 20, 30]'
+  answer: '[10, 20, 30]'
+  difficulty: 3
+  distractor_misconceptions:
+    '[]': cs-code-after-call-skipped
+    '[30, 30, 30]': cs-shared-locals
+  is_microcheck: false
+  review_status: draft
+- id: posttest-11
+  concept_id: binary-search
+  kind: mcq
+  stem: About how many comparisons does binary search need on a sorted list of 4,000 elements, in the
+    worst case?
+  options:
+  - About 12
+  - About 12, even if the list is unsorted
+  - About 2,000
+  answer: About 12
+  difficulty: 2
+  distractor_misconceptions:
+    About 2,000: bs-linear-time
+    About 12, even if the list is unsorted: bs-unsorted-ok
+  is_microcheck: false
+  review_status: draft
+- id: posttest-12
+  concept_id: merge-sort
+  kind: mcq
+  stem: 'Merging the sorted lists [1, 4, 5, 7] and [2, 3]: the main loop stops once [2, 3] is used up.
+    What must still be added?'
+  options:
+  - Nothing
+  - Nothing, and the merge used O(1) extra memory
+  - '[4, 5, 7]'
+  answer: '[4, 5, 7]'
+  difficulty: 3
+  distractor_misconceptions:
+    Nothing: ms-forget-leftovers
+    Nothing, and the merge used O(1) extra memory: ms-in-place-free
+  is_microcheck: false
+  review_status: draft
+- id: posttest-13
+  concept_id: binary-search-tree
+  kind: mcq
+  stem: Root 50 has right child 70; 70 has left child 40. Is this a valid BST?
+  options:
+  - 'Yes: 40 < 70, so each node is ordered with its children'
+  - Yes, and search is O(log n)
+  - 'No: 40 is in 50''s right subtree'
+  answer: 'No: 40 is in 50''s right subtree'
+  difficulty: 3
+  distractor_misconceptions:
+    'Yes: 40 < 70, so each node is ordered with its children': bst-local-check
+    Yes, and search is O(log n): bst-always-logn
+  is_microcheck: false
+  review_status: draft
+- id: posttest-14
+  concept_id: graph-bfs
+  kind: mcq
+  stem: Edges s-b (weight 1), b-t (weight 3), s-t (weight 7). Which path to t does BFS from s find first?
+  options:
+  - s-b-t, the cheapest path
+  - s-t, the path with fewest edges
+  - s-b-t, because BFS minimises total weight
+  answer: s-t, the path with fewest edges
+  difficulty: 3
+  distractor_misconceptions:
+    s-b-t, the cheapest path: bfs-weighted-shortest
+    s-b-t, because BFS minimises total weight: bfs-weighted-shortest
+  is_microcheck: false
+  review_status: draft
+- id: posttest-15
+  concept_id: memoization
+  kind: mcq
+  stem: A memoised function starts each call with `seen = dict()` and stores results in it. What is the
+    effect?
+  options:
+  - Results are reused, but only within one level
+  - Every result is reused
+  - Nothing is reused; it is as slow as plain recursion
+  answer: Nothing is reused; it is as slow as plain recursion
+  difficulty: 3
+  distractor_misconceptions:
+    Every result is reused: memo-fresh-cache
+    Results are reused, but only within one level: memo-fresh-cache
+  is_microcheck: false
+  review_status: draft

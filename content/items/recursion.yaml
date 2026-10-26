@@ -1,0 +1,613 @@
+# Draft items for the recursion cluster. Every item is review_status: draft until Ronit reviews it
+# (S3): set approved or rejected per item. Only approved items are served (GraphSnapshot).
+# Each distractor maps to a misconception of the item's own concept (content/misconceptions.yaml).
+items:
+- id: recursion-base-case-p1
+  concept_id: recursion-base-case
+  kind: mcq
+  stem: |-
+    ```python
+    def fact(n):
+        if n == 0:
+            return 0
+        return n * fact(n - 1)
+
+    print(fact(4))
+    ```
+    What does this print?
+  options:
+  - '4'
+  - '24'
+  - '0'
+  answer: '0'
+  difficulty: 2
+  distractor_misconceptions:
+    '24': rbc-base-case-wrong-value
+    '4': rbc-base-case-wrong-value
+  is_microcheck: false
+  review_status: draft
+- id: recursion-base-case-p2
+  concept_id: recursion-base-case
+  kind: mcq
+  stem: |-
+    ```python
+    def down(n):
+        if n == 0:
+            return "done"
+        return down(n - 2)
+    ```
+    What happens when you call down(5)?
+  options:
+  - It returns 'done' after three calls
+  - It recurses until RecursionError, because n skips over 0
+  - It returns None once n is negative
+  answer: It recurses until RecursionError, because n skips over 0
+  difficulty: 2
+  distractor_misconceptions:
+    It returns 'done' after three calls: rbc-unreachable-base
+    It returns None once n is negative: recursion-no-base-case
+  is_microcheck: false
+  review_status: draft
+- id: recursion-base-case-p3
+  concept_id: recursion-base-case
+  kind: mcq
+  stem: |-
+    ```python
+    def count(n):
+        return 1 + count(n - 1)
+    ```
+    What happens when you call count(3)?
+  options:
+  - It returns 4 once n reaches 0
+  - It returns 3, because recursion stops when n runs out
+  - It recurses until RecursionError
+  answer: It recurses until RecursionError
+  difficulty: 3
+  distractor_misconceptions:
+    It returns 4 once n reaches 0: recursion-no-base-case
+    It returns 3, because recursion stops when n runs out: recursion-no-base-case
+  is_microcheck: false
+  review_status: draft
+- id: recursion-base-case-mc
+  concept_id: recursion-base-case
+  kind: mcq
+  stem: What is a base case in a recursive function?
+  options:
+  - Any `if` statement; its returned value does not affect other results
+  - 'An optional check: recursion stops on its own when the input runs out'
+  - An input the function answers directly, without calling itself
+  - A check that only needs to cover the inputs you expect to test
+  answer: An input the function answers directly, without calling itself
+  difficulty: 2
+  distractor_misconceptions:
+    'An optional check: recursion stops on its own when the input runs out': recursion-no-base-case
+    Any `if` statement; its returned value does not affect other results: rbc-base-case-wrong-value
+    A check that only needs to cover the inputs you expect to test: rbc-unreachable-base
+  is_microcheck: true
+  review_status: draft
+- id: recursive-case-p1
+  concept_id: recursive-case
+  kind: mcq
+  stem: |-
+    ```python
+    def total(a):
+        if not a:
+            return 0
+        return a[0] + total(a)
+    ```
+    What happens when you call total([1, 2, 3])?
+  options:
+  - It recurses until RecursionError, because the input never shrinks
+  - It returns 6
+  - It returns 1
+  answer: It recurses until RecursionError, because the input never shrinks
+  difficulty: 2
+  distractor_misconceptions:
+    It returns 6: rc-no-progress
+    It returns 1: rc-no-progress
+  is_microcheck: false
+  review_status: draft
+- id: recursive-case-p2
+  concept_id: recursive-case
+  kind: mcq
+  stem: '`length(a)` returns 0 for an empty list. Which recursive case is correct?'
+  options:
+  - return 1 + length(a)
+  - return 1 + length(a[1:])
+  - return length(a[1:])
+  answer: return 1 + length(a[1:])
+  difficulty: 2
+  distractor_misconceptions:
+    return 1 + length(a): rc-no-progress
+    return length(a[1:]): rc-no-progress
+  is_microcheck: false
+  review_status: draft
+- id: recursive-case-p3
+  concept_id: recursive-case
+  kind: mcq
+  stem: How should you convince yourself that `total(a) = a[0] + total(a[1:])` is correct?
+  options:
+  - Trace every call down to the base case for a long example list
+  - Assume total(a[1:]) is correct, then check that adding a[0] gives total(a) and that the list shrinks
+  - You cannot be sure until you have traced all calls by hand
+  answer: Assume total(a[1:]) is correct, then check that adding a[0] gives total(a) and that the list
+    shrinks
+  difficulty: 3
+  distractor_misconceptions:
+    Trace every call down to the base case for a long example list: rc-must-trace-everything
+    You cannot be sure until you have traced all calls by hand: rc-must-trace-everything
+  is_microcheck: false
+  review_status: draft
+- id: recursive-case-mc
+  concept_id: recursive-case
+  kind: mcq
+  stem: What two things must a recursive case get right?
+  options:
+  - Trace every recursive call by hand before trusting it
+  - Call itself on the same input, and let the base case stop it
+  - Call itself on a smaller input, and combine that result correctly
+  answer: Call itself on a smaller input, and combine that result correctly
+  difficulty: 2
+  distractor_misconceptions:
+    Call itself on the same input, and let the base case stop it: rc-no-progress
+    Trace every recursive call by hand before trusting it: rc-must-trace-everything
+  is_microcheck: true
+  review_status: draft
+- id: call-stack-p1
+  concept_id: call-stack
+  kind: mcq
+  stem: |-
+    ```python
+    out = []
+    def countdown(n):
+        if n == 0:
+            return
+        out.append(n)
+        countdown(n - 1)
+        out.append(-n)
+
+    countdown(2)
+    print(out)
+    ```
+    What does this print?
+  options:
+  - '[2, 1, -2, -1]'
+  - '[2, 1]'
+  - '[2, 1, -1, -2]'
+  answer: '[2, 1, -1, -2]'
+  difficulty: 3
+  distractor_misconceptions:
+    '[2, 1]': cs-code-after-call-skipped
+    '[2, 1, -2, -1]': cs-shared-locals
+  is_microcheck: false
+  review_status: draft
+- id: call-stack-p2
+  concept_id: call-stack
+  kind: mcq
+  stem: |-
+    ```python
+    def f(n):
+        x = n * 10
+        if n > 0:
+            f(n - 1)
+        return x
+
+    print(f(3))
+    ```
+    What does this print?
+  options:
+  - '0'
+  - '30'
+  - '10'
+  answer: '30'
+  difficulty: 3
+  distractor_misconceptions:
+    '0': cs-shared-locals
+    '10': cs-shared-locals
+  is_microcheck: false
+  review_status: draft
+- id: call-stack-p3
+  concept_id: call-stack
+  kind: mcq
+  stem: When a recursive function calls itself, what happens to the caller's local variables?
+  options:
+  - They are discarded; code after the call cannot run
+  - They stay in the caller's frame, unchanged, until the call returns
+  - They are overwritten by the new call's values
+  answer: They stay in the caller's frame, unchanged, until the call returns
+  difficulty: 3
+  distractor_misconceptions:
+    They are overwritten by the new call's values: cs-shared-locals
+    They are discarded; code after the call cannot run: cs-code-after-call-skipped
+  is_microcheck: false
+  review_status: draft
+- id: call-stack-mc
+  concept_id: call-stack
+  kind: mcq
+  stem: |-
+    ```python
+    def show(n):
+        if n == 0:
+            return ""
+        return show(n - 1) + str(n)
+
+    print(show(3))
+    ```
+    What does this print?
+  options:
+  - '3'
+  - '123'
+  - '321'
+  answer: '123'
+  difficulty: 3
+  distractor_misconceptions:
+    '321': cs-shared-locals
+    '3': cs-code-after-call-skipped
+  is_microcheck: true
+  review_status: draft
+- id: recursion-tracing-p1
+  concept_id: recursion-tracing
+  kind: mcq
+  stem: |-
+    ```python
+    calls = 0
+    def fib(n):
+        global calls
+        calls += 1
+        return n if n < 2 else fib(n - 1) + fib(n - 2)
+
+    fib(4)
+    print(calls)
+    ```
+    What does this print?
+  options:
+  - '5'
+  - '4'
+  - '9'
+  answer: '9'
+  difficulty: 3
+  distractor_misconceptions:
+    '4': trace-depth-is-cost
+    '5': trace-depth-is-cost
+  is_microcheck: false
+  review_status: draft
+- id: recursion-tracing-p2
+  concept_id: recursion-tracing
+  kind: mcq
+  stem: Naive `fib(n)` recursion is only about n levels deep. What is its running time?
+  options:
+  - O(n), because the depth is n
+  - 'Exponential: the call tree branches at every level'
+  - O(n^2)
+  answer: 'Exponential: the call tree branches at every level'
+  difficulty: 3
+  distractor_misconceptions:
+    O(n), because the depth is n: trace-depth-is-cost
+    O(n^2): trace-depth-is-cost
+  is_microcheck: false
+  review_status: draft
+- id: recursion-tracing-p3
+  concept_id: recursion-tracing
+  kind: mcq
+  stem: |-
+    ```python
+    def g(n):
+        if n <= 1:
+            return 1
+        return g(n - 1) + g(n - 2)
+
+    print(g(4))
+    ```
+    What does this print?
+  options:
+  - '5'
+  - '3'
+  - '4'
+  answer: '5'
+  difficulty: 3
+  distractor_misconceptions:
+    '3': trace-top-down-values
+    '4': trace-top-down-values
+  is_microcheck: false
+  review_status: draft
+- id: recursion-tracing-mc
+  concept_id: recursion-tracing
+  kind: mcq
+  stem: When tracing a recursive call tree, how do you compute the return values?
+  options:
+  - From the root downwards, before any base case is reached
+  - From the base cases at the leaves back up to the root
+  - Only along the deepest path, since depth decides the result
+  answer: From the base cases at the leaves back up to the root
+  difficulty: 3
+  distractor_misconceptions:
+    From the root downwards, before any base case is reached: trace-top-down-values
+    Only along the deepest path, since depth decides the result: trace-depth-is-cost
+  is_microcheck: true
+  review_status: draft
+- id: recursion-vs-iteration-p1
+  concept_id: recursion-vs-iteration
+  kind: mcq
+  stem: 'A recursive sum of a list and a loop that sums the same list: how do their time complexities
+    compare?'
+  options:
+  - The recursive version is O(log n), so it is faster
+  - The recursive version is O(n^2), so it is always slower
+  - Both are O(n); they differ only in constant factors and stack use
+  answer: Both are O(n); they differ only in constant factors and stack use
+  difficulty: 3
+  distractor_misconceptions:
+    The recursive version is O(log n), so it is faster: rvi-recursion-faster
+    The recursive version is O(n^2), so it is always slower: rvi-recursion-faster
+  is_microcheck: false
+  review_status: draft
+- id: recursion-vs-iteration-p2
+  concept_id: recursion-vs-iteration
+  kind: mcq
+  stem: What happens if a recursive function in Python goes 100,000 calls deep (default settings)?
+  options:
+  - 'It raises RecursionError: the default limit is about 1000 frames'
+  - It runs fine but slowly
+  - 'It runs fine: recursion depth is unlimited'
+  answer: 'It raises RecursionError: the default limit is about 1000 frames'
+  difficulty: 3
+  distractor_misconceptions:
+    'It runs fine: recursion depth is unlimited': rvi-no-depth-limit
+    It runs fine but slowly: rvi-no-depth-limit
+  is_microcheck: false
+  review_status: draft
+- id: recursion-vs-iteration-p3
+  concept_id: recursion-vs-iteration
+  kind: mcq
+  stem: Which is a good reason to rewrite a recursive function as a loop in Python?
+  options:
+  - Recursion is always asymptotically faster, so never rewrite it
+  - Loops always have a better Big-O
+  - The recursion can go thousands of calls deep
+  answer: The recursion can go thousands of calls deep
+  difficulty: 3
+  distractor_misconceptions:
+    Loops always have a better Big-O: rvi-recursion-faster
+    Recursion is always asymptotically faster, so never rewrite it: rvi-recursion-faster
+  is_microcheck: false
+  review_status: draft
+- id: recursion-vs-iteration-mc
+  concept_id: recursion-vs-iteration
+  kind: mcq
+  stem: Which statement about recursion versus iteration is correct?
+  options:
+  - Recursion is always asymptotically faster than a loop
+  - Any recursive algorithm can be written iteratively, usually with the same Big-O
+  - Python lets recursion go as deep as memory allows
+  answer: Any recursive algorithm can be written iteratively, usually with the same Big-O
+  difficulty: 3
+  distractor_misconceptions:
+    Recursion is always asymptotically faster than a loop: rvi-recursion-faster
+    Python lets recursion go as deep as memory allows: rvi-no-depth-limit
+  is_microcheck: true
+  review_status: draft
+- id: backtracking-p1
+  concept_id: backtracking
+  kind: mcq
+  stem: |-
+    ```python
+    def subsets(items):
+        result, current = [], []
+        def explore(i):
+            if i == len(items):
+                result.append(current)
+                return
+            current.append(items[i])
+            explore(i + 1)
+            current.pop()
+            explore(i + 1)
+        explore(0)
+        return result
+
+    print(subsets([1, 2]))
+    ```
+    What does this print?
+  options:
+  - '[[1, 2], [1], [2], []]'
+  - '[[], [], [], []]'
+  - '[[1, 2]]'
+  answer: '[[], [], [], []]'
+  difficulty: 4
+  distractor_misconceptions:
+    '[[1, 2], [1], [2], []]': bt-store-reference
+    '[[1, 2]]': bt-store-reference
+  is_microcheck: false
+  review_status: draft
+- id: backtracking-p2
+  concept_id: backtracking
+  kind: mcq
+  stem: |-
+    ```python
+    def subsets(items):
+        result, current = [], []
+        def explore(i):
+            if i == len(items):
+                result.append(current.copy())
+                return
+            current.append(items[i])
+            explore(i + 1)
+            explore(i + 1)
+        explore(0)
+        return result
+
+    print(subsets([1, 2]))
+    ```
+    What does this print?
+  options:
+  - '[[1, 2], [1, 2], [1, 2, 2], [1, 2, 2]]'
+  - '[[1, 2], [1], [2], []]'
+  - '[[1, 2], [1]]'
+  answer: '[[1, 2], [1, 2], [1, 2, 2], [1, 2, 2]]'
+  difficulty: 4
+  distractor_misconceptions:
+    '[[1, 2], [1], [2], []]': bt-missing-unchoose
+    '[[1, 2], [1]]': bt-missing-unchoose
+  is_microcheck: false
+  review_status: draft
+- id: backtracking-p3
+  concept_id: backtracking
+  kind: mcq
+  stem: What is the core pattern of backtracking?
+  options:
+  - Choose, explore, and keep the choice for the next branch
+  - Choose, explore, and store the shared partial list itself as a solution
+  - Choose, explore, un-choose
+  answer: Choose, explore, un-choose
+  difficulty: 4
+  distractor_misconceptions:
+    Choose, explore, and keep the choice for the next branch: bt-missing-unchoose
+    Choose, explore, and store the shared partial list itself as a solution: bt-store-reference
+  is_microcheck: false
+  review_status: draft
+- id: backtracking-mc
+  concept_id: backtracking
+  kind: mcq
+  stem: When a backtracking search reaches a complete solution held in the list `current`, what should
+    it store?
+  options:
+  - current, then never undo later choices
+  - current.copy()
+  - current
+  answer: current.copy()
+  difficulty: 4
+  distractor_misconceptions:
+    current: bt-store-reference
+    current, then never undo later choices: bt-missing-unchoose
+  is_microcheck: true
+  review_status: draft
+- id: divide-and-conquer-p1
+  concept_id: divide-and-conquer
+  kind: mcq
+  stem: A divide-and-conquer function works on `a[lo..hi]` (inclusive) with `mid = (lo + hi) // 2`. Which
+    split is correct?
+  options:
+  - (lo, mid) and (mid, hi)
+  - (lo, mid + 1) and (mid, hi)
+  - (lo, mid) and (mid + 1, hi)
+  answer: (lo, mid) and (mid + 1, hi)
+  difficulty: 3
+  distractor_misconceptions:
+    (lo, mid) and (mid, hi): dc-overlapping-split
+    (lo, mid + 1) and (mid, hi): dc-overlapping-split
+  is_microcheck: false
+  review_status: draft
+- id: divide-and-conquer-p2
+  concept_id: divide-and-conquer
+  kind: mcq
+  stem: |-
+    ```python
+    def count(a, lo, hi):
+        if lo == hi:
+            return 1
+        mid = (lo + hi) // 2
+        return count(a, lo, mid) + count(a, mid, hi)
+    ```
+    What happens when you call count([5, 6, 7], 0, 2)?
+  options:
+  - It returns 4
+  - It returns 3
+  - It recurses until RecursionError
+  answer: It recurses until RecursionError
+  difficulty: 3
+  distractor_misconceptions:
+    It returns 3: dc-overlapping-split
+    It returns 4: dc-overlapping-split
+  is_microcheck: false
+  review_status: draft
+- id: divide-and-conquer-p3
+  concept_id: divide-and-conquer
+  kind: mcq
+  stem: An algorithm splits n items into two halves, solves both recursively, and combines them in O(n).
+    Which statement is right?
+  options:
+  - The combine cost must be counted; the total is O(n log n)
+  - Combining is free, so the total is O(n)
+  - Only the splitting matters, so the total is O(log n)
+  answer: The combine cost must be counted; the total is O(n log n)
+  difficulty: 3
+  distractor_misconceptions:
+    Only the splitting matters, so the total is O(log n): dc-combine-free
+    Combining is free, so the total is O(n): dc-combine-free
+  is_microcheck: false
+  review_status: draft
+- id: divide-and-conquer-mc
+  concept_id: divide-and-conquer
+  kind: mcq
+  stem: What are the three steps of divide and conquer?
+  options:
+  - Divide into overlapping parts, solve, and the overlap does not matter
+  - Divide into independent subproblems, solve them recursively, combine the answers
+  - Divide and solve; combining is free and can be ignored in the cost
+  answer: Divide into independent subproblems, solve them recursively, combine the answers
+  difficulty: 3
+  distractor_misconceptions:
+    Divide into overlapping parts, solve, and the overlap does not matter: dc-overlapping-split
+    Divide and solve; combining is free and can be ignored in the cost: dc-combine-free
+  is_microcheck: true
+  review_status: draft
+- id: recurrence-relations-p1
+  concept_id: recurrence-relations
+  kind: mcq
+  stem: What does T(n) = 2T(n/2) + O(n) solve to?
+  options:
+  - O(n)
+  - O(log n)
+  - O(n log n)
+  answer: O(n log n)
+  difficulty: 4
+  distractor_misconceptions:
+    O(n): rr-halving-means-linear
+    O(log n): rr-count-levels-only
+  is_microcheck: false
+  review_status: draft
+- id: recurrence-relations-p2
+  concept_id: recurrence-relations
+  kind: mcq
+  stem: What does T(n) = T(n/2) + O(1) solve to?
+  options:
+  - O(n log n)
+  - O(n), because the input halves
+  - O(log n)
+  answer: O(log n)
+  difficulty: 4
+  distractor_misconceptions:
+    O(n), because the input halves: rr-halving-means-linear
+    O(n log n): rr-count-levels-only
+  is_microcheck: false
+  review_status: draft
+- id: recurrence-relations-p3
+  concept_id: recurrence-relations
+  kind: mcq
+  stem: In the recursion tree for T(n) = 2T(n/2) + cn, how much work is done at each level, and how many
+    levels are there?
+  options:
+  - cn at the top only, about log2(n) levels, so O(log n) in total
+  - cn per level, about log2(n) levels
+  - c(n/2) per level, n levels
+  answer: cn per level, about log2(n) levels
+  difficulty: 4
+  distractor_misconceptions:
+    cn at the top only, about log2(n) levels, so O(log n) in total: rr-count-levels-only
+    c(n/2) per level, n levels: rr-halving-means-linear
+  is_microcheck: false
+  review_status: draft
+- id: recurrence-relations-mc
+  concept_id: recurrence-relations
+  kind: mcq
+  stem: Merge sort's running time is T(n) = 2T(n/2) + O(n). Why is it O(n log n) and not O(n)?
+  options:
+  - Both halves are solved, and every one of the log n levels does O(n) work
+  - It is O(n), because the input halves at each step
+  - It is O(log n), because there are log n levels
+  answer: Both halves are solved, and every one of the log n levels does O(n) work
+  difficulty: 4
+  distractor_misconceptions:
+    It is O(n), because the input halves at each step: rr-halving-means-linear
+    It is O(log n), because there are log n levels: rr-count-levels-only
+  is_microcheck: true
+  review_status: draft

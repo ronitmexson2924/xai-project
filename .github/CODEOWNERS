@@ -1,0 +1,22 @@
+# Owners are requested for review automatically. Ownership map: docs/ARCHITECTURE.md
+# TODO: replace MIT_GITHUB_USERNAME with Mit's GitHub username and uncomment Mit's lines.
+
+*                               @ronitmexson2924
+
+/backend/app/db/                @ronitmexson2924
+/backend/alembic/               @ronitmexson2924
+/backend/app/graph/             @ronitmexson2924
+/backend/app/psychometrics/     @ronitmexson2924
+/backend/app/learner_model/     @ronitmexson2924
+/backend/app/planner/           @ronitmexson2924
+/content/                       @ronitmexson2924
+/research/                      @ronitmexson2924
+
+# /backend/app/api/             @MIT_GITHUB_USERNAME
+# /backend/app/auth/            @MIT_GITHUB_USERNAME
+# /backend/app/explainer/       @MIT_GITHUB_USERNAME
+# /backend/app/telemetry/       @MIT_GITHUB_USERNAME
+# /frontend/                    @MIT_GITHUB_USERNAME
+# /content/items/               @MIT_GITHUB_USERNAME
+# /.github/                     @MIT_GITHUB_USERNAME
+# /backend/app/contracts/       @ronitmexson2924 @MIT_GITHUB_USERNAME
