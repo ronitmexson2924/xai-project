@@ -50,7 +50,7 @@ export default function OnboardingPage() {
                 aria-current={i === stepIndex ? "step" : undefined}
                 className={cn(
                   "h-1.5 rounded-full transition-all duration-500",
-                  i < stepIndex ? "w-6 bg-accent" : i === stepIndex ? "w-10 bg-accent" : "w-6 bg-line"
+                  i < stepIndex ? "w-6 bg-primary" : i === stepIndex ? "w-10 bg-primary" : "w-6 bg-line"
                 )}
               />
               <span className="sr-only">
@@ -129,7 +129,7 @@ function Consent({ onAgree, onDecline }: { onAgree: () => Promise<void>; onDecli
           ["Your choice", "Taking part is voluntary. You can withdraw at any time from your account page, and your data is deleted."],
         ].map(([title, body]) => (
           <li key={title} className="flex gap-4">
-            <span className="mt-1 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-accent-soft text-accent" aria-hidden>
+            <span className="mt-1 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-primary-soft text-primary" aria-hidden>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m5 12 5 5L20 7" />
               </svg>
@@ -146,7 +146,7 @@ function Consent({ onAgree, onDecline }: { onAgree: () => Promise<void>; onDecli
           type="checkbox"
           checked={agreed}
           onChange={(e) => setAgreed(e.target.checked)}
-          className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
+          className="mt-0.5 h-4 w-4 accent-[var(--primary)]"
         />
         <span className="text-sm text-fg">I have read this and agree to take part in the study.</span>
       </label>
@@ -268,7 +268,7 @@ function Questions({ onDone }: { onDone: () => void }) {
                       className={cn(
                         "group flex items-center gap-4 rounded-xl border px-4 py-3.5 text-left transition-all duration-150",
                         selected
-                          ? "border-accent bg-accent-soft shadow-card"
+                          ? "border-primary bg-primary-soft shadow-card"
                           : "border-line bg-surface hover:border-line-strong hover:shadow-card"
                       )}
                     >
@@ -276,7 +276,7 @@ function Questions({ onDone }: { onDone: () => void }) {
                         aria-hidden
                         className={cn(
                           "flex h-7 w-7 flex-none items-center justify-center rounded-md border text-xs font-semibold tabular-nums transition-colors",
-                          selected ? "border-accent bg-accent text-accent-fg" : "border-line text-subtle group-hover:text-fg"
+                          selected ? "border-primary bg-primary text-primary-fg" : "border-line text-subtle group-hover:text-fg"
                         )}
                       >
                         {o.value}

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:unit": "node --test src/lib/*.test.ts",
     "test:smoke": "playwright test tests/smoke.spec.ts",
     "gen:api": "openapi-typescript http://localhost:8000/openapi.json -o src/lib/api.d.ts"
   },

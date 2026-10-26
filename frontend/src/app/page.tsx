@@ -41,7 +41,7 @@ export default function Landing() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-bg">
       <div aria-hidden className="bg-grid pointer-events-none absolute inset-x-0 top-0 h-[640px]" />
-      <div aria-hidden className="pointer-events-none absolute left-1/2 top-[-200px] h-[480px] w-[880px] -translate-x-1/2 rounded-full bg-accent/15 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute left-1/2 top-[-200px] h-[480px] w-[880px] -translate-x-1/2 rounded-full bg-primary/15 blur-3xl" />
 
       <header className="relative z-10 mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Logo />
@@ -72,7 +72,7 @@ export default function Landing() {
             </motion.p>
             <motion.h1 variants={fadeUp} className="text-4xl font-semibold tracking-tight text-fg sm:text-6xl sm:leading-[1.05]">
               Learn algorithms the way
-              <br className="hidden sm:block" /> <span className="text-accent">you</span> learn best.
+              <br className="hidden sm:block" /> <span className="text-primary">you</span> learn best.
             </motion.h1>
             <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
               Concept is a tutor for data structures and algorithms that chooses your next step, adapts how it
@@ -107,9 +107,9 @@ export default function Landing() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-80px" }}
                   transition={{ duration: 0.5, ease, delay: i * 0.08 }}
-                  className="rounded-2xl border border-line bg-surface p-6 shadow-card"
+                  className="rounded-xl border border-line bg-surface p-6 shadow-card"
                 >
-                  <span className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent-soft text-accent">
+                  <span className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                       {f.icon}
                     </svg>
@@ -136,7 +136,7 @@ export default function Landing() {
                 transition={{ duration: 0.5, ease, delay: i * 0.1 }}
                 className="relative"
               >
-                <span className="text-sm font-medium text-accent">0{i + 1}</span>
+                <span className="text-sm font-medium text-primary">0{i + 1}</span>
                 <h3 className="mt-2 text-lg font-semibold text-fg">{title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted">{body}</p>
               </motion.li>
@@ -170,10 +170,10 @@ function HeroPreview() {
       className="relative mx-auto mt-16 max-w-2xl text-left"
       aria-hidden
     >
-      <div className="rounded-2xl border border-line bg-surface p-5 shadow-pop sm:p-6">
+      <div className="rounded-xl border border-line bg-surface p-5 shadow-pop sm:p-6">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-subtle">Recursion · base case</span>
-          <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-medium text-accent">example first</span>
+          <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-medium text-primary">example first</span>
         </div>
         <pre className="mt-4 overflow-hidden rounded-lg bg-surface-2 p-3 font-mono text-[13px] leading-relaxed text-fg">
 {`def fact(n):
@@ -184,7 +184,7 @@ function HeroPreview() {
         <p className="mt-4 text-sm font-medium text-fg">What does fact(0) return?</p>
         <div className="mt-3 grid grid-cols-3 gap-2">
           {["0", "1", "It never returns"].map((o, i) => (
-            <div key={o} className={`rounded-lg border px-3 py-2 text-sm ${i === 1 ? "border-accent bg-accent-soft text-fg" : "border-line text-muted"}`}>
+            <div key={o} className={`rounded-lg border px-3 py-2 text-sm ${i === 1 ? "border-primary bg-primary-soft text-fg" : "border-line text-muted"}`}>
               {o}
             </div>
           ))}

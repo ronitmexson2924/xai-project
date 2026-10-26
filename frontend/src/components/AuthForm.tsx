@@ -9,6 +9,8 @@ import { Field } from "./ui/Field";
 import { Logo } from "./ui/Logo";
 import { ease } from "./ui/motion";
 import { ApiException, useAuth } from "@/lib/auth-context";
+import { ENGAGEMENT_UI } from "@/lib/engagement";
+import { firstName } from "@/lib/moments";
 import { homeFor } from "@/lib/routes";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,11 +24,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [touched, setTouched] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [welcome, setWelcome] = useState<string | null>(null);
   const signup = mode === "signup";
 
   useEffect(() => {
-    if (!isLoading && user) router.replace(homeFor(user));
-  }, [user, isLoading, router]);
+    if (!isLoading && user && welcome === null) router.replace(homeFor(user));
+  }, [user, isLoading, router, welcome]);
 
   const errors = {
     name: signup && !name.trim() ? "Tell us what to call you" : null,
@@ -50,6 +53,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       const u = signup
         ? await register({ email: email.trim(), password, display_name: name.trim() })
         : await login({ email: email.trim(), password });
+      // greet by name while the next page loads; the redirect is not held back for it
+      if (ENGAGEMENT_UI && !signup) setWelcome(firstName(u.display_name));
       router.replace(homeFor(u));
     } catch (err) {
       setError(err instanceof ApiException ? err.message : "Something went wrong. Please try again.");
@@ -69,8 +74,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           transition={{ duration: 0.5, ease }}
           className="w-full max-w-sm"
         >
-          <h1 className="text-2xl font-semibold tracking-tight text-fg">
-            {signup ? "Create your account" : "Welcome back"}
+          <h1 className="text-2xl font-semibold tracking-tight text-fg" aria-live="polite">
+            {signup ? "Create your account" : welcome ? `Welcome back, ${welcome}` : "Welcome back"}
           </h1>
           <p className="mt-1.5 text-sm text-muted">
             {signup ? "It takes a minute. Then a few quick questions and you’re in." : "Log in to pick up where you left off."}
@@ -131,7 +136,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
           <p className="mt-6 text-center text-sm text-muted">
             {signup ? "Already have an account? " : "New here? "}
-            <Link href={signup ? "/login" : "/signup"} className="font-medium text-accent hover:text-accent-hover">
+            <Link href={signup ? "/login" : "/signup"} className="font-medium text-primary hover:text-primary-hover">
               {signup ? "Log in" : "Create an account"}
             </Link>
           </p>

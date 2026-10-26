@@ -5,7 +5,7 @@ import { api, ApiException, BeliefExplanation } from "@/lib/api";
 import { Badge } from "./ui/Badge";
 import { Progress } from "./ui/Progress";
 
-const CONFIDENCE = { tentative: "warning", moderate: "accent", confident: "success" } as const;
+const CONFIDENCE = { tentative: "warning", moderate: "primary", confident: "success" } as const;
 
 /** XAI E4: "Why do you think that about me?" for one concept or trait, from the audit log. */
 export function BeliefPanel({ subject, showValue = true }: { subject: string; showValue?: boolean }) {
@@ -42,7 +42,7 @@ export function BeliefPanel({ subject, showValue = true }: { subject: string; sh
       <p className="text-sm leading-relaxed text-muted">{belief.summary}</p>
       {belief.top_evidence.length > 0 && (
         <details className="group text-sm">
-          <summary className="cursor-pointer list-none text-accent hover:text-accent-hover">
+          <summary className="cursor-pointer list-none text-primary hover:text-primary-hover">
             <span className="inline-flex items-center gap-1">
               What this is based on
               <span aria-hidden className="transition-transform group-open:rotate-90">›</span>

@@ -56,7 +56,7 @@ export function TestRunner({ phase }: { phase: TestPhase }) {
     <AppShell>
       <div className="mx-auto max-w-3xl space-y-6">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-accent">Study test</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-primary">Study test</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-tight text-fg">{title}</h1>
         </div>
 
@@ -66,7 +66,7 @@ export function TestRunner({ phase }: { phase: TestPhase }) {
           </p>
         )}
 
-        {state === "loading" && !error && <div className="h-40 animate-pulse rounded-2xl bg-surface-2" aria-busy />}
+        {state === "loading" && !error && <div className="h-40 animate-pulse rounded-xl bg-surface-2" aria-busy />}
 
         {state === "done" ? (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease }}>
@@ -126,7 +126,7 @@ export function TestRunner({ phase }: { phase: TestPhase }) {
                                 key={opt}
                                 className={cn(
                                   "flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm transition-colors",
-                                  checked ? "border-accent bg-accent-soft" : "border-line hover:bg-surface-2"
+                                  checked ? "border-primary bg-primary-soft" : "border-line hover:bg-surface-2"
                                 )}
                               >
                                 <input
@@ -135,7 +135,7 @@ export function TestRunner({ phase }: { phase: TestPhase }) {
                                   value={opt}
                                   checked={checked}
                                   onChange={() => setAnswers((a) => ({ ...a, [item.id]: opt }))}
-                                  className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
+                                  className="mt-0.5 h-4 w-4 accent-[var(--primary)]"
                                 />
                                 <span className="text-fg">{opt}</span>
                               </label>
@@ -150,7 +150,7 @@ export function TestRunner({ phase }: { phase: TestPhase }) {
                           placeholder="Your answer"
                           value={answers[item.id] ?? ""}
                           onChange={(e) => setAnswers((a) => ({ ...a, [item.id]: e.target.value }))}
-                          className="h-11 w-full rounded-lg border border-line bg-surface px-3.5 font-mono text-sm text-fg focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/15"
+                          className="h-11 w-full rounded-lg border border-line bg-surface px-3.5 font-mono text-sm text-fg focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/15"
                         />
                       )}
                     </Card>

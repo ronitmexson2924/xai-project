@@ -221,3 +221,10 @@ _(add items here when you need something from Ronit's side)_
 
 ## Notes / decisions log
 _(date: decision, and why)_
+- 2026-10-26: UX refresh (Ronit's agent, `ronit-ux-refresh`). New colour tokens with a dark mode
+  and a theme switch in the account menu; red now means real errors only (wrong answers are
+  neutral, chart "lowers" bars are orange); Continue lives in a sticky bottom bar and Enter
+  presses it; code is highlighted with line numbers. The warmer extras (greeting, "you beat the
+  prediction", mastery meter, session recap, second-person model panel) sit behind
+  `NEXT_PUBLIC_ENGAGEMENT_UI`, off by default so study arms are unaffected. Presentation only: no
+  model, prediction or explanation number changed. **Mit to review.**

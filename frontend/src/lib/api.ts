@@ -67,6 +67,7 @@ export type BeliefExplanation = Json<"/api/v1/learners/me/explain", "get", 200>;
 export type ModelInsight = Json<"/api/v1/recommendations/{recommendation_id}/model", "get", 200>;
 export type MethodAttribution = ModelInsight["attributions"][number];
 export type ModelCounterfactual = ModelInsight["counterfactuals"][number];
+export type CounterfactualChange = ModelCounterfactual["changes"][number];
 export interface ModelMetrics {
   auc: number;
   log_loss: number;

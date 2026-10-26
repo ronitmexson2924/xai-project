@@ -53,6 +53,14 @@ export async function answerQuestionnaire(page: Page) {
 
 /** Answer whatever the session shows: pick the first option or type a short answer. */
 export async function answerCurrentQuestion(page: Page) {
+  // wait for the next question; with ENGAGEMENT_UI a session recap may come first
+  const submit = page.getByRole("button", { name: "Submit answer" });
+  const recap = page.getByTestId("session-recap");
+  await expect(submit.or(recap)).toBeVisible();
+  if (await recap.isVisible()) {
+    await recap.getByRole("button", { name: /Keep going/ }).click();
+    await expect(submit).toBeVisible();
+  }
   const text = page.getByLabel("Your answer");
   if (await text.isVisible().catch(() => false)) {
     await text.fill("my answer");

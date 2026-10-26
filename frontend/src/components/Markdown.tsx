@@ -1,5 +1,14 @@
 import React from "react";
+import { highlightLine, TokenKind } from "@/lib/highlight";
 import { Diagram } from "./Diagram";
+
+const TOKEN_CLASS: Record<TokenKind, string | undefined> = {
+  keyword: "text-[var(--code-keyword)] font-medium",
+  string: "text-[var(--code-string)]",
+  number: "text-[var(--code-number)]",
+  comment: "text-[var(--code-comment)] italic",
+  plain: undefined,
+};
 
 /**
  * A small, safe Markdown renderer for explanation and card text: fenced code blocks, headings,
@@ -16,15 +25,40 @@ export function Markdown({ text, className = "" }: { text: string; className?: s
         blocks.push(<Diagram key={`diagram-${i}`} source={lines.slice(1).join("\n")} />);
         return;
       }
-      const code = (/^[a-z0-9+-]*$/i.test(lines[0]) && lines.length > 1 ? lines.slice(1) : lines)
-        .join("\n")
-        .replace(/\n$/, "");
+      const lang = /^[a-z0-9+-]*$/i.test(lines[0]) && lines.length > 1 ? lines[0].trim().toLowerCase() : null;
+      const code = (lang !== null ? lines.slice(1) : lines).join("\n").replace(/\n$/, "").split("\n");
+      const python = lang === null || lang === "" || lang === "python" || lang === "py";
+      const numbered = code.length > 1;
       blocks.push(
         <pre
           key={`code-${i}`}
-          className="my-3 overflow-x-auto rounded-xl border border-line bg-surface-2 p-4 font-mono text-[13px] leading-relaxed text-fg"
+          tabIndex={0} // wide code scrolls sideways: keyboard users must be able to reach it
+          className="my-3 overflow-x-auto rounded-lg border border-line bg-surface-2 py-3.5 font-mono text-[13px] leading-relaxed text-fg"
         >
-          <code>{code}</code>
+          <code className="grid min-w-max grid-cols-[auto_1fr]">
+            {code.map((line, n) => (
+              <React.Fragment key={n}>
+                {/* line numbers: not selectable, not read out */}
+                <span className={numbered ? "select-none pl-4 pr-4 text-right tabular-nums text-subtle" : "pl-4"} aria-hidden>
+                  {numbered ? n + 1 : ""}
+                </span>
+                <span className="pr-4">
+                  {python
+                    ? highlightLine(line).map((t, k) =>
+                        TOKEN_CLASS[t.kind] ? (
+                          <span key={k} className={TOKEN_CLASS[t.kind]}>
+                            {t.text}
+                          </span>
+                        ) : (
+                          <React.Fragment key={k}>{t.text}</React.Fragment>
+                        )
+                      )
+                    : line}
+                  {"\n"}
+                </span>
+              </React.Fragment>
+            ))}
+          </code>
         </pre>
       );
       return;

@@ -58,7 +58,7 @@ export default function ModelPage() {
     <AppShell>
       <Stagger className="mx-auto max-w-4xl space-y-8">
         <motion.div variants={fadeUp}>
-          <Badge tone="accent">Explainable AI</Badge>
+          <Badge tone="primary">Explainable AI</Badge>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight text-fg sm:text-3xl">How the AI model works</h1>
           <p className="mt-2 max-w-2xl text-muted">
             A neural network trained in Python predicts whether you will answer a question correctly. After each answer
@@ -72,7 +72,7 @@ export default function ModelPage() {
             {error}
           </p>
         )}
-        {!card && !error && <div className="h-64 animate-pulse rounded-2xl bg-surface-2" aria-busy />}
+        {!card && !error && <CardSkeleton />}
         {card && <CardBody card={card} />}
 
         <motion.section variants={fadeUp} className="space-y-4">
@@ -132,7 +132,7 @@ function CardBody({ card }: { card: ModelCard }) {
               training ({card.trained_on}). The best value in each column is marked.
             </p>
           </div>
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto" tabIndex={0} role="region" aria-label="Test metrics by model">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b border-line text-left text-xs text-subtle">
@@ -178,10 +178,12 @@ function CardBody({ card }: { card: ModelCard }) {
           <ul className="space-y-1.5">
             {importance.map(([name, v], i) => (
               <li key={name} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_3.5rem] items-center gap-3 text-[13px]">
-                <span className="truncate text-fg">{labels[name] ?? name}</span>
+                <span className="leading-snug text-fg sm:line-clamp-2" title={labels[name] ?? name}>
+                  {labels[name] ?? name}
+                </span>
                 <span className="h-2.5 rounded-r-[4px] bg-surface-2">
                   <motion.span
-                    className="block h-full rounded-r-[4px] bg-viz-pos"
+                    className="block h-full rounded-r-[4px] bg-viz-raise"
                     initial={{ width: 0 }}
                     animate={{ width: `${(v / maxImp) * 100}%` }}
                     transition={{ duration: 0.6, ease, delay: i * 0.03 }}
@@ -231,6 +233,41 @@ function CardBody({ card }: { card: ModelCard }) {
   );
 }
 
+/** The card's shape while it loads: three stats, the metrics table, the importance bars. */
+function CardSkeleton() {
+  const bar = "animate-pulse rounded bg-surface-2";
+  return (
+    <div className="space-y-8" aria-busy role="status" aria-label="Loading the model card" data-testid="model-skeleton">
+      <div className="grid gap-4 sm:grid-cols-3">
+        {[0, 1, 2].map((i) => (
+          <Card key={i} className="space-y-3 p-5">
+            <div className={`h-3 w-24 ${bar}`} />
+            <div className={`h-7 w-32 ${bar}`} />
+            <div className={`h-2.5 w-40 ${bar}`} />
+          </Card>
+        ))}
+      </div>
+      <Card className="space-y-4 p-6">
+        <div className={`h-4 w-40 ${bar}`} />
+        <div className={`h-3 w-3/4 ${bar}`} />
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className={`h-3 ${bar}`} />
+        ))}
+      </Card>
+      <Card className="space-y-3 p-6">
+        <div className={`h-4 w-52 ${bar}`} />
+        {[90, 70, 55, 40, 30, 22].map((w) => (
+          <div key={w} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_3.5rem] items-center gap-3">
+            <div className={`h-3 w-3/4 ${bar}`} />
+            <div className={`h-2.5 ${bar}`} style={{ width: `${w}%` }} />
+            <div className={`h-3 ${bar}`} />
+          </div>
+        ))}
+      </Card>
+    </div>
+  );
+}
+
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <Card className="p-5">
@@ -243,7 +280,7 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 
 function Check({ title, detail }: { title: string; detail: string }) {
   return (
-    <li className="rounded-xl border border-line bg-surface-2/50 p-3">
+    <li className="rounded-lg border border-line bg-surface-2/50 p-3">
       <p className="font-medium text-fg">{title}</p>
       <p className="mt-0.5 text-xs text-muted">{detail}</p>
     </li>

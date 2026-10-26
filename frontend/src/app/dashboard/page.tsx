@@ -73,7 +73,7 @@ export default function DashboardPage() {
         {!data && !error && (
           <div className="grid gap-4 sm:grid-cols-3" aria-busy>
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-28 animate-pulse rounded-2xl bg-surface-2" />
+              <div key={i} className="h-28 animate-pulse rounded-xl bg-surface-2" />
             ))}
           </div>
         )}
@@ -131,8 +131,8 @@ function NextStep({ data }: { data: Data }) {
 
   return (
     <Card className="relative overflow-hidden p-6 sm:p-8" data-testid="next-step">
-      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
-      <p className="text-xs font-medium uppercase tracking-wide text-accent">{step.eyebrow}</p>
+      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+      <p className="text-xs font-medium uppercase tracking-wide text-primary">{step.eyebrow}</p>
       <h2 className="mt-2 text-2xl font-semibold tracking-tight text-fg">{step.title}</h2>
       <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">{step.body}</p>
       <div className="mt-6 flex flex-wrap items-center gap-3">

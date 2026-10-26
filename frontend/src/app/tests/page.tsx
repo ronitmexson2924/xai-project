@@ -37,7 +37,7 @@ export default function TestsIndex() {
             score.
           </p>
         </motion.div>
-        {!tests && <div className="h-24 animate-pulse rounded-2xl bg-surface-2" aria-busy />}
+        {!tests && <div className="h-24 animate-pulse rounded-xl bg-surface-2" aria-busy />}
         {tests?.map((t) => (
           <motion.div key={t.phase} variants={fadeUp}>
             <Card className="flex flex-wrap items-center justify-between gap-4 p-5 sm:p-6">

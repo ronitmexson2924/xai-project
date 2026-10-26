@@ -10,7 +10,7 @@ type Size = "sm" | "md" | "lg";
 const base =
   "inline-flex items-center justify-center gap-2 rounded-lg font-medium whitespace-nowrap transition-[background-color,color,box-shadow,transform] duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 select-none";
 const variants: Record<Variant, string> = {
-  primary: "bg-accent text-accent-fg shadow-sm hover:bg-accent-hover",
+  primary: "bg-primary text-primary-fg shadow-sm hover:bg-primary-hover",
   secondary: "bg-surface text-fg border border-line shadow-sm hover:bg-surface-2",
   ghost: "text-muted hover:text-fg hover:bg-surface-2",
   danger: "bg-danger text-white hover:opacity-90",

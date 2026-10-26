@@ -90,14 +90,14 @@ export function Diagram({ source }: { source: string }) {
     return (
       <figure className="my-3">
         <figcaption className="mb-1 text-xs font-medium text-subtle">Diagram</figcaption>
-        <pre className="overflow-x-auto rounded-xl border border-line bg-surface-2 p-4 font-mono text-[13px] text-fg">
+        <pre tabIndex={0} className="overflow-x-auto rounded-xl border border-line bg-surface-2 p-4 font-mono text-[13px] text-fg">
           <code>{source}</code>
         </pre>
       </figure>
     );
   }
   return (
-    <figure className="my-4 overflow-x-auto rounded-xl border border-line bg-surface-2/50 p-4" data-testid="diagram">
+    <figure tabIndex={0} className="my-4 overflow-x-auto rounded-xl border border-line bg-surface-2/50 p-4" data-testid="diagram">
       <div role="img" aria-label={describe(graph)} className="diagram-tree mx-auto w-max">
         <ul>
           {graph.roots.map((r) => (

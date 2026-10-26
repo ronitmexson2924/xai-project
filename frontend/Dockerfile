@@ -8,6 +8,9 @@ COPY . .
 # The browser calls the API directly, so its public URL is compiled into the bundle.
 ARG NEXT_PUBLIC_API_URL=http://localhost:8000
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# the engagement extras (src/lib/engagement.ts) are compiled in or out; off unless asked for
+ARG NEXT_PUBLIC_ENGAGEMENT_UI=false
+ENV NEXT_PUBLIC_ENGAGEMENT_UI=$NEXT_PUBLIC_ENGAGEMENT_UI
 RUN npm run build && npm prune --omit=dev
 
 FROM node:22-slim AS runner

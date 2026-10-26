@@ -20,20 +20,26 @@ export function formatContribution(v: number, unit: "probability" | "logit"): st
 }
 
 /**
- * Diverging bar chart of feature contributions: right (blue) raises the predicted chance, left
- * (red) lowers it. Every bar is also labelled with its signed value, has a hover/focus tooltip,
- * and the whole chart can be shown as a table, so nothing depends on colour alone.
+ * Diverging bar chart of feature contributions: right (blue, ▲) raises the predicted chance, left
+ * (orange, ▼) lowers it. Every bar is also labelled with its signed value, has a hover/focus
+ * tooltip, and the whole chart can be shown as a table, so nothing depends on colour alone.
+ * `personal` shows each factor's value for you under its name; `animated` lets the bars glide to
+ * new values (e.g. when switching method) instead of regrowing.
  */
 export function AttributionChart({
   rows,
   unit,
   limit = 8,
   caption,
+  personal = false,
+  animated = false,
 }: {
   rows: AttributionRow[];
   unit: "probability" | "logit";
   limit?: number;
   caption: string;
+  personal?: boolean;
+  animated?: boolean;
 }) {
   const [all, setAll] = useState(false);
   const [table, setTable] = useState(false);
@@ -48,12 +54,14 @@ export function AttributionChart({
         <span>{caption}</span>
         <span className="flex items-center gap-3">
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-3 rounded-sm bg-viz-neg" aria-hidden /> lowers
+            <span className="h-2 w-3 rounded-sm bg-viz-lower" aria-hidden />
+            <span aria-hidden className="text-[9px] text-viz-lower">▼</span> lowers
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-2 w-3 rounded-sm bg-viz-pos" aria-hidden /> raises
+            <span className="h-2 w-3 rounded-sm bg-viz-raise" aria-hidden />
+            <span aria-hidden className="text-[9px] text-viz-raise">▲</span> raises
           </span>
-          <button type="button" onClick={() => setTable((t) => !t)} className="font-medium text-accent hover:text-accent-hover">
+          <button type="button" onClick={() => setTable((t) => !t)} className="font-medium text-primary hover:text-primary-hover">
             {table ? "Show chart" : "Show as table"}
           </button>
         </span>
@@ -84,9 +92,12 @@ export function AttributionChart({
             const width = (Math.abs(r.value) / max) * 100;
             const positive = r.value >= 0;
             const text = formatContribution(r.value, unit);
+            const grow = { duration: animated ? 0.3 : 0.5, ease, delay: animated ? 0 : i * 0.03 };
             return (
-              <li
+              <motion.li
                 key={r.name}
+                layout={animated ? "position" : false}
+                transition={{ layout: { duration: 0.3, ease } }}
                 tabIndex={0}
                 onMouseEnter={() => setActive(r.name)}
                 onFocus={() => setActive(r.name)}
@@ -98,26 +109,30 @@ export function AttributionChart({
                   active === r.name && "bg-surface-2"
                 )}
               >
-                <span className="col-span-2 text-[13px] text-fg sm:col-span-1 sm:truncate">{r.label}</span>
+                {/* long names wrap to two lines rather than being cut off; the full name is in the tooltip */}
+                <span className="col-span-2 sm:col-span-1" title={r.label}>
+                  <span className="block text-[13px] leading-snug text-fg sm:line-clamp-2">{r.label}</span>
+                  {personal && r.display && <span className="block text-[11px] tabular-nums text-subtle">you: {r.display}</span>}
+                </span>
                 <span className="relative flex h-5 items-center">
-                  <span className="absolute left-1/2 top-0 h-full w-px bg-viz-mid" aria-hidden />
+                  <span className="absolute left-1/2 top-0 h-full w-px bg-viz-neutral" aria-hidden />
                   <span className="relative h-full w-1/2">
                     {!positive && (
                       <motion.span
-                        className="absolute right-0 top-1/2 h-2.5 -translate-y-1/2 rounded-l-[4px] bg-viz-neg"
+                        className="absolute right-0 top-1/2 h-2.5 -translate-y-1/2 rounded-l-[4px] bg-viz-lower"
                         initial={{ width: 0 }}
                         animate={{ width: `${width}%` }}
-                        transition={{ duration: 0.5, ease, delay: i * 0.03 }}
+                        transition={grow}
                       />
                     )}
                   </span>
                   <span className="relative h-full w-1/2">
                     {positive && (
                       <motion.span
-                        className="absolute left-0 top-1/2 h-2.5 -translate-y-1/2 rounded-r-[4px] bg-viz-pos"
+                        className="absolute left-0 top-1/2 h-2.5 -translate-y-1/2 rounded-r-[4px] bg-viz-raise"
                         initial={{ width: 0 }}
                         animate={{ width: `${width}%` }}
-                        transition={{ duration: 0.5, ease, delay: i * 0.03 }}
+                        transition={grow}
                       />
                     )}
                   </span>
@@ -135,13 +150,13 @@ export function AttributionChart({
                     </span>
                   </span>
                 )}
-              </li>
+              </motion.li>
             );
           })}
         </ul>
       )}
       {!table && sorted.length > limit && (
-        <button type="button" onClick={() => setAll((a) => !a)} className="text-xs font-medium text-accent hover:text-accent-hover">
+        <button type="button" onClick={() => setAll((a) => !a)} className="text-xs font-medium text-primary hover:text-primary-hover">
           {all ? "Show the top factors only" : `Show all ${sorted.length} factors`}
         </button>
       )}
