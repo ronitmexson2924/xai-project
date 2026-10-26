@@ -16,6 +16,7 @@ the content. This doc defines what the app must explain, how the explanations st
 | Evaluation measures (R11) | ✅ In the pre-registration (X1, X2) and `research/analyze.py` | `research/` |
 | API endpoints (M9) | ✅ `GET /recommendations/{id}/why`, `GET /learners/me/explain`, `change` on answers and close | `backend/app/api/` |
 | UI panels (M10) | ✅ "Why this?" panel with 1-tap rating, belief panels on the dashboard, change notices | `frontend/src/components/` |
+| Performance model + post-hoc XAI (§7) | ✅ Trained MLP; SHAP, LIME, LRP, DiCE per prediction; model card | `backend/app/ml/`, `GET /recommendations/{id}/model`, `/model` page |
 
 **See it now:** `cd backend && python -m app.planner.xai_demo` prints every explanation for the
 three demo learners (rolled back; the database is unchanged).
@@ -110,3 +111,35 @@ Add to `research/preregistration.md` before sign-off:
 > this, and then you go on to *Recursion: recursive case*.
 > **Why does the explanation look like this?** Your questionnaire suggests examples help you
 > (tentative: no explanation feedback yet).
+
+## 7. Post-hoc explanations of a trained model (SHAP, LIME, LRP, DiCE)
+
+E1–E5 explain transparent models (BKT, the bandit, the rule planner) *from their own
+decision traces*. To also cover the standard post-hoc methods, the app has a trained neural
+network: the performance model (`docs/MODEL_SPEC.md` §7), which predicts P(correct) for each
+question. After each answer the learner sees what it predicted, and why, four ways. All of it
+runs in Python on the server; no external AI service is involved.
+
+| Method | Question it answers | Implementation | Checked by tests |
+|---|---|---|---|
+| SHAP (Lundberg & Lee, 2017) | How much did each factor move the prediction away from the average learner's? | `shap` library, permutation algorithm, 200-row reference sample | Additivity: base + contributions = prediction; a factor the model ignores gets 0 |
+| LIME (Ribeiro et al., 2016) | What simple linear story fits the network near this learner? | `lime` library, 2,000 perturbed samples; the surrogate's R² is shown | Recovers a nearly linear model and its top factor |
+| LRP (Bach et al., 2015) | How is the network's output passed back through its layers onto the inputs? | Epsilon rule on the network's weights, in `app/ml/explain.py` | Conservation: inputs + bias share = logit; weight × input on a linear model |
+| DiCE (Mothilal et al., 2020) | What realistic changes would flip the prediction? | DiCE's loss (hinge validity + MAD-weighted proximity − DPP diversity) minimised by gradient descent, then DiCE's post-hoc sparsity step, in `app/ml/explain.py`. Only actionable factors move, within plausible ranges, and answered-question counts never decrease. | Every counterfactual flips the prediction, changes only actionable factors and stays in range |
+
+`dice-ml` was not used because it would add about 430 MB of unused GPU and boosting libraries.
+LRP has no scikit-learn implementation.
+
+**Faithfulness and honesty measures,** reported per prediction and in the model card
+(`research/reports/performance_model.md`):
+- agreement between methods (Spearman ρ between SHAP, LIME and LRP);
+- LIME's local R²;
+- counterfactual validity, sparsity and how often one is found;
+- a deletion test: removing SHAP's top 3 factors must move the prediction more than removing
+  3 random ones.
+
+When LIME fits poorly or the methods disagree, the panel says so.
+
+**Scope:** these explain the performance model's prediction, not the planner's choice (that is
+E1–E2), and not causes in the learner.
+

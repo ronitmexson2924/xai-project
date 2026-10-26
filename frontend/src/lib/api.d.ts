@@ -263,6 +263,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/recommendations/{recommendation_id}/model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The model's predicted chance of a correct answer, explained with SHAP, LIME, LRP and DiCE counterfactuals */
+        get: operations["recommendation_model_api_v1_recommendations__recommendation_id__model_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/model/card": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** How the performance model was trained, how well it predicts compared with BKT, and what drives it overall */
+        get: operations["card_api_v1_model_card_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/learners/me/state": {
         parameters: {
             query?: never;
@@ -641,6 +675,24 @@ export interface components {
             /** Outcome Concept Id */
             outcome_concept_id: string;
         };
+        /** CounterfactualChange */
+        CounterfactualChange: {
+            /** Name */
+            name: string;
+            /** Label */
+            label: string;
+            /** Now */
+            now: string;
+            /** Then */
+            then: string;
+        };
+        /** CounterfactualOut */
+        CounterfactualOut: {
+            /** P Correct */
+            p_correct: number;
+            /** Changes */
+            changes: components["schemas"]["CounterfactualChange"][];
+        };
         /** EventBatchIn */
         EventBatchIn: {
             /** Events */
@@ -721,6 +773,17 @@ export interface components {
              * @default 0
              */
             latency_ms: number;
+        };
+        /** FeatureValue */
+        FeatureValue: {
+            /** Name */
+            name: string;
+            /** Label */
+            label: string;
+            /** Value */
+            value: number;
+            /** Display */
+            display: string;
         };
         /**
          * FeedbackOut
@@ -822,6 +885,71 @@ export interface components {
              * @default 0
              */
             version: number;
+        };
+        /** MethodAttribution */
+        MethodAttribution: {
+            /** Method */
+            method: string;
+            /** Title */
+            title: string;
+            /** About */
+            about: string;
+            /** Unit */
+            unit: string;
+            /** Base */
+            base: number;
+            /** Output */
+            output: number;
+            /** Fidelity */
+            fidelity: number | null;
+            /** Contributions */
+            contributions: {
+                [key: string]: number;
+            };
+        };
+        /** ModelInsight */
+        ModelInsight: {
+            /**
+             * Recommendation Id
+             * Format: uuid
+             */
+            recommendation_id: string;
+            /** Concept Id */
+            concept_id: string;
+            /** Concept Name */
+            concept_name: string;
+            /** P Correct */
+            p_correct: number;
+            /** Summary */
+            summary: string;
+            /** Features */
+            features: components["schemas"]["FeatureValue"][];
+            /** Attributions */
+            attributions: components["schemas"]["MethodAttribution"][];
+            /** Counterfactuals */
+            counterfactuals: components["schemas"]["CounterfactualOut"][];
+            /** Agreement */
+            agreement: {
+                [key: string]: number;
+            };
+            /** Notes */
+            notes: string[];
+            /** Answered Correctly */
+            answered_correctly: boolean | null;
+            model: components["schemas"]["ModelSummary"];
+        };
+        /** ModelSummary */
+        ModelSummary: {
+            /** Name */
+            name: string;
+            /** Architecture */
+            architecture: string;
+            /** Trained On */
+            trained_on: string;
+            /** Test Auc */
+            test_auc: number;
+            /** Bkt Auc */
+            bkt_auc: number;
         };
         /**
          * NextStepResponse
@@ -1629,6 +1757,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recommendation_model_api_v1_recommendations__recommendation_id__model_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recommendation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelInsight"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    card_api_v1_model_card_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };

@@ -87,6 +87,23 @@ recent activity). Learning happens in `/session`, the study tests in `/tests`, a
 withdrawal in `/account`, and study admins see `/admin`. Light and dark themes follow the system
 setting, and animations respect "reduce motion".
 
+
+### The AI model and its explanations
+
+Besides the transparent learner model (BKT, a Bayesian bandit, a rule planner), the backend
+trains a **neural network** (`backend/app/ml/`). It predicts whether a learner will answer a
+question correctly. Each prediction is explained with **SHAP**, **LIME**, **LRP** and **DiCE**
+counterfactuals: after each answer under "What the AI model predicted", and on the `/model`
+page. Everything runs in Python on the server, and no API key is needed. An LLM key is only an
+optional extra for rephrasing explanation text.
+
+```bash
+cd backend && PYTHONPATH=../research python -m app.ml.train   # retrain on simulated learners
+cd backend && python -m app.ml.train --source db               # retrain on the study's data
+```
+
+Metrics against BKT, global importance and explanation-quality checks are in
+`research/reports/performance_model.md`.
 ## Checks
 
 ```bash

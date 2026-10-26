@@ -19,6 +19,8 @@ RUN addgroup --system --gid 1001 appgroup && \
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH=/opt/venv/bin:$PATH
 ENV PYTHONUNBUFFERED=1
+# LIME imports matplotlib, which needs a writable cache directory (appuser has no home)
+ENV MPLCONFIGDIR=/tmp/matplotlib
 
 COPY --chown=appuser:appgroup app/ ./app/
 COPY --chown=appuser:appgroup alembic/ ./alembic/

@@ -126,6 +126,22 @@ test("a concept-card flowchart is drawn as a diagram, not shown as source", asyn
   await expect(page.getByText("flowchart TD")).toHaveCount(0);
 });
 
+test("the model page explains the AI model and passes the accessibility checks", async ({ page }) => {
+  await register(page, uniqueEmail("modelcard"));
+  await consent(page);
+  await answerQuestionnaire(page);
+  await page.getByRole("link", { name: "Model" }).first().click();
+  await expect(page).toHaveURL(/\/model/);
+  await expect(page.getByRole("heading", { name: "How the AI model works" })).toBeVisible();
+  await expect(page.getByTestId("global-importance").getByRole("listitem")).toHaveCount(13);
+  await expect(page.getByText("BKT (the learner model)")).toBeVisible();
+  await expect(page.getByText(/^13 → (\d+ → )+1$/)).toBeVisible(); // the architecture model selection chose
+  for (const method of ["SHAP", "LIME", "LRP", "DiCE"]) {
+    await expect(page.getByText(method, { exact: true })).toBeVisible();
+  }
+  await expectAccessible(page);
+});
+
 test.describe("dark mode and small screens", () => {
   test.use({ colorScheme: "dark", viewport: { width: 375, height: 740 } });
 

@@ -33,6 +33,8 @@ against the caller. Another learner's id answers `404`, exactly like an id that 
 | `POST /explanations/{id}/events` | `{events: list[ExplanationEventIn]}` (1–100) → `{accepted, duplicates}` | Idempotent per `idempotency_key`. `followup_answered` is server-only. `clarity_rated` needs rating 1–5, `why_rated` needs `helpful` bool. Dwell is capped (10 min per stretch, 30 min total) |
 | `POST /explanations/{id}/close` | `{}` → `ExplanationFeedbackSummary` + `change` (E5) | Called on "Continue". Idempotent: the second call returns the stored summary |
 | `GET /recommendations/{id}/why` | → `RecommendationWhy` | XAI E1–E3 ("Why this?"), exactly as stored when the planner decided |
+| `GET /recommendations/{id}/model` | → `ModelInsight` | The performance model's P(correct) for that question, from the features as they were when it was recommended. Includes the SHAP, LIME (with R²) and LRP attributions, DiCE counterfactuals, method agreement, notes, and `answered_correctly` once answered. Own recommendations only (404 otherwise); about 0.5 s the first time, then cached |
+| `GET /model/card` | → model card | The model's training data, test metrics against BKT and logistic regression, global SHAP and LRP importance, and explanation-quality checks. Any signed-in user |
 | `GET /learners/me/state` | → `LearnerState` | Open learner model |
 | `GET /learners/me/history?limit=&before_id=` | → `list[StateUpdateView]` | Newest first, at most 200 per page |
 | `GET /learners/me/explain?subject=` | → `BeliefExplanation` | XAI E4. `subject` = concept id or trait name |

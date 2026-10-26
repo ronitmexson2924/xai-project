@@ -57,6 +57,17 @@ test.describe("a learner's whole study, in the browser", () => {
     await page.getByRole("button", { name: /Why this\?/ }).click();
     await expect(page.getByTestId("why-summary")).toContainText(/placement question/i);
 
+    // the trained model's prediction for that question, explained with SHAP, LIME, LRP and DiCE
+    await page.getByRole("button", { name: /What the AI model predicted/ }).click();
+    await expect(page.getByTestId("model-prediction")).toHaveText(/^\d{1,3}%$/);
+    await expect(page.getByTestId("model-insight")).toContainText(/You answered (correctly|incorrectly)/);
+    for (const method of ["LIME", "LRP", "SHAP"]) {
+      await page.getByRole("tab", { name: method }).click();
+      await expect(page.getByRole("tab", { name: method })).toHaveAttribute("aria-selected", "true");
+      await expect(page.getByTestId("attribution-chart").getByRole("listitem").first()).toBeVisible();
+    }
+    await expect(page.getByTestId("counterfactuals")).toContainText(/What would make the model expect/);
+
     // finish the placement phase
     for (let i = 2; i <= 8; i++) {
       await page.getByRole("button", { name: /Continue/ }).click();
