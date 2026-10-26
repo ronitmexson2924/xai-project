@@ -4,60 +4,75 @@ Owner: Mit.
 Guaranteed to execute locally without network access.
 """
 
+import re
+
 from jinja2 import BaseLoader, Environment
 
 from app.contracts.explanation import StyleParams
 from app.contracts.graph import ConceptCard
 
 TEMPLATE_SOURCE = """
+{% set example %}
+```python
+{{ card.worked_example | trim }}
+```
+{% endset %}
 {% if style.length == 'short' %}
 {% if style.example_first %}
-For example: {{ card.worked_example | trim }}. {{ card.definition }}
+For example:
+
+{{ example }}
+
+{{ card.definition }}
 {% else %}
-{{ card.definition }} For example: {{ card.worked_example | trim }}.
+{{ card.definition }} For example:
+
+{{ example }}
 {% endif %}
 {% elif style.length == 'medium' %}
 {% if style.example_first %}
-**Worked Example:**
-{{ card.worked_example | trim }}
+**Worked example**
 
-**Core Concept:**
-{{ card.definition }}
-{{ card.key_idea }}
+{{ example }}
+
+**Core idea**
+
+{{ card.definition }} {{ card.key_idea }}
 {% else %}
-**Core Concept:**
-{{ card.definition }}
-{{ card.key_idea }}
+**Core idea**
 
-**Worked Example:**
-{{ card.worked_example | trim }}
+{{ card.definition }} {{ card.key_idea }}
+
+**Worked example**
+
+{{ example }}
 {% endif %}
 {% else %}
 {# Long length #}
 {% if style.example_first %}
-### Concrete Demonstration
-{{ card.worked_example | trim }}
+### A concrete example
 
-### Theoretical Foundation
+{{ example }}
+
+### The idea behind it
+
 {{ card.definition }}
 
-**Key Idea:**
-{{ card.key_idea }}
+**Key idea:** {{ card.key_idea }}
 
-**Common Pitfall:**
-{{ card.pitfall }}
+**Common pitfall:** {{ card.pitfall }}
 {% else %}
-### Theoretical Foundation
+### The idea
+
 {{ card.definition }}
 
-**Key Idea:**
-{{ card.key_idea }}
+**Key idea:** {{ card.key_idea }}
 
-### Concrete Demonstration
-{{ card.worked_example | trim }}
+### A concrete example
 
-**Common Pitfall:**
-{{ card.pitfall }}
+{{ example }}
+
+**Common pitfall:** {{ card.pitfall }}
 {% endif %}
 {% endif %}
 """.strip()
@@ -69,7 +84,8 @@ _template = _env.from_string(TEMPLATE_SOURCE)
 def render_template_fallback(card: ConceptCard, style: StyleParams) -> str:
     """Render a deterministic fallback explanation from concept card fields."""
     rendered = _template.render(card=card, style=style)
-    # Normalize excessive newlines
-    lines = [line.rstrip() for line in rendered.split("\n")]
-    cleaned = "\n".join(line for line in lines if line)
-    return cleaned
+    # Collapse runs of blank lines to one: blank lines separate paragraphs and keep the worked
+    # example's code fence on lines of its own, so they must not all be removed
+    return re.sub(
+        r"\n{3,}", "\n\n", "\n".join(line.rstrip() for line in rendered.split("\n"))
+    ).strip()

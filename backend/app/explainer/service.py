@@ -35,6 +35,12 @@ class GroundedExplainerService(ExplainerService):
         self.llm_client = llm_client
         self.prompt_version = prompt_version
 
+    def _concept_name(self, concept_id: str) -> str:
+        try:
+            return self.graph.get_concept(concept_id).name
+        except KeyError:
+            return concept_id
+
     def explain(self, request: ExplanationRequest) -> Explanation:
         t0 = time.perf_counter()
         target_concept_id = request.concept_ids[0]
@@ -54,6 +60,7 @@ class GroundedExplainerService(ExplainerService):
                 reasons=request.reasons,
                 style=request.style,
                 card=card,
+                name_of=self._concept_name,
             )
             latency_ms = int((time.perf_counter() - t0) * 1000)
             return Explanation(
@@ -94,6 +101,7 @@ class GroundedExplainerService(ExplainerService):
                     reasons=request.reasons,
                     style=request.style,
                     card=card,
+                    name_of=self._concept_name,
                 )
                 latency_ms = int((time.perf_counter() - t0) * 1000)
                 return Explanation(
@@ -118,6 +126,7 @@ class GroundedExplainerService(ExplainerService):
             reasons=request.reasons,
             style=request.style,
             card=card,
+            name_of=self._concept_name,
         )
         latency_ms = int((time.perf_counter() - t0) * 1000)
         return Explanation(

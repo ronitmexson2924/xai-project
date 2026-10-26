@@ -50,6 +50,8 @@ test.describe("a learner's whole study, in the browser", () => {
     await answerCurrentQuestion(page);
     await expect(page.getByTestId("explanation-card")).toBeVisible();
     await expect(page.getByTestId("answered-count")).toContainText("1");
+    // the worked example is a code block, not code flattened into sentences
+    await expect(page.getByTestId("explanation-card").locator("pre code").first()).toBeVisible();
 
     // "Why this?" shows the stored rationale (XAI E1-E3)
     await page.getByRole("button", { name: /Why this\?/ }).click();

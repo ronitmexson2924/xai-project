@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from app.contracts.explanation import StyleParams
 from app.contracts.graph import ConceptCard
-from app.explainer.prompt import WORD_LIMITS
+from app.explainer.prompt import WORD_LIMITS, card_has_code
 
 
 class ValidationResult(BaseModel):
@@ -22,14 +22,6 @@ class ValidationResult(BaseModel):
 
     def to_dict(self) -> dict[str, Any]:
         return self.model_dump()
-
-
-def _card_has_code(card: ConceptCard) -> bool:
-    example = card.worked_example.strip()
-    if "```" in example:
-        return True
-    code_indicators = ("def ", "for ", "while ", "return ", "class ", "int ", "let ", "const ")
-    return any(indicator in example for indicator in code_indicators)
 
 
 def validate_explanation(
@@ -60,7 +52,7 @@ def validate_explanation(
     # 3. No code blocks unless the card contains code
     has_code_block = "```" in body_markdown
     illegal_code_blocks = False
-    if has_code_block and not _card_has_code(card):
+    if has_code_block and not card_has_code(card):
         illegal_code_blocks = True
         errors.append("Output contains code blocks but concept card does not contain code")
 
