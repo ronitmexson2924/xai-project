@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { PublicItem } from "@/lib/api";
+import { ENGAGEMENT_UI } from "@/lib/engagement";
 import { Markdown } from "./Markdown";
 import { Badge } from "./ui/Badge";
 import { Button } from "./ui/Button";
@@ -16,6 +17,8 @@ interface ItemCardProps {
   disabled?: boolean;
   selectedAnswer?: string | null;
   isCorrect?: boolean | null;
+  /** the expected answer, once the server has marked the attempt (revealed after a wrong answer) */
+  correctAnswer?: string | null;
   conceptName?: string;
 }
 
@@ -26,6 +29,7 @@ export function ItemCard({
   disabled = false,
   selectedAnswer = null,
   isCorrect = null,
+  correctAnswer = null,
   conceptName,
 }: ItemCardProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(selectedAnswer);
@@ -91,7 +95,7 @@ export function ItemCard({
     <Card className="space-y-6 p-5 sm:p-7">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Badge tone="accent">Question</Badge>
+          <Badge tone="primary">Question</Badge>
           {conceptName && <span className="text-sm text-muted">{conceptName}</span>}
         </div>
         {isChoice && !disabled && (
@@ -124,7 +128,7 @@ export function ItemCard({
                 handleSubmit();
               }
             }}
-            className="h-11 w-full rounded-lg border border-line bg-surface px-3.5 font-mono text-sm text-fg transition-colors focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/15 disabled:opacity-70"
+            className="h-11 w-full rounded-lg border border-line bg-surface px-3.5 font-mono text-sm text-fg transition-colors focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/15 disabled:opacity-70"
           />
         </div>
       )}
@@ -133,7 +137,18 @@ export function ItemCard({
         <div className="space-y-2.5" role="radiogroup" aria-label="Question options">
           {item.options.map((option, idx) => {
             const isSelected = selectedOption === option;
-            const verdict = disabled && isSelected ? (isCorrect === true ? "right" : isCorrect === false ? "wrong" : null) : null;
+            // after marking: your pick is right (green, ✓) or wrong (neutral, ✕); a wrong pick also
+            // reveals the expected option. Never colour alone: each state has its own icon and text.
+            const verdict = disabled
+              ? isSelected && isCorrect === true
+                ? "right"
+                : isSelected && isCorrect === false
+                  ? "wrong"
+                  : isCorrect === false && option === correctAnswer
+                    ? "answer"
+                    : null
+              : null;
+            const note = verdict === "right" ? "you chose this: correct" : verdict === "wrong" ? "you chose this: incorrect" : verdict === "answer" ? "the correct answer" : null;
             return (
               <motion.button
                 key={`${item.id}-opt-${idx}`}
@@ -144,33 +159,41 @@ export function ItemCard({
                 onClick={() => setSelectedOption(option)}
                 whileTap={{ scale: 0.99 }}
                 className={cn(
-                  "flex w-full items-start gap-3.5 rounded-xl border p-3.5 text-left transition-colors sm:p-4",
-                  verdict === "right"
+                  "group flex w-full items-start gap-3.5 rounded-lg border p-3.5 text-left transition-[background-color,border-color,transform] duration-150 sm:p-4",
+                  verdict === "right" || verdict === "answer"
                     ? "border-success bg-success-soft"
                     : verdict === "wrong"
-                      ? "border-danger bg-danger-soft"
+                      ? "border-line-strong bg-surface-2"
                       : isSelected
-                        ? "border-accent bg-accent-soft ring-1 ring-accent"
+                        ? "border-primary bg-primary-soft"
                         : "border-line bg-surface hover:border-line-strong hover:bg-surface-2",
-                  disabled && !isSelected && "opacity-60"
+                  ENGAGEMENT_UI && !disabled && !isSelected && "hover:-translate-y-px",
+                  disabled && !verdict && "opacity-60"
                 )}
               >
                 <span
                   className={cn(
                     "mt-px flex h-6 w-6 flex-none items-center justify-center rounded-md border text-xs font-semibold transition-colors",
-                    verdict === "right"
+                    verdict === "right" || verdict === "answer"
                       ? "border-success bg-success text-white"
                       : verdict === "wrong"
-                        ? "border-danger bg-danger text-white"
+                        ? "border-line-strong bg-surface text-muted"
                         : isSelected
-                          ? "border-accent bg-accent text-accent-fg"
-                          : "border-line text-muted"
+                          ? "border-primary bg-primary text-primary-fg"
+                          : cn("border-line text-muted", ENGAGEMENT_UI && "group-hover:border-primary/40 group-hover:text-primary")
                   )}
                   aria-hidden
                 >
-                  {letters[idx]}
+                  {verdict === "right" || verdict === "answer" ? <Tick /> : verdict === "wrong" ? <Cross /> : letters[idx]}
                 </span>
-                <span className="self-center text-sm leading-relaxed text-fg">{option}</span>
+                <span className="flex flex-1 flex-wrap items-center justify-between gap-x-3 gap-y-1 self-center">
+                  <span className="text-sm leading-relaxed text-fg">
+                    {option}
+                    {note && <span className="sr-only"> ({note})</span>}
+                  </span>
+                  {verdict === "answer" && <span className="text-xs font-medium text-success" aria-hidden>Correct answer</span>}
+                  {verdict === "wrong" && <span className="text-xs font-medium text-muted" aria-hidden>Your answer</span>}
+                </span>
               </motion.button>
             );
           })}
@@ -185,6 +208,22 @@ export function ItemCard({
         </div>
       )}
     </Card>
+  );
+}
+
+function Tick() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12.5 10 17.5 19 7" />
+    </svg>
+  );
+}
+
+function Cross() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
   );
 }
 

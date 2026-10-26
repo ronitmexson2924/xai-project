@@ -18,9 +18,9 @@ export function ChangeNotice({ notice }: { notice: ChangeNoticeData | null | und
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.35, ease }}
-            className="flex gap-3 rounded-2xl border border-accent/25 bg-accent-soft p-4 text-sm"
+            className="flex gap-3 rounded-xl border border-primary/25 bg-primary-soft p-4 text-sm"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 flex-none text-accent" aria-hidden>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 flex-none text-primary" aria-hidden>
               <path d="M3 12h4l3 8 4-16 3 8h4" />
             </svg>
             <div className="space-y-1">

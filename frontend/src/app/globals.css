@@ -1,79 +1,131 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. One neutral scale, one accent, semantic names only, so every component reads the
- * same in light and dark mode. Contrast of text on bg/surface meets WCAG AA in both themes.
+ * Design tokens. Semantic names only, so every component reads the same in light and dark mode.
+ * Colour roles: indigo (primary) is the app; apricot (accent) marks moments about *you* and is
+ * used at most once per screen; green is "correct"; blue/orange only show a chart's direction;
+ * red (danger) is for real errors only. Text tokens meet WCAG AA on bg, surface and surface-2.
+ * Theme: follows the system unless the account menu sets <html data-theme="light|dark">.
  */
 :root {
-  --bg: #fafafa;
+  --bg: #fafaf8;
   --surface: #ffffff;
-  --surface-2: #f4f4f5;
-  --line: #e4e4e7;
-  --line-strong: #d4d4d8;
-  --fg: #09090b;
-  --muted: #52525b;
-  --subtle: #71717a;
-  --accent: #4f46e5;
-  --accent-hover: #4338ca;
-  --accent-fg: #ffffff;
-  --accent-soft: #eef2ff;
-  --success: #15803d;
-  --success-soft: #f0fdf4;
+  --surface-muted: #f5f4f1;
+  --border: #eceae5;
+  --border-strong: #dad7d0;
+  --text: #1b1a1f;
+  --text-muted: #6b6874;
+  --text-subtle: #716e7a; /* #9a97a2 in the brief is 2.9:1 on white; darkened for AA */
+  --primary: #5b4ce0;
+  --primary-hover: #4b3ccb;
+  --primary-fg: #ffffff;
+  --primary-soft: #f0eeff;
+  --accent: #f2994a; /* fills and strokes only: as text it is 2.2:1 */
+  --accent-text: #a35a1a;
+  --accent-fg: #2b1600;
+  --accent-soft: #fff3e8;
+  --success: #17804a; /* #1f9d55 is 3.5:1 as text; darkened for AA */
+  --success-soft: #eaf7ef;
   --warning: #b45309;
   --warning-soft: #fffbeb;
-  --danger: #b91c1c;
-  --danger-soft: #fef2f2;
-  --ring: #6366f1;
-  /* charts: diverging pair (validated for colour-blind separation and contrast), sequential hue */
-  --viz-pos: #2a78d6;
-  --viz-neg: #d34a3a;
-  --viz-mid: #d4d4d8;
-  --shadow: 0 1px 2px rgb(9 9 11 / 0.04), 0 4px 16px -4px rgb(9 9 11 / 0.08);
-  --shadow-lg: 0 2px 4px rgb(9 9 11 / 0.04), 0 16px 48px -12px rgb(9 9 11 / 0.18);
+  --danger: #c13b3b; /* #d64545 is 4.4:1; darkened for AA */
+  --danger-soft: #fdeeee;
+  --ring: #5b4ce0;
+  /* charts: diverging pair, blue raises / orange lowers (no red: red reads as "wrong") */
+  --viz-raise: #2f6fde;
+  --viz-lower: #d06a28; /* #e07b39 is 2.97:1, just under the 3:1 for graphics */
+  --viz-neutral: #c9c6cf;
+  /* code */
+  --code-keyword: var(--primary);
+  --code-string: #2a7a4b;
+  --code-number: var(--accent-text);
+  --code-comment: var(--text-subtle);
+  --shadow: 0 1px 2px rgb(20 18 30 / 0.04);
+  --shadow-lg: 0 1px 2px rgb(20 18 30 / 0.04), 0 8px 24px -8px rgb(20 18 30 / 0.14);
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #09090b;
-    --surface: #111113;
-    --surface-2: #18181b;
-    --line: #27272a;
-    --line-strong: #3f3f46;
-    --fg: #fafafa;
-    --muted: #a1a1aa;
-    --subtle: #8b8b94;
-    --accent: #818cf8;
-    --accent-hover: #a5b4fc;
-    --accent-fg: #0b0b1a;
-    --accent-soft: #1e1b4b;
-    --success: #4ade80;
-    --success-soft: #052e16;
+  :root:not([data-theme="light"]) {
+    --bg: #121116;
+    --surface: #1a1920;
+    --surface-muted: #22212a;
+    --border: #2c2b34;
+    --border-strong: #3a3944;
+    --text: #edecf1;
+    --text-muted: #a5a2ae;
+    --text-subtle: #8a8794;
+    --primary: #8a7dff;
+    --primary-hover: #a398ff;
+    --primary-fg: #121116;
+    --primary-soft: #26223f;
+    --accent: #f5a964;
+    --accent-text: #f5a964;
+    --accent-soft: #2a1e12;
+    --success: #3cc27a;
+    --success-soft: #13261c;
     --warning: #fbbf24;
     --warning-soft: #2a1a04;
-    --danger: #f87171;
-    --danger-soft: #2a0a0a;
-    --ring: #818cf8;
-    --viz-pos: #3987e5;
-    --viz-neg: #d95926;
-    --viz-mid: #3f3f46;
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 16px -4px rgb(0 0 0 / 0.5);
-    --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.4), 0 16px 48px -12px rgb(0 0 0 / 0.7);
+    --danger: #f07272;
+    --danger-soft: #2a1416;
+    --ring: #8a7dff;
+    --viz-raise: #5b93f5;
+    --viz-lower: #f09a5e;
+    --viz-neutral: #4a4954;
+    --code-string: #7fd4a0;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.6);
     color-scheme: dark;
   }
+}
+
+:root[data-theme="dark"] {
+  --bg: #121116;
+  --surface: #1a1920;
+  --surface-muted: #22212a;
+  --border: #2c2b34;
+  --border-strong: #3a3944;
+  --text: #edecf1;
+  --text-muted: #a5a2ae;
+  --text-subtle: #8a8794;
+  --primary: #8a7dff;
+  --primary-hover: #a398ff;
+  --primary-fg: #121116;
+  --primary-soft: #26223f;
+  --accent: #f5a964;
+  --accent-text: #f5a964;
+  --accent-soft: #2a1e12;
+  --success: #3cc27a;
+  --success-soft: #13261c;
+  --warning: #fbbf24;
+  --warning-soft: #2a1a04;
+  --danger: #f07272;
+  --danger-soft: #2a1416;
+  --ring: #8a7dff;
+  --viz-raise: #5b93f5;
+  --viz-lower: #f09a5e;
+  --viz-neutral: #4a4954;
+  --code-string: #7fd4a0;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -8px rgb(0 0 0 / 0.6);
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-line: var(--line);
-  --color-line-strong: var(--line-strong);
-  --color-fg: var(--fg);
-  --color-muted: var(--muted);
-  --color-subtle: var(--subtle);
+  --color-surface-2: var(--surface-muted);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-fg: var(--text);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--text-subtle);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
   --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
+  --color-accent-text: var(--accent-text);
   --color-accent-fg: var(--accent-fg);
   --color-accent-soft: var(--accent-soft);
   --color-success: var(--success);
@@ -82,18 +134,28 @@
   --color-warning-soft: var(--warning-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
-  --color-viz-pos: var(--viz-pos);
-  --color-viz-neg: var(--viz-neg);
-  --color-viz-mid: var(--viz-mid);
+  --color-viz-raise: var(--viz-raise);
+  --color-viz-lower: var(--viz-lower);
+  --color-viz-neutral: var(--viz-neutral);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --shadow-card: var(--shadow);
   --shadow-pop: var(--shadow-lg);
 }
 
+/* section labels: small capitals, wide tracking, quiet colour */
+@utility label-caps {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-subtle);
+}
+
 body {
   background: var(--bg);
-  color: var(--fg);
+  color: var(--text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -107,14 +169,14 @@ body {
 }
 
 ::selection {
-  background: var(--accent-soft);
+  background: var(--primary-soft);
 }
 
 /* subtle grid behind the landing hero */
 .bg-grid {
   background-image:
-    linear-gradient(to right, var(--line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 30%, transparent 75%);
 }
@@ -155,12 +217,12 @@ body {
   right: 50%;
   width: 50%;
   height: 1rem;
-  border-top: 1px solid var(--line-strong);
+  border-top: 1px solid var(--border-strong);
 }
 .diagram-tree li::after {
   right: auto;
   left: 50%;
-  border-left: 1px solid var(--line-strong);
+  border-left: 1px solid var(--border-strong);
 }
 .diagram-tree li:only-child::before,
 .diagram-tree li:only-child::after {
@@ -174,7 +236,7 @@ body {
   border: 0;
 }
 .diagram-tree li:last-child::before {
-  border-right: 1px solid var(--line-strong);
+  border-right: 1px solid var(--border-strong);
   border-top-right-radius: 6px;
 }
 .diagram-tree li:first-child::after {
@@ -186,7 +248,7 @@ body {
   top: 0;
   left: 50%;
   height: 1rem;
-  border-left: 1px solid var(--line-strong);
+  border-left: 1px solid var(--border-strong);
 }
 .diagram-tree > ul > li {
   padding-top: 0;
@@ -197,12 +259,28 @@ body {
 }
 .diagram-node {
   white-space: nowrap;
-  border: 1px solid var(--line);
+  border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
   box-shadow: var(--shadow);
   padding: 0.25rem 0.625rem;
   font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--fg);
+  color: var(--text);
+}
+
+/* the avatar's own pastel, from a hue derived from the learner's name (ENGAGEMENT_UI) */
+.avatar-hue {
+  background: hsl(var(--hue) 70% 92%);
+  color: hsl(var(--hue) 45% 28%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .avatar-hue {
+    background: hsl(var(--hue) 30% 24%);
+    color: hsl(var(--hue) 70% 86%);
+  }
+}
+:root[data-theme="dark"] .avatar-hue {
+  background: hsl(var(--hue) 30% 24%);
+  color: hsl(var(--hue) 70% 86%);
 }

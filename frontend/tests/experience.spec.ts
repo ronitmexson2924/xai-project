@@ -148,7 +148,7 @@ test.describe("dark mode and small screens", () => {
   test("pages follow the system theme and fit a phone screen", async ({ page }) => {
     await page.goto("/");
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(bg).toBe("rgb(9, 9, 11)");
+    expect(bg).toBe("rgb(18, 17, 22)"); // --bg, dark
     await expectAccessible(page);
 
     await register(page, uniqueEmail("phone"));
@@ -157,6 +157,16 @@ test.describe("dark mode and small screens", () => {
     await expectAccessible(page);
     await page.goto("/session");
     await expect(page.getByRole("button", { name: "Submit answer" })).toBeVisible();
+    await expectAccessible(page);
+
+    // the account menu can override the system theme, and the choice survives a reload
+    await page.getByRole("button", { name: "Account menu" }).click();
+    await page.getByRole("menuitemradio", { name: "Light" }).click();
+    const light = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    await expect.poll(light).toBe("rgb(250, 250, 248)");
+    await page.reload();
+    await expect(page.getByRole("button", { name: "Submit answer" })).toBeVisible();
+    expect(await light()).toBe("rgb(250, 250, 248)");
     await expectAccessible(page);
   });
 });

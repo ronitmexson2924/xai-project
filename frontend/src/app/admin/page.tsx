@@ -129,7 +129,7 @@ export default function AdminPage() {
       <Stagger className="space-y-8">
         <motion.div variants={fadeUp} className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
-            <Badge tone="accent">Research &amp; operations</Badge>
+            <Badge tone="primary">Research &amp; operations</Badge>
             <h1 className="mt-3 text-2xl font-semibold tracking-tight text-fg sm:text-3xl">Study analytics</h1>
             <p className="mt-1 max-w-2xl text-sm text-muted">
               Arm balance, explanation latency, explanation sources, clarity ratings and pseudonymised exports.
@@ -142,7 +142,7 @@ export default function AdminPage() {
 
         {loading ? (
           <div className="flex flex-col items-center gap-3 py-24 text-sm text-muted" aria-busy>
-            <Spinner className="h-6 w-6 text-accent" />
+            <Spinner className="h-6 w-6 text-primary" />
             Loading metrics…
           </div>
         ) : error ? (
@@ -219,7 +219,7 @@ export default function AdminPage() {
                     return (
                       <div key={r} className="flex items-center gap-3 text-sm">
                         <span className="w-4 tabular-nums text-muted">{r}</span>
-                        <Progress value={count / totalRatings} label={`Rating ${r}`} tone={r >= 4 ? "success" : "accent"} />
+                        <Progress value={count / totalRatings} label={`Rating ${r}`} tone={r >= 4 ? "success" : "primary"} />
                         <span className="w-16 flex-none text-right tabular-nums text-muted">
                           {count} ({Math.round((count / totalRatings) * 100)}%)
                         </span>

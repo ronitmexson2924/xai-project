@@ -58,7 +58,8 @@ test.describe("a learner's whole study, in the browser", () => {
     await expect(page.getByTestId("why-summary")).toContainText(/placement question/i);
 
     // the trained model's prediction for that question, explained with SHAP, LIME, LRP and DiCE
-    await page.getByRole("button", { name: /What the AI model predicted/ }).click();
+    // (the second title is the ENGAGEMENT_UI wording)
+    await page.getByRole("button", { name: /What the AI model predicted|How the model saw you/ }).click();
     await expect(page.getByTestId("model-prediction")).toHaveText(/^\d{1,3}%$/);
     await expect(page.getByTestId("model-insight")).toContainText(/You answered (correctly|incorrectly)/);
     for (const method of ["LIME", "LRP", "SHAP"]) {
@@ -66,11 +67,17 @@ test.describe("a learner's whole study, in the browser", () => {
       await expect(page.getByRole("tab", { name: method })).toHaveAttribute("aria-selected", "true");
       await expect(page.getByTestId("attribution-chart").getByRole("listitem").first()).toBeVisible();
     }
-    await expect(page.getByTestId("counterfactuals")).toContainText(/What would make the model expect/);
+    await expect(page.getByTestId("counterfactuals")).toContainText(/What would make the model expect|Your path to a higher prediction|What would change the model/);
 
-    // finish the placement phase
+    // finish the placement phase. Continue sits in the bottom action bar, and Enter works too
+    await expect(page.getByTestId("action-bar").getByRole("button", { name: /Continue/ })).toBeVisible();
     for (let i = 2; i <= 8; i++) {
-      await page.getByRole("button", { name: /Continue/ }).click();
+      if (i === 2) {
+        await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+        await page.keyboard.press("Enter");
+      } else {
+        await page.getByRole("button", { name: /Continue/ }).click();
+      }
       await answerCurrentQuestion(page);
       await expect(page.getByTestId("answered-count")).toContainText(String(i));
     }

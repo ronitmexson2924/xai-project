@@ -50,7 +50,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - if: hashFiles('frontend/package.json') != ''
         working-directory: frontend
-        run: npm ci && npm run lint && npm run build
+        run: npm ci && npm run lint && npm run test:unit && npm run build
 
   e2e:
     # Browser tests against the real stack: Postgres, the API and the production frontend.

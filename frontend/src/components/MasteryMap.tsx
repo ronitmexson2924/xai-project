@@ -14,15 +14,15 @@ import { ease } from "./ui/motion";
 const TILE: Record<Band, string> = {
   new: "border-line bg-surface text-muted",
   learning: "border-warning/40 bg-warning-soft text-fg",
-  progress: "border-accent/30 bg-accent-soft text-fg",
-  ready: "border-accent/60 bg-accent-soft text-fg",
+  progress: "border-primary/30 bg-primary-soft text-fg",
+  ready: "border-primary/60 bg-primary-soft text-fg",
   mastered: "border-success/50 bg-success-soft text-fg",
 };
 const DOT: Record<Band, string> = {
   new: "bg-line-strong",
   learning: "bg-warning",
-  progress: "bg-accent/60",
-  ready: "bg-accent",
+  progress: "bg-primary/60",
+  ready: "bg-primary",
   mastered: "bg-success",
 };
 
@@ -134,7 +134,7 @@ function ConceptDrawer({ concept, state, onClose }: { concept: Concept | null; s
               </button>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Badge tone={b === "mastered" ? "success" : b === "learning" ? "warning" : b === "new" ? "neutral" : "accent"}>{BAND_LABEL[b]}</Badge>
+              <Badge tone={b === "mastered" ? "success" : b === "learning" ? "warning" : b === "new" ? "neutral" : "primary"}>{BAND_LABEL[b]}</Badge>
               <Badge>{m?.n_attempts ?? 0} answers</Badge>
             </div>
             <p className="mt-5 text-sm leading-relaxed text-muted">{concept.description}</p>

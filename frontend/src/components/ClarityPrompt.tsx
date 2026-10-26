@@ -68,7 +68,7 @@ export function ClarityPrompt({ explanationId, onRate, forceShow = false }: Clar
                   key={r.value}
                   type="button"
                   onClick={() => handleRating(r.value)}
-                  className="rounded-lg border border-line bg-surface px-1 py-1.5 text-xs text-muted transition-all hover:border-accent/50 hover:text-fg active:scale-95"
+                  className="rounded-lg border border-line bg-surface px-1 py-1.5 text-xs text-muted transition-all hover:border-primary/50 hover:text-fg active:scale-95"
                 >
                   {r.label}
                 </button>

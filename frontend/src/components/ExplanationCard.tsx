@@ -52,11 +52,11 @@ export function ExplanationCard({ explanation, concept, onDismiss }: Explanation
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease }}
-      className="space-y-5 rounded-2xl border border-line bg-surface p-5 shadow-card sm:p-7"
+      className="space-y-5 rounded-xl border border-line bg-surface p-5 shadow-card sm:p-7"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-accent">Explanation</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-primary">Explanation</p>
           <h2 className="mt-1 text-lg font-semibold tracking-tight text-fg">
             {concept?.name ?? explanation.concept_ids.join(", ")}
           </h2>
