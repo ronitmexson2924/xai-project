@@ -1,5 +1,5 @@
 import { expect, Page, test } from "@playwright/test";
-import { answerQuestionnaire, consent, register, uniqueEmail } from "./helpers";
+import { answerCurrentQuestion, answerQuestionnaire, consent, register, uniqueEmail } from "./helpers";
 
 /** Basic checks a screen reader or keyboard user depends on, run on every page of the flow. */
 async function expectAccessible(page: Page) {
@@ -103,6 +103,27 @@ test.describe("the first-run experience", () => {
     await page.keyboard.press("Escape");
     await expect(drawer).toHaveCount(0);
   });
+});
+
+test("a concept-card flowchart is drawn as a diagram, not shown as source", async ({ page }) => {
+  await register(page, uniqueEmail("diagram"));
+  await consent(page);
+  await answerQuestionnaire(page);
+  // the diagrams only appear for some concepts and styles, so put one into the next explanation
+  await page.route("**/api/v1/session/next", async (route) => {
+    const response = await route.fetch();
+    const body = await response.json();
+    body.explanation.body_markdown +=
+      '\n\n```mermaid\nflowchart TD\n  A["fact(2)"] --> B["2 * fact(1)"] --> C["1 * fact(0)"]\n```';
+    await route.fulfill({ response, json: body });
+  });
+  await page.goto("/session");
+  await answerCurrentQuestion(page); // placement: the explanation follows the answer
+  const diagram = page.getByTestId("diagram");
+  await expect(diagram).toBeVisible();
+  await expect(diagram.getByText("2 * fact(1)")).toBeVisible();
+  await expect(diagram.getByRole("img")).toHaveAttribute("aria-label", /fact\(2\) leads to 2 \* fact\(1\)/);
+  await expect(page.getByText("flowchart TD")).toHaveCount(0);
 });
 
 test.describe("dark mode and small screens", () => {

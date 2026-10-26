@@ -20,9 +20,10 @@ from app.contracts.graph import Concept, ConceptCard
 from app.contracts.reasons import ReasonCode, ReasonEvidence
 from app.explainer.llm import LLMClientProtocol
 from app.explainer.precompute import get_all_variant_styles, precompute_all
-from app.explainer.prompt import PROMPT_VERSION
+from app.explainer.prompt import PROMPT_VERSION, card_has_code
 from app.explainer.service import GroundedExplainerService
 from app.explainer.store import ExplanationVariantRecord, VariantStore
+from app.explainer.templates import render_template_fallback
 from app.explainer.validator import validate_explanation
 from app.explainer.wrapper import wrap_explanation
 
@@ -182,7 +183,8 @@ def test_explainer_valid_mock_gemini_returns_llm_source():
     assert explanation.model is not None
     assert "A loop runs code repeatedly." in explanation.body_markdown
     # Wrapper added reason sentence
-    assert "**Why this:** Strengthening prerequisite knowledge for loops" in (
+    # learners see the concept's name, not its id
+    assert "**Why this:** Strengthening prerequisite knowledge for Loops" in (
         explanation.body_markdown
     )
     assert mock_client.call_count == 1
@@ -413,3 +415,32 @@ def test_wrapper_diagram_and_encouraging_tone():
     assert "Core binary search content." in wrapped
     assert "💡 *Take your time tracing each step." in wrapped
     assert "```mermaid\ngraph LR\n  A --> B\n```" in wrapped
+
+
+def test_template_puts_the_worked_example_in_a_code_block():
+    """Code keeps its lines and indentation: it is fenced on lines of its own, never inlined."""
+    card = FakeThreeConceptGraph().get_concept("recursion-base-case").card
+    for length in ("short", "medium", "long"):
+        for example_first in (True, False):
+            style = StyleParams(example_first=example_first, length=length, depth="how")
+            body = render_template_fallback(card, style)
+            code = card.worked_example.strip()
+            assert f"```python\n{code}\n```" in body, (length, example_first)
+            assert "\n\n```python" in body or body.startswith("```python")
+            assert "```\n\n" in body or body.endswith("```")
+
+
+def test_code_detection_covers_examples_without_def_or_for():
+    """An example like `x = 5` is code too, so the prompt allows code and the validator keeps it."""
+    card = ConceptCard(
+        definition="A variable is a name bound to a value.",
+        key_idea="Assignment binds a name.",
+        worked_example="x = 5\nprint(x)",
+        pitfall="Reading = as equality.",
+    )
+    assert card_has_code(card)
+    style = StyleParams(example_first=True, length="medium", depth="how")
+    body = render_template_fallback(card, style)
+    assert validate_explanation(body, ["variables"], ["variables"], card, style).valid
+    prose = card.model_copy(update={"worked_example": "Think of a label on a box."})
+    assert not card_has_code(prose)

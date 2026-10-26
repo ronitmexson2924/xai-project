@@ -1,4 +1,5 @@
 import React from "react";
+import { Diagram } from "./Diagram";
 
 /**
  * A small, safe Markdown renderer for explanation and card text: fenced code blocks, headings,
@@ -11,6 +12,10 @@ export function Markdown({ text, className = "" }: { text: string; className?: s
   parts.forEach((part, i) => {
     if (part.startsWith("```") && part.endsWith("```") && part.length >= 6) {
       const lines = part.slice(3, -3).replace(/^\n/, "").split("\n");
+      if (lines[0].trim().toLowerCase() === "mermaid") {
+        blocks.push(<Diagram key={`diagram-${i}`} source={lines.slice(1).join("\n")} />);
+        return;
+      }
       const code = (/^[a-z0-9+-]*$/i.test(lines[0]) && lines.length > 1 ? lines.slice(1) : lines)
         .join("\n")
         .replace(/\n$/, "");

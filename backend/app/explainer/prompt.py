@@ -11,7 +11,7 @@ from app.contracts.explanation import Length, StyleParams
 from app.contracts.graph import ConceptCard
 from app.contracts.reasons import ReasonEvidence
 
-PROMPT_VERSION = "v1"
+PROMPT_VERSION = "v2"  # v2: code examples in fenced blocks; wider code detection
 
 WORD_LIMITS: dict[Length, int] = {
     "short": 80,
@@ -33,6 +33,26 @@ class ExplanationOutputSchema(BaseModel):
         ...,
         description="The concept IDs that are directly discussed in the explanation.",
     )
+
+
+def card_has_code(card: ConceptCard) -> bool:
+    """Whether the card's worked example is code (so an explanation may show code)."""
+    example = card.worked_example.strip()
+    if "```" in example:
+        return True
+    code_indicators = (
+        "def ",
+        "for ",
+        "while ",
+        "return ",
+        "class ",
+        "int ",
+        "let ",
+        "const ",
+        "print(",
+        " = ",
+    )
+    return any(indicator in example for indicator in code_indicators)
 
 
 def build_system_instruction() -> str:
@@ -72,7 +92,7 @@ def build_prompt_payload(
 
     code_instruction = (
         "You may include concise code snippets only if code is provided in the worked example."
-        if card.worked_example and ("def " in card.worked_example or "for " in card.worked_example)
+        if card_has_code(card)
         else "Do NOT include code blocks; explain conceptually."
     )
 
