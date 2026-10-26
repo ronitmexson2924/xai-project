@@ -5,6 +5,10 @@ the real services on Postgres; nothing on screen is mocked.
 
 ## Setup (once)
 
+The quickest way is `docker compose up --build` from the repository root. It creates the demo
+learners below and an admin (`admin@example.com` / `Admin-pass-1`); then open
+http://localhost:3000. To run the parts by hand instead:
+
 ```bash
 cd backend
 alembic upgrade head && python -m app.graph.seed ../content

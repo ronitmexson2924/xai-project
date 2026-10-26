@@ -35,7 +35,34 @@ All project docs, agent instructions and code live on `dev`. Start there:
 | `docs/EVALUATION_PLAN.md` | Hypotheses H1–H5, pilot protocol |
 | `docs/TEAM_PLAN.md` · `docs/GIT_WORKFLOW.md` | Who does what, when, and how code flows to `main` |
 
-## Quickstart
+## Run the whole app with one command
+
+Needs only Docker (Docker Desktop on Mac/Windows):
+
+```bash
+docker compose up --build
+```
+
+Then open **http://localhost:3000**. The first build takes a few minutes; later starts take
+seconds. Compose starts Postgres, the API (http://localhost:8000, docs at `/docs`) and the
+frontend. On every start it migrates the database and loads `content/`. The first time, it also
+creates these accounts:
+
+| Account | Password | What you see |
+|---|---|---|
+| Sign up yourself | your choice | the new-student flow: consent, questionnaire, dashboard |
+| `asha@demo.example.com` | `Demo-pass-1` | a new learner |
+| `ben@demo.example.com` | `Demo-pass-1` | a misconception being fixed |
+| `chen@demo.example.com` | `Demo-pass-1` | an advanced learner with tuned explanations |
+| `admin@example.com` | `Admin-pass-1` | the study admin page |
+
+Your data survives restarts (`docker compose down`, then `up`). `docker compose down -v` wipes
+it. For live LLM explanations, put `GEMINI_API_KEY` and the `GEMINI_MODEL_*` names in `.env`;
+without them, explanations come from the reviewed templates. This setup is for local use and
+demos only: it uses fixed development secrets and serves draft items. Production deploys with
+`render.yaml` and Vercel (see Deploy).
+
+## Quickstart (for development, with hot reload)
 
 ```bash
 cp .env.example .env
