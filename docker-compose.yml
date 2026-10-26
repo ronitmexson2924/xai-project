@@ -1,3 +1,9 @@
+# The whole app with one command:   docker compose up --build
+# then open http://localhost:3000 (API on http://localhost:8000, Postgres on localhost:5432).
+#
+# For local development and demos only: fixed development secrets, and unreviewed (draft) items
+# are served because the item bank is still in review. Never deploy this file; production uses
+# render.yaml (API) and Vercel (frontend). `docker compose up -d db` still starts just Postgres.
 services:
   db:
     image: postgres:16
@@ -10,9 +16,53 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pcg"]
+      test: ["CMD-SHELL", "pg_isready -U pcg -d pcg"]
       interval: 5s
       retries: 10
+
+  api:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - path: .env  # optional: GEMINI_API_KEY / GEMINI_MODEL_* turn on live explanations
+        required: false
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: postgresql+psycopg://pcg:pcg@db:5432/pcg
+      JWT_SECRET: local-docker-compose-only-secret-not-for-production
+      CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      ANALYSIS_SALT: local-docker-compose-salt
+      INCLUDE_DRAFT_ITEMS: "true"
+      DEMO_PASSWORD: Demo-pass-1
+      ADMIN_EMAIL: admin@example.com
+      ADMIN_PASSWORD: Admin-pass-1
+    volumes:
+      - ./content:/content:ro
+    # migrate, load content and demo accounts (all idempotent), then serve
+    command: >-
+      sh -c "alembic upgrade head && python -m app.devstack /content &&
+      uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
+      interval: 5s
+      timeout: 5s
+      start_period: 60s
+      retries: 20
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
 
 volumes:
   pgdata:
