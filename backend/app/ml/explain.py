@@ -185,6 +185,8 @@ def counterfactuals(
     high = np.array([f.high for f in FEATURES], dtype=float)
     attempts = FEATURE_NAMES.index("attempts")
     low[attempts] = x[attempts]  # practice cannot be undone
+    misconception = FEATURE_NAMES.index("misconception")
+    high[misconception] = x[misconception]  # a misconception can be cleared, never advised
     mask = np.array([f.actionable for f in FEATURES], dtype=float)
     rng = np.random.default_rng(SEED)
     cfs = x + mask * rng.normal(0, 0.3, (total, N_FEATURES)) * mad

@@ -158,6 +158,26 @@ def test_dice_counterfactuals_flip_the_prediction_realistically(mastery: float) 
     assert len({tuple(sorted(cf.changes)) for cf in found}) == len(found) or len(found) == 1
 
 
+def _only(feature: str, weight: float) -> PerformanceModel:
+    w = np.zeros((N_FEATURES, 1))
+    w[FEATURE_NAMES.index(feature), 0] = weight
+    return _model([w], [np.zeros(1)])
+
+
+def test_dice_never_suggests_acquiring_a_misconception() -> None:
+    # a model that (wrongly, but faithfully to its data) links a flagged misconception to success
+    model = _only("misconception", 3.0)
+    x = learner(misconception=0)
+    assert model.predict_proba(x)[0] < 0.5
+    for cf in explain.counterfactuals(model, x):
+        assert cf.x[FEATURE_NAMES.index("misconception")] == 0  # never "get a misconception"
+
+
+def test_dice_may_suggest_clearing_a_misconception() -> None:
+    found = explain.counterfactuals(_only("misconception", -3.0), learner(misconception=1))
+    assert found and all(cf.changes == {"misconception": (1.0, 0.0)} for cf in found)
+
+
 def test_dice_on_a_mastery_only_model_changes_mastery() -> None:
     found = explain.counterfactuals(only_mastery_matters(), learner(0.2))
     assert found and all(set(cf.changes) == {"mastery"} for cf in found)  # sparse: nothing else
