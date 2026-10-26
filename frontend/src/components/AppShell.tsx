@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/session", label: "Learn" },
   { href: "/tests", label: "Tests" },
+  { href: "/model", label: "Model" },
 ];
 
 /** Signed-in layout: a quiet top bar, the page, nothing else. */

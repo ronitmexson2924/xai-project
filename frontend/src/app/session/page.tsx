@@ -6,6 +6,7 @@ import { AppShell, PageLoading } from "@/components/AppShell";
 import { ChangeNotice } from "@/components/ChangeNotice";
 import { ExplanationCard } from "@/components/ExplanationCard";
 import { ItemCard } from "@/components/ItemCard";
+import { ModelInsightPanel } from "@/components/xai/ModelInsightPanel";
 import { Badge } from "@/components/ui/Badge";
 import { Button, Spinner } from "@/components/ui/Button";
 import { ease } from "@/components/ui/motion";
@@ -202,6 +203,8 @@ export default function SessionPage() {
               </AnimatePresence>
 
               <ChangeNotice notice={result?.change} />
+
+              {result && step.item && <ModelInsightPanel recommendationId={step.recommendation.id} />}
 
               {!explanationFirst && showExplanation && <ExplanationCard explanation={step.explanation} concept={concept} />}
 

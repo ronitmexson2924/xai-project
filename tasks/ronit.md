@@ -276,6 +276,24 @@
     Simulated run: 100% of recommendations carry a rationale and 99-100% a verified
     counterfactual. Panel-use columns stay empty until Mit's M10 exists._
 
+## R12: Trained performance model with post-hoc explanations (SHAP, LIME, LRP, DiCE)
+- **Do:** train a neural network in Python (no API key) that predicts P(correct) from the
+  learner model's state. Explain each prediction with SHAP, LIME, LRP and DiCE, compare the model
+  against BKT, and show it to learners (MODEL_SPEC §7, XAI_DESIGN §7).
+- [x] Features replayed from the logs, the same code for training and serving (`app/ml/features.py`)
+- [x] MLP chosen on validation learners; BKT and logistic regression baselines; report in
+  `research/reports/performance_model.md`
+- [x] SHAP and LIME (libraries), LRP and DiCE (implemented from their papers), each checked
+  against its paper's property in `tests/test_ml.py`
+- [x] `GET /recommendations/{id}/model`, `GET /model/card`; the session panel and the `/model` page
+- [ ] Retrain on pilot data (`python -m app.ml.train --source db`) and compare with the simulated
+  model
+- [x] **R12 done** (except the pilot retrain)
+  - _Simulated data, 180 learners, test learners unseen: AUC 0.726 (logistic 0.731, BKT 0.729),
+    log loss 0.514 (BKT 0.547), ECE 0.007 (BKT 0.111). Before model selection the explanations
+    showed reliance on the questionnaire traits and on difficulty, which the simulator's ground
+    truth does not use: overfitting. Selection cut that about fivefold._
+
 ---
 
 ## I1: Integration (agreed with Ronit, done by his agent on `ronit-integration`)

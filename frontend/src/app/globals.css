@@ -24,6 +24,10 @@
   --danger: #b91c1c;
   --danger-soft: #fef2f2;
   --ring: #6366f1;
+  /* charts: diverging pair (validated for colour-blind separation and contrast), sequential hue */
+  --viz-pos: #2a78d6;
+  --viz-neg: #d34a3a;
+  --viz-mid: #d4d4d8;
   --shadow: 0 1px 2px rgb(9 9 11 / 0.04), 0 4px 16px -4px rgb(9 9 11 / 0.08);
   --shadow-lg: 0 2px 4px rgb(9 9 11 / 0.04), 0 16px 48px -12px rgb(9 9 11 / 0.18);
   color-scheme: light;
@@ -50,6 +54,9 @@
     --danger: #f87171;
     --danger-soft: #2a0a0a;
     --ring: #818cf8;
+    --viz-pos: #3987e5;
+    --viz-neg: #d95926;
+    --viz-mid: #3f3f46;
     --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 16px -4px rgb(0 0 0 / 0.5);
     --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.4), 0 16px 48px -12px rgb(0 0 0 / 0.7);
     color-scheme: dark;
@@ -75,6 +82,9 @@
   --color-warning-soft: var(--warning-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
+  --color-viz-pos: var(--viz-pos);
+  --color-viz-neg: var(--viz-neg);
+  --color-viz-mid: var(--viz-mid);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --shadow-card: var(--shadow);

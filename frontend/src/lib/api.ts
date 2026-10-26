@@ -63,6 +63,46 @@ export type FeedbackOut = Json<"/api/v1/explanations/{explanation_id}/close", "p
 export type RecommendationWhy = Json<"/api/v1/recommendations/{recommendation_id}/why", "get", 200>;
 export type BeliefExplanation = Json<"/api/v1/learners/me/explain", "get", 200>;
 
+// The performance model (a trained neural network) and its SHAP / LIME / LRP / DiCE explanations
+export type ModelInsight = Json<"/api/v1/recommendations/{recommendation_id}/model", "get", 200>;
+export type MethodAttribution = ModelInsight["attributions"][number];
+export type ModelCounterfactual = ModelInsight["counterfactuals"][number];
+export interface ModelMetrics {
+  auc: number;
+  log_loss: number;
+  brier: number;
+  accuracy: number;
+  ece: number;
+}
+export interface ModelCard {
+  name: string;
+  task: string;
+  architecture: string;
+  trained_on: string;
+  trained_at: string;
+  rows: { train: number; validation: number; test: number };
+  learners: { train: number; validation: number; test: number };
+  base_rate: number;
+  model_selection: {
+    chosen: { hidden: number[]; alpha: number };
+    candidates: { hidden: number[]; alpha: number; val_log_loss: number }[];
+  };
+  test_metrics: Record<string, ModelMetrics>;
+  global_importance: { shap: Record<string, number>; lrp: Record<string, number> };
+  explanation_quality: {
+    rows_explained: number;
+    method_agreement_spearman: Record<string, number>;
+    lime_median_r2: number;
+    counterfactual_found: number;
+    counterfactual_valid: number;
+    counterfactual_mean_features_changed: number;
+    deletion_top3_shap: number;
+    deletion_random3: number;
+  };
+  features: { name: string; label: string }[];
+  limitations: string[];
+}
+
 // Learner state, graph, tests, admin
 export type LearnerState = Json<"/api/v1/learners/me/state", "get", 200>;
 export type StateUpdateView = Json<"/api/v1/learners/me/history", "get", 200>[number];
@@ -182,6 +222,9 @@ export const api = {
       get<RecommendationWhy>(`/api/v1/recommendations/${encodeURIComponent(recommendationId)}/why`),
     belief: (subject: string) =>
       get<BeliefExplanation>(`/api/v1/learners/me/explain?subject=${encodeURIComponent(subject)}`),
+    model: (recommendationId: string) =>
+      get<ModelInsight>(`/api/v1/recommendations/${encodeURIComponent(recommendationId)}/model`),
+    modelCard: () => get<ModelCard>("/api/v1/model/card"),
   },
 
   learners: {

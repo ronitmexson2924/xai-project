@@ -246,3 +246,37 @@ item id.
     "last answer wrong" baseline.
   - In the resonance score, P is approximated by the latest clarity rating on the concept
     (0.5 if none), because the per-step bandit fit is not logged.
+
+## 7. Performance model (a trained neural network; `backend/app/ml/`)
+
+A learned model next to the hand-specified ones above, so that its predictions can be explained
+with post-hoc XAI methods (SHAP, LIME, LRP, DiCE; see `docs/XAI_DESIGN.md` §7).
+
+- **Task:** `P(correct)` for one answer, from what the system knew just before it.
+- **Features** (13; `app/ml/features.py`):
+  - learner-model state: BKT mastery of the concept, mean and minimum prerequisite mastery
+    (effective, i.e. priors for unattempted concepts), whether a misconception is flagged;
+  - history: answers on the concept (capped at 50), recent accuracy on it (last 3,
+    Laplace-smoothed), overall accuracy (smoothed), signed streak (±5), days since the concept
+    was practised (capped at 30; never practised = 30);
+  - the question: difficulty (1–5), guess rate (1/options for MCQ, else BKT's `p_guess`);
+  - questionnaire traits: self-efficacy and persistence.
+
+  They are rebuilt by replaying `attempts` and their `state_updates` rows, so training and
+  serving share one code path, and mastery is the value the learner model actually held then.
+- **Model:** a multilayer perceptron with ReLU hidden layers and a sigmoid output, trained with
+  Adam and early stopping (scikit-learn). Inputs are standardised with the training mean and SD.
+  The architecture and L2 strength are chosen by model selection: 3 architectures (32-16, 16-8,
+  8) × 4 strengths (1e-3 to 1), fitted on the training learners, keeping the lowest log loss on
+  the validation learners. The current pick is 13 → 8 → 1 with L2 1e-3. Served from
+  `app/ml/artifacts/performance_model.json` (plain weights, run in numpy).
+- **Training** (`python -m app.ml.train`):
+  - Data: the R6 simulator (synthetic learners through the real services, rolled back) until
+    pilot data exists, then `--source db`.
+  - Split 70/15/15 by learner, so test metrics are on unseen learners.
+  - Baselines: BKT's own `predict_correct`, logistic regression on the same features, and the
+    base rate.
+  - Report: `research/reports/performance_model.md`.
+- **Use:** shown and explained to the learner after each answer, and on the `/model` page. The
+  planner does **not** use it. Recommendations follow §5, as pre-registered, so adding the model
+  does not change the study's intervention.
