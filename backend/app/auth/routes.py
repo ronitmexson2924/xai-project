@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request, Response, status
 
 from app.auth.deps import DbDep, UserDep
-from app.auth.limits import client_ip, login_throttle
+from app.auth.limits import client_ip, login_throttle, windows
 from app.auth.models import AuthResponse, ConsentResponse, UserLoginIn, UserRegisterIn, UserResponse
 from app.auth.security import create_access_token, hash_password, verify_password
 from app.auth.store import (
@@ -15,6 +15,7 @@ from app.auth.store import (
     set_consent,
     soft_delete_user,
 )
+from app.config import settings
 
 router = APIRouter(tags=["auth"])
 
@@ -31,7 +32,23 @@ def _error(code: int, error: str, message: str, headers: dict[str, str] | None =
     status_code=status.HTTP_201_CREATED,
     summary="Register a new learner account",
 )
-def register(payload: UserRegisterIn, session: DbDep) -> AuthResponse:
+def register(payload: UserRegisterIn, request: Request, session: DbDep) -> AuthResponse:
+    if not settings.allow_registration:
+        raise _error(
+            status.HTTP_403_FORBIDDEN,
+            "REGISTRATION_CLOSED",
+            "Sign-up is closed. Use the account you were given.",
+        )
+    # every attempt counts, taken or not, so the 409 below cannot be used to test emails in bulk
+    if settings.rate_limit_enabled and (
+        wait := windows.hit(f"register:{client_ip(request)}", settings.register_max_per_hour, 3600)
+    ):
+        raise _error(
+            status.HTTP_429_TOO_MANY_REQUESTS,
+            "TOO_MANY_REGISTRATIONS",
+            "Too many sign-ups from this network. Try again later.",
+            headers={"Retry-After": str(wait)},
+        )
     try:
         user, arm = register_user(
             session,

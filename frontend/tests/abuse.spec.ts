@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
   API,
   PASSWORD,
+  SESSION_COOKIE,
   answerCurrentQuestion,
   answerQuestionnaire,
   consent,
@@ -55,7 +56,7 @@ test.describe("what a curious or hostile user tries in the browser", () => {
     const email = uniqueEmail("dup");
     await register(page, email);
     await expect(page).toHaveURL(/\/onboarding/);
-    await page.evaluate(() => localStorage.clear());
+    await page.context().clearCookies();
 
     await register(page, email);
     await expect(page.getByText("Email is already registered")).toBeVisible();
@@ -68,15 +69,30 @@ test.describe("what a curious or hostile user tries in the browser", () => {
     await expect(page.getByText(/Too many failed logins/)).toBeVisible();
   });
 
-  test("a tampered token in storage logs the user out instead of breaking the page", async ({ page }) => {
+  test("a tampered session cookie logs the user out instead of breaking the page", async ({ page }) => {
     await register(page, uniqueEmail("tamper"));
     await consent(page);
-    await page.evaluate(() => {
-      const t = localStorage.getItem("pcg_token") ?? "";
-      localStorage.setItem("pcg_token", t.slice(0, -4) + "AAAA");
-    });
+    const t = await token(page);
+    await page.context().addCookies([
+      { name: SESSION_COOKIE, value: t.slice(0, -4) + "AAAA", domain: "localhost", path: "/api", httpOnly: true, sameSite: "Strict" },
+    ]);
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/login/);
+  });
+
+  test("page scripts never see the login token", async ({ page }) => {
+    const signUp = page.waitForResponse((r) => r.url().endsWith("/api/v1/auth/register"));
+    await register(page, uniqueEmail("cookie"));
+    const body = await (await signUp).json();
+    expect(body.user).toBeTruthy();
+    expect(body.token).toBeUndefined(); // the proxy keeps it in the cookie
+    expect(await token(page)).not.toBe("");
+    const visible = await page.evaluate(() => ({ cookies: document.cookie, stored: JSON.stringify(localStorage) }));
+    expect(visible.cookies).not.toContain(SESSION_COOKIE);
+    expect(visible.stored).not.toContain("eyJ"); // no JWT anywhere in storage
+    const cookie = (await page.context().cookies()).find((c) => c.name === SESSION_COOKIE);
+    expect(cookie?.httpOnly).toBe(true);
+    expect(cookie?.sameSite).toBe("Strict");
   });
 
   test("double-clicking submit records one answer; reloading shows the same question", async ({

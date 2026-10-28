@@ -294,6 +294,43 @@
     showed reliance on the questionnaire traits and on difficulty, which the simulator's ground
     truth does not use: overfitting. Selection cut that about fivefold._
 
+## R13: The learner report's Explainability section
+- **Do:** add an Explainability section to each learner's report: an XAI matrix (SHAP, LIME,
+  LRP per factor, with direction, plain meaning and whether the methods agree), agreement and
+  quality metrics, a neutral summary paragraph, and charts. Show the cross-learner view to admins
+  only (XAI_DESIGN §8).
+- [x] `backend/app/xai/`: `explain_user` (one entry point), per-method failure isolation, cache,
+  start-up warm-up; `global_attributions` for admins
+- [x] Endpoints: `GET /learners/me/report`, `GET /admin/learners`,
+  `GET /admin/learners/{pseudonym}/report`, `GET /admin/xai/global`
+- [x] Report page (`/report`) and admin view, with SVG charts and print-to-PDF:
+  - trait and mastery radars;
+  - SHAP waterfall and decision plot;
+  - LIME bars and SHAP vs LIME;
+  - DiCE table;
+  - LRP heatmap;
+  - admin-only beeswarm.
+- [x] Tests: `tests/test_xai_report.py`, `src/lib/report-charts.test.ts`, E2E in `journey.spec.ts`
+- [x] **R13 done**
+
+---
+
+## R14: Fixes from the security review
+- **Do:** fix the nine findings of the codebase security review (asked for by Ronit). Most files
+  are Mit's (API, auth, frontend, deploy config), so Mit reviews the PR.
+- [x] Session token in an httpOnly, `SameSite=Strict` cookie, held by the web app's server, which
+  forwards `/api/v1/*` (`frontend/src/app/api/[...path]/route.ts`); CSP `connect-src 'self'`
+- [x] CPU-heavy explanation and report endpoints: per-user limit and a concurrency cap
+  (`app/api/heavy.py`)
+- [x] Rate-limit and login counters shared through Redis when `REDIS_URL` is set
+- [x] `X-Forwarded-For` only from `TRUSTED_PROXY_IPS`; the web app names the browser with
+  `PROXY_SECRET`
+- [x] Sign-ups limited per client and closable (`ALLOW_REGISTRATION`)
+- [x] Security headers on every response (429 and 413 too); HSTS and no version in production
+- [x] Docker Compose: ports on 127.0.0.1, secrets overridable; Render: paid database, Key Value
+- [x] Tests: `tests/test_security_review.py`, `src/lib/proxy.test.ts`, `abuse.spec.ts`
+- [x] **R14 done**
+
 ---
 
 ## I1: Integration (agreed with Ronit, done by his agent on `ronit-integration`)

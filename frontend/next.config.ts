@@ -1,7 +1,5 @@
 import type { NextConfig } from "next";
 
-const api = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
@@ -9,10 +7,11 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
   {
     key: "Content-Security-Policy",
-    // the app talks only to its own API: no third-party scripts, frames or trackers (D11)
+    // the browser talks only to this app, which forwards API calls (src/app/api): no third-party
+    // scripts, frames or trackers (D11)
     value: [
       "default-src 'self'",
-      `connect-src 'self' ${api}`,
+      "connect-src 'self'",
       "script-src 'self' 'unsafe-inline'" + (process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""),
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data:",

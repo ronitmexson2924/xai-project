@@ -319,6 +319,9 @@ function InsightBody({
         questions.{" "}
         <Link href="/model" className="font-medium text-primary hover:text-primary-hover">
           How the model works →
+        </Link>{" "}
+        <Link href="/report" className="font-medium text-primary hover:text-primary-hover">
+          Your full report →
         </Link>
       </p>
     </>

@@ -1,57 +1,49 @@
 """Rate limiting and security middleware for FastAPI.
 
 Owner: Mit.
-- RateLimitMiddleware: sliding-window limit per client address (in memory: one API instance).
-- SecurityHeadersMiddleware: no sniffing, no framing, no caching of personal data.
+- RateLimitMiddleware: sliding-window limit per client address (shared through Redis when
+  REDIS_URL is set, see app/auth/limits.py).
+- SecurityHeadersMiddleware: no sniffing, no framing, no caching of personal data. It is the
+  outermost middleware, so every response gets the headers, including 413s and 429s.
 - BodySizeLimitMiddleware: rejects oversized request bodies before they are parsed.
 """
 
-import time
-from collections import defaultdict
-from threading import Lock
-
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
+from starlette.datastructures import MutableHeaders
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from app.auth.limits import client_ip
+from app.auth.limits import MemoryWindows, Windows, client_ip, windows
+from app.config import settings
 
 EXEMPT_PATHS = {"/health", "/health/ready", "/docs", "/openapi.json", "/redoc", "/favicon.ico"}
 MAX_BODY_BYTES = 64 * 1024
 
 
 class SlidingWindowRateLimiter:
-    """Thread-safe sliding window rate limiter."""
+    """At most max_requests per client in any window_seconds."""
 
-    def __init__(self, max_requests: int = 120, window_seconds: int = 60) -> None:
+    def __init__(
+        self,
+        max_requests: int = 120,
+        window_seconds: int = 60,
+        store: Windows | MemoryWindows | None = None,
+    ) -> None:
         self.max_requests = max_requests
         self.window_seconds = window_seconds
-        self._lock = Lock()
-        self._requests: dict[str, list[float]] = defaultdict(list)
+        self.store = store or MemoryWindows()
 
     def is_allowed(self, client_key: str) -> tuple[bool, int]:
         """Returns (allowed, retry_after_seconds)."""
-        now = time.time()
-        cutoff = now - self.window_seconds
-        with self._lock:
-            valid = [ts for ts in self._requests[client_key] if ts > cutoff]
-            if len(valid) >= self.max_requests:
-                self._requests[client_key] = valid
-                return False, max(1, int(valid[0] + self.window_seconds - now))
-            valid.append(now)
-            self._requests[client_key] = valid
-            if len(self._requests) > 10_000:  # forget idle clients so memory stays bounded
-                for key in [k for k, v in self._requests.items() if not v or v[-1] <= cutoff]:
-                    del self._requests[key]
-            return True, 0
+        wait = self.store.hit(f"req:{client_key}", self.max_requests, self.window_seconds)
+        return wait == 0, wait
 
     def reset(self) -> None:
-        with self._lock:
-            self._requests.clear()
+        self.store.reset()
 
 
-global_rate_limiter = SlidingWindowRateLimiter()
+global_rate_limiter = SlidingWindowRateLimiter(store=windows)
 
 
 def reset_rate_limiter() -> None:
@@ -64,8 +56,6 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.limiter = limiter or global_rate_limiter
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
-        from app.config import settings
-
         if not settings.rate_limit_enabled or request.url.path in EXEMPT_PATHS:
             return await call_next(request)
         self.limiter.max_requests = settings.rate_limit_requests_per_minute
@@ -84,19 +74,35 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
-        response = await call_next(request)
-        response.headers.setdefault("X-Content-Type-Options", "nosniff")
-        response.headers.setdefault("X-Frame-Options", "DENY")
-        response.headers.setdefault("Referrer-Policy", "no-referrer")
-        if request.url.path.startswith("/api/"):
-            response.headers.setdefault("Cache-Control", "no-store")
-            # JSON only: nothing here may load or run anything if opened in a browser
-            response.headers.setdefault(
-                "Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'"
-            )
-        return response
+class SecurityHeadersMiddleware:
+    """Pure ASGI, so it can wrap everything else and add headers to every response."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        is_api = scope["path"].startswith("/api/")
+
+        async def send_with_headers(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                headers = MutableHeaders(scope=message)
+                headers.setdefault("X-Content-Type-Options", "nosniff")
+                headers.setdefault("X-Frame-Options", "DENY")
+                headers.setdefault("Referrer-Policy", "no-referrer")
+                if settings.environment == "production":
+                    headers.setdefault("Strict-Transport-Security", "max-age=31536000")
+                if is_api:
+                    headers.setdefault("Cache-Control", "no-store")
+                    # JSON only: nothing here may load or run anything if opened in a browser
+                    headers.setdefault(
+                        "Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'"
+                    )
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
 
 
 class BodySizeLimitMiddleware:
