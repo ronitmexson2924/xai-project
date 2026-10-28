@@ -1,4 +1,5 @@
 import type { paths } from "./api.d";
+import { busyRetryDelay } from "./retry";
 
 /**
  * Every call goes to this app's own /api/v1 route (src/app/api/[...path]/route.ts), which forwards
@@ -144,7 +145,7 @@ export function setUnauthorizedHandler(handler: (() => void) | null): void {
   onUnauthorized = handler;
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}, attempt = 0): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
@@ -167,6 +168,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       code: "UNKNOWN_ERROR",
       message: res.statusText || "An unexpected error occurred",
     };
+    const wait = busyRetryDelay(options.method ?? "GET", res.status, error.code, res.headers.get("retry-after"), attempt);
+    if (wait !== null) {
+      await new Promise((resolve) => setTimeout(resolve, wait));
+      return request<T>(path, options, attempt + 1);
+    }
     // a wrong password is not a lost session
     if (res.status === 401 && !/^\/api\/v1\/auth\/(login|register)$/.test(path)) onUnauthorized?.();
     throw new ApiException(res.status, error);

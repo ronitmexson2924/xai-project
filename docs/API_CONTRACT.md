@@ -74,5 +74,6 @@ carries the security headers; production adds `Strict-Transport-Security`.
 
 CPU-heavy endpoints (`/recommendations/{id}/model`, `/learners/me/report`,
 `/admin/learners/{pseudonym}/report`, `/admin/xai/global`): at most `XAI_REQUESTS_PER_MINUTE` per
-user (`429 TOO_MANY_EXPLANATION_REQUESTS`), at most `XAI_MAX_CONCURRENT` worked out at once, and a
-few more wait up to `XAI_WAIT_SECONDS`; beyond that `503 SERVER_BUSY` with `Retry-After: 5`.
+user (`429 TOO_MANY_EXPLANATION_REQUESTS`), at most `XAI_MAX_CONCURRENT` worked out at once, and up
+to `XAI_MAX_WAITING` more wait up to `XAI_WAIT_SECONDS`; beyond that `503 SERVER_BUSY` with
+`Retry-After: 5`. The web app retries a busy read up to three times, waiting 0.5–1.5 × Retry-After.

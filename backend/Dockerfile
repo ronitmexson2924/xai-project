@@ -33,5 +33,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')" || exit 1
 
-# One worker: rate limits and login lockouts are kept in process memory.
+# One worker: the explanation caches and the limit on concurrent explanations are per process
+# (rate limits are shared through Redis when REDIS_URL is set).
 CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]

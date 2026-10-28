@@ -378,7 +378,7 @@ hard-coded.
 | `PROXY_SECRET` | — | Shared by the API and the web app's server, which then names each browser's address for rate limiting |
 | `REDIS_URL` | — | Rate-limit counters shared by every API instance; without it, each process counts alone |
 | `ALLOW_REGISTRATION`, `REGISTER_MAX_PER_HOUR` | `true`, `10` | Self sign-up (off for a study with issued accounts) and sign-ups per client per hour |
-| `XAI_MAX_CONCURRENT`, `XAI_WAIT_SECONDS`, `XAI_REQUESTS_PER_MINUTE` | `2`, `10`, `20` | Limits on the CPU-heavy explanation and report endpoints |
+| `XAI_MAX_CONCURRENT`, `XAI_MAX_WAITING`, `XAI_WAIT_SECONDS`, `XAI_REQUESTS_PER_MINUTE` | `2`, `16`, `10`, `20` | Limits on the CPU-heavy explanation and report endpoints |
 | `ANALYSIS_SALT` | — | HMAC salt for pseudonymous research exports; fixed for a study |
 | `INCLUDE_DRAFT_ITEMS` | `false` | Serve unreviewed items (demos only) |
 | `RATE_LIMIT_*`, `LOGIN_MAX_FAILURES`, `LOGIN_LOCKOUT_SECONDS` | `120/min`, `5`, `900 s` | Abuse protection |
@@ -401,7 +401,7 @@ cd frontend && PYTHON=../backend/.venv/bin/python npx playwright test   # starts
 | **Backend: 264 tests** | Learner model maths, planner policy and rationale, explainer grounding, telemetry idempotency, API contracts, the ML explainers' formal properties (SHAP additivity, LRP conservation, LIME recovery, DiCE validity and feasibility) |
 | **Security** (`test_security.py`, `test_security_review.py`, `abuse.spec.ts`, `proxy.test.ts`) | Forged and revoked tokens, access to other learners' data, replayed answers, injection, oversized payloads, login lockout, spoofed client addresses, shared rate limits, limits on the heavy endpoints, the httpOnly session cookie |
 | **End to end: 21 Playwright tests** | The whole study journey in a real browser against Postgres, the API and the production build, plus keyboard-only, dark-mode and phone-width accessibility checks |
-| **Frontend unit: 31 tests** | Learner-facing copy generators, the code highlighter, the report charts' geometry and the API proxy |
+| **Frontend unit: 34 tests** | Learner-facing copy generators, the code highlighter, the report charts' geometry, the API proxy and busy retries |
 | **Load** (`research/load_test.py`) | 100 concurrent learners: `session/next` p95 35 ms (budget 300 ms), `attempts` p95 54 ms (budget 200 ms) |
 
 CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs four jobs on every PR:

@@ -329,6 +329,9 @@
 - [x] Security headers on every response (429 and 413 too); HSTS and no version in production
 - [x] Docker Compose: ports on 127.0.0.1, secrets overridable; Render: paid database, Key Value
 - [x] Tests: `tests/test_security_review.py`, `src/lib/proxy.test.ts`, `abuse.spec.ts`
+- [x] Follow-up from testing `main` like production: a class opening reports at once got 503s
+  (8 of 30). The queue is now `XAI_MAX_WAITING` (16) and the web app retries busy reads
+  (`src/lib/retry.ts`); 30 of 30 now succeed
 - [x] **R14 done**
 
 ---

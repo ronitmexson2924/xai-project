@@ -227,7 +227,7 @@ def test_a_busy_server_answers_503_instead_of_queueing_forever(
         r = bob.get("/learners/me/report")
         assert r.status_code == 503 and r.json()["error"]["code"] == "SERVER_BUSY"
         assert r.headers["retry-after"] == "5"
-        monkeypatch.setattr(heavy._slots, "waiting", heavy.MAX_WAITING)  # queue full: no waiting
+        monkeypatch.setattr(heavy._slots, "waiting", settings.xai_max_waiting)  # queue full
         assert bob.get("/learners/me/report").status_code == 503
         monkeypatch.setattr(heavy._slots, "waiting", 0)
     finally:

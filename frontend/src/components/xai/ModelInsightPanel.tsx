@@ -58,6 +58,7 @@ export function ModelInsightPanel({
     const next = !open;
     setOpen(next);
     if (!next || insight) return;
+    setError(null); // a retry after a failed load starts clean
     try {
       setInsight(await api.xai.model(recommendationId));
     } catch (err) {

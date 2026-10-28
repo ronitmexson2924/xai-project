@@ -45,10 +45,11 @@ class Settings(BaseSettings):
     # registrations per client per hour, which also slows probing for registered emails
     register_max_per_hour: int = 10
 
-    # the model explanations and reports are CPU-heavy: at most this many are worked out at once
-    # (others wait up to xai_wait_seconds, then get a 503), and at most xai_requests_per_minute
-    # per user
+    # the model explanations and reports are CPU-heavy: at most this many are worked out at once,
+    # up to xai_max_waiting more wait up to xai_wait_seconds (then a 503), and at most
+    # xai_requests_per_minute per user
     xai_max_concurrent: int = 2
+    xai_max_waiting: int = 16
     xai_wait_seconds: float = 10.0
     xai_requests_per_minute: int = 20
 

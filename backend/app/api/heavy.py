@@ -1,7 +1,8 @@
 """A guard for the CPU-heavy endpoints: the model explanations (SHAP, LIME, LRP, DiCE) and the
 learner reports. One API process has few cores, so a burst of these could slow every other
 request. Each user gets at most XAI_REQUESTS_PER_MINUTE of them, at most XAI_MAX_CONCURRENT run
-at once, and a few more may queue briefly; anything beyond that gets a 503 with Retry-After.
+at once, and up to XAI_MAX_WAITING more queue for up to XAI_WAIT_SECONDS; anything beyond that
+gets a 503 with Retry-After, which the web app retries by itself.
 
 Owner: Mit.
 """
@@ -16,8 +17,6 @@ from fastapi import HTTPException, status
 from app.auth.limits import windows
 from app.config import settings
 
-MAX_WAITING = 8  # requests queued for a slot; each holds a server thread while it waits
-
 
 class _Slots:
     def __init__(self) -> None:
@@ -28,14 +27,16 @@ class _Slots:
 
     def semaphore(self) -> threading.BoundedSemaphore:
         with self._lock:
-            if self._size != settings.xai_max_concurrent:  # settings changed (tests)
-                self._size = max(1, settings.xai_max_concurrent)
-                self._semaphore = threading.BoundedSemaphore(self._size)
+            size = max(1, settings.xai_max_concurrent)
+            if self._size != size:  # settings changed (tests)
+                self._size = size
+                self._semaphore = threading.BoundedSemaphore(size)
             return self._semaphore
 
     def queue(self) -> bool:
         with self._lock:
-            if self.waiting >= MAX_WAITING:
+            # each waiting request holds one of the server's threads (40 by default)
+            if self.waiting >= settings.xai_max_waiting:
                 return False
             self.waiting += 1
             return True
