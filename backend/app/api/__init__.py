@@ -14,6 +14,7 @@ from app.api.model_insight import router as model_insight_router
 from app.api.onboarding import router as onboarding_router
 from app.api.ops import router as ops_router
 from app.api.recommendations import router as recommendations_router
+from app.api.report import router as report_router
 from app.api.session import router as session_router
 from app.api.tests_route import router as tests_router
 
@@ -27,6 +28,7 @@ for router in (
     recommendations_router,
     model_insight_router,
     learners_router,
+    report_router,
     graph_router,
     tests_router,
     admin_router,

@@ -284,3 +284,52 @@ body {
   background: hsl(var(--hue) 30% 24%);
   color: hsl(var(--hue) 70% 86%);
 }
+
+/*
+ * "Download PDF" is the browser's print-to-PDF: paper gets the light palette (even when the app is
+ * in dark mode), no navigation or buttons, and charts and tables are not split across pages.
+ * `:not(#print)` adds an id's weight, so this beats the theme rules above.
+ */
+@media print {
+  :root:not(#print) {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-muted: #f5f4f1;
+    --border: #e2e0da;
+    --border-strong: #cfccc4;
+    --text: #1b1a1f;
+    --text-muted: #55525d;
+    --text-subtle: #6b6874;
+    --primary: #5b4ce0;
+    --primary-soft: #f0eeff;
+    --success: #17804a;
+    --success-soft: #eaf7ef;
+    --warning: #b45309;
+    --warning-soft: #fffbeb;
+    --viz-raise: #2f6fde;
+    --viz-lower: #d06a28;
+    --viz-neutral: #c9c6cf;
+    --shadow: none;
+    color-scheme: light;
+  }
+  header,
+  nav,
+  .no-print,
+  [data-testid="action-bar"],
+  a[href="#main"] {
+    display: none !important;
+  }
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+  figure,
+  table,
+  [data-testid="report-summary"],
+  [data-testid="xai-quality"] > section {
+    break-inside: avoid;
+  }
+  @page {
+    margin: 14mm;
+  }
+}

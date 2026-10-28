@@ -107,6 +107,11 @@ jobs:
           curl -fsS -X POST http://localhost:8000/api/v1/auth/login \
             -H 'Content-Type: application/json' \
             -d '{"email":"chen@demo.example.com","password":"Demo-pass-1"}' -o /dev/null
+          # and through the frontend, which keeps the token in an httpOnly cookie
+          curl -fsS -X POST http://localhost:3000/api/v1/auth/login \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"chen@demo.example.com","password":"Demo-pass-1"}' -D - -o /dev/null \
+            | grep -i '^set-cookie: pcg_session=.*HttpOnly'
       - if: failure()
         run: docker compose logs
       - if: always()

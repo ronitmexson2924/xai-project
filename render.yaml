@@ -1,5 +1,7 @@
-# Render blueprint: the API and its Postgres. The frontend deploys to Vercel (frontend/vercel.json)
-# with NEXT_PUBLIC_API_URL set to this service's URL; put that Vercel URL in CORS_ORIGINS here.
+# Render blueprint: the API, its Postgres and a Key Value store (Redis) for rate-limit counters.
+# The frontend deploys to Vercel (frontend/vercel.json) with API_URL set to this service's URL and
+# PROXY_SECRET set to the value Render generates below. Browsers call only the frontend, which
+# forwards API calls, so CORS_ORIGINS can stay empty.
 services:
   - type: web
     name: pcg-engine-backend
@@ -22,10 +24,21 @@ services:
         generateValue: true
       - key: ANALYSIS_SALT  # fixed for the whole study: never regenerate it
         generateValue: true
+      - key: PROXY_SECRET  # copy this value to the Vercel project's PROXY_SECRET
+        generateValue: true
       - key: CORS_ORIGINS
-        sync: false  # e.g. https://your-frontend.vercel.app
+        sync: false  # only for browsers calling the API directly; empty is fine
       - key: TRUST_FORWARDED_FOR
-        value: "true"  # Render's proxy sets X-Forwarded-For
+        value: "true"  # Render's proxy sets X-Forwarded-For...
+      - key: TRUSTED_PROXY_IPS
+        value: "*"  # ...and every request reaches the service through it
+      - key: REDIS_URL  # rate limits shared by every instance
+        fromService:
+          type: keyvalue
+          name: pcg-limits
+          property: connectionString
+      - key: ALLOW_REGISTRATION
+        value: "true"  # "false" for the study: accounts come from `python -m app.auth.onboard cohort`
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL_EXPLAIN
@@ -39,8 +52,15 @@ services:
       - key: RATE_LIMIT_REQUESTS_PER_MINUTE
         value: "120"
 
+  - type: keyvalue  # Redis-compatible; counters only, nothing that must survive a restart
+    name: pcg-limits
+    plan: free
+    maxmemoryPolicy: volatile-lru
+    ipAllowList: []  # reachable only from this account's services
+
 databases:
   - name: pcg-db
     databaseName: pcg
     user: pcg
-    plan: free
+    # a paid plan: free Render databases expire after 30 days, and this one holds study data
+    plan: basic-256mb

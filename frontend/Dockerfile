@@ -5,9 +5,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY . .
-# The browser calls the API directly, so its public URL is compiled into the bundle.
-ARG NEXT_PUBLIC_API_URL=http://localhost:8000
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 # the engagement extras (src/lib/engagement.ts) are compiled in or out; off unless asked for
 ARG NEXT_PUBLIC_ENGAGEMENT_UI=false
 ENV NEXT_PUBLIC_ENGAGEMENT_UI=$NEXT_PUBLIC_ENGAGEMENT_UI
@@ -16,9 +13,9 @@ RUN npm run build && npm prune --omit=dev
 FROM node:22-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
-ARG NEXT_PUBLIC_API_URL=http://localhost:8000
-# read again at start-up for the Content-Security-Policy header (next.config.ts)
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# The browser calls this server, which forwards API calls (src/app/api/[...path]/route.ts) to
+# API_URL, read at run time. Set PROXY_SECRET too when the API has one.
+ENV API_URL=http://localhost:8000
 COPY --from=build --chown=node:node /app/package.json /app/next.config.ts ./
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/.next ./.next
