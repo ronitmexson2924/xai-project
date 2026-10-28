@@ -97,6 +97,20 @@ test.describe("a learner's whole study, in the browser", () => {
     const history = await (await request.get(`${API}/learners/me/history`, { headers: auth })).json();
     expect(history.some((h: { source: string }) => h.source === "explanation_feedback")).toBe(true);
 
+    // the learner's report: profile radars and the Explainability section (XAI matrix + charts)
+    await page.getByRole("navigation", { name: "Main" }).first().getByRole("link", { name: "Report" }).click();
+    await expect(page.getByTestId("learner-report")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId("report-disclaimer")).toContainText("not a clinical");
+    await expect(page.getByTestId("report-summary")).toContainText(/chance of a correct answer/);
+    await expect(page.getByTestId("xai-matrix").getByRole("row")).toHaveCount(9); // header + top 8
+    for (const chart of ["trait-radar", "mastery-radar", "shap-waterfall", "lime-bars", "shap-vs-lime", "dice-table", "decision-plot", "lrp-heatmap"]) {
+      await expect(page.getByTestId(chart)).toBeVisible();
+    }
+    await expect(page.getByTestId("xai-quality")).toContainText("LIME local fit");
+    // every chart can be read as a table instead
+    await page.getByTestId("shap-waterfall").getByRole("button", { name: "Show as table" }).click();
+    await expect(page.getByTestId("shap-waterfall").getByRole("table")).toContainText("This prediction");
+
     // open learner model (E4)
     await page.goto("/dashboard");
     await expect(page.getByTestId("trait-card")).toBeVisible();
@@ -133,5 +147,15 @@ test.describe("a learner's whole study, in the browser", () => {
     await page.getByRole("button", { name: "Download assignments.csv" }).click();
     const csv = await (await download).path();
     expect(csv).toBeTruthy();
+
+    // learners' reports by pseudonym, and the cross-learner SHAP beeswarm (admins only)
+    const xai = page.getByTestId("admin-xai");
+    await expect(xai.getByRole("link", { name: /Open report/ }).first()).toBeVisible();
+    await expect(page.getByTestId("beeswarm")).toBeVisible({ timeout: 60_000 });
+    await expect(xai).not.toContainText("@"); // no email addresses, only pseudonyms
+    await xai.getByRole("link", { name: /Open report/ }).first().click();
+    await expect(page).toHaveURL(/\/admin\/report\?p=[0-9a-f]{12}/);
+    await expect(page.getByTestId("learner-report")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole("heading", { level: 1, name: /^Learner [0-9a-f]{12}$/ })).toBeVisible();
   });
 });

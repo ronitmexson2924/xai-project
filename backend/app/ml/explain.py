@@ -63,14 +63,20 @@ class Explanation:
 # --- SHAP -----------------------------------------------------------------------------------
 
 
-def shap_attribution(model: PerformanceModel, x: np.ndarray) -> Attribution:
+def shap_values(model: PerformanceModel, xs: np.ndarray) -> tuple[np.ndarray, float]:
+    """SHAP values for several inputs in one explainer call (rows x features) and the base value
+    (the mean prediction over the reference sample) they are relative to."""
     import shap  # imported on first use: it adds over a second to the API's start-up
 
     masker = shap.maskers.Independent(model.background, max_samples=len(model.background))
     explainer = shap.PermutationExplainer(model.predict_proba, masker, seed=SEED)
-    result = explainer(np.atleast_2d(x), max_evals=SHAP_MAX_EVALS, silent=True)
-    values = np.asarray(result.values[0], dtype=float)
-    base = float(np.ravel(result.base_values)[0])
+    result = explainer(np.atleast_2d(xs), max_evals=SHAP_MAX_EVALS, silent=True)
+    return np.asarray(result.values, dtype=float), float(np.ravel(result.base_values)[0])
+
+
+def shap_attribution(model: PerformanceModel, x: np.ndarray) -> Attribution:
+    all_values, base = shap_values(model, x)
+    values = all_values[0]
     output = float(model.predict_proba(x)[0])
     return Attribution(
         "shap", "probability", values, base, output, residual=base + values.sum() - output
@@ -158,7 +164,9 @@ def lrp_attribution(
 # --- DiCE -----------------------------------------------------------------------------------
 
 
-def _mad(background: np.ndarray) -> np.ndarray:
+def mad_scale(background: np.ndarray) -> np.ndarray:
+    """Each feature's typical spread (median absolute deviation, or the standard deviation where the
+    MAD is zero): DiCE's unit for distances between learners."""
     mad = np.median(np.abs(background - np.median(background, axis=0)), axis=0)
     spread = background.std(axis=0)
     return np.where(mad > 1e-6, mad, np.where(spread > 1e-6, spread, 1.0))
@@ -180,7 +188,7 @@ def counterfactuals(
     want_correct = p_now < DECISION
     sign = 1.0 if want_correct else -1.0
     margin = 0.5  # in logit units past the decision boundary (DiCE's hinge margin)
-    mad = _mad(model.background)
+    mad = mad_scale(model.background)
     low = np.array([f.low for f in FEATURES], dtype=float)
     high = np.array([f.high for f in FEATURES], dtype=float)
     attempts = FEATURE_NAMES.index("attempts")
@@ -259,7 +267,7 @@ def counterfactuals(
 # --- all together ---------------------------------------------------------------------------
 
 
-def _spearman(a: np.ndarray, b: np.ndarray) -> float:
+def spearman(a: np.ndarray, b: np.ndarray) -> float:
     ra, rb = np.argsort(np.argsort(a)), np.argsort(np.argsort(b))
     if ra.std() == 0 or rb.std() == 0:
         return 0.0
@@ -275,7 +283,7 @@ def explain(model: PerformanceModel, x: np.ndarray) -> Explanation:
     }
     names = list(attributions)
     agreement = {
-        f"{a}~{b}": _spearman(attributions[a].values, attributions[b].values)
+        f"{a}~{b}": spearman(attributions[a].values, attributions[b].values)
         for i, a in enumerate(names)
         for b in names[i + 1 :]
     }

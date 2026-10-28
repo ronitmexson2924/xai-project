@@ -348,6 +348,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/learners/me/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Your report's Explainability section: why the model predicts what it does for you */
+        get: operations["my_report_api_v1_learners_me_report_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/learners": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Learners by pseudonym, most recently active first (admins only) */
+        get: operations["list_learners_api_v1_admin_learners_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/learners/{learner_pseudonym}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One learner's report, by pseudonym (admins only) */
+        get: operations["learner_report_api_v1_admin_learners__learner_pseudonym__report_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/xai/global": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** SHAP across learners' recent predictions, for a beeswarm (admins only, anonymous) */
+        get: operations["global_view_api_v1_admin_xai_global_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/graph": {
         parameters: {
             query?: never;
@@ -491,6 +559,17 @@ export interface components {
              * @default 0
              */
             fatigue: number;
+        };
+        /** AgreementPair */
+        AgreementPair: {
+            /** Pair */
+            pair: string;
+            /** Spearman */
+            spearman: number;
+            /** Top K Overlap */
+            top_k_overlap: number;
+            /** Verdict */
+            verdict: string;
         };
         /**
          * AttemptBody
@@ -686,12 +765,67 @@ export interface components {
             /** Then */
             then: string;
         };
+        /** CounterfactualOption */
+        CounterfactualOption: {
+            /** P Correct */
+            p_correct: number;
+            /** Values */
+            values: string[];
+            /** Changed */
+            changed: boolean[];
+        };
         /** CounterfactualOut */
         CounterfactualOut: {
             /** P Correct */
             p_correct: number;
             /** Changes */
             changes: components["schemas"]["CounterfactualChange"][];
+        };
+        /** CounterfactualTable */
+        CounterfactualTable: {
+            /**
+             * Direction
+             * @enum {string}
+             */
+            direction: "higher" | "lower";
+            /** Features */
+            features: string[];
+            /** Labels */
+            labels: string[];
+            /** Now */
+            now: string[];
+            /** P Now */
+            p_now: number;
+            /** Options */
+            options: components["schemas"]["CounterfactualOption"][];
+        };
+        /** DecisionPlot */
+        DecisionPlot: {
+            /** Base */
+            base: number;
+            /** Features */
+            features: string[];
+            /** Labels */
+            labels: string[];
+            /** Predictions */
+            predictions: components["schemas"]["PredictionColumn"][];
+            /** Contributions */
+            contributions: number[][];
+        };
+        /** DiceQuality */
+        DiceQuality: {
+            /** Requested */
+            requested: number;
+            /** Found */
+            found: number;
+            /** Validity */
+            validity: number;
+            /** Proximity */
+            proximity: number | null;
+            /** Sparsity */
+            sparsity: number | null;
+            /** Diversity */
+            diversity: number | null;
         };
         /** EventBatchIn */
         EventBatchIn: {
@@ -831,6 +965,61 @@ export interface components {
             dismissed_quickly: boolean;
             change?: components["schemas"]["ChangeNotice"] | null;
         };
+        /** Focus */
+        Focus: {
+            /** Recommendation Id */
+            recommendation_id: string | null;
+            /** Concept Id */
+            concept_id: string;
+            /** Concept */
+            concept: string;
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** P Correct */
+            p_correct: number;
+            /** Answered Correctly */
+            answered_correctly: boolean | null;
+        };
+        /**
+         * GlobalAttributions
+         * @description SHAP for recent predictions across learners, for a beeswarm. No learner is identified.
+         */
+        GlobalAttributions: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Learners */
+            learners: number;
+            /** Predictions */
+            predictions: number;
+            /** Base */
+            base: number | null;
+            /** Features */
+            features: components["schemas"]["GlobalFeature"][];
+        };
+        /** GlobalFeature */
+        GlobalFeature: {
+            /** Name */
+            name: string;
+            /** Label */
+            label: string;
+            /** Mean Abs Shap */
+            mean_abs_shap: number;
+            /** Points */
+            points: components["schemas"]["GlobalPoint"][];
+        };
+        /** GlobalPoint */
+        GlobalPoint: {
+            /** Shap */
+            shap: number;
+            /** Position */
+            position: number;
+        };
         /** GraphResponse */
         GraphResponse: {
             /** Concepts */
@@ -842,6 +1031,30 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** Heatmap */
+        Heatmap: {
+            /** Unit */
+            unit: string;
+            /** Features */
+            features: string[];
+            /** Labels */
+            labels: string[];
+            /** Predictions */
+            predictions: components["schemas"]["PredictionColumn"][];
+            /** Values */
+            values: number[][];
+        };
+        /** LearnerListing */
+        LearnerListing: {
+            /** Pseudonym */
+            pseudonym: string;
+            /** Arm */
+            arm: string;
+            /** Attempts */
+            attempts: number;
+            /** Last Active */
+            last_active: string | null;
         };
         /** LearnerState */
         LearnerState: {
@@ -886,6 +1099,37 @@ export interface components {
              */
             version: number;
         };
+        /**
+         * MatrixRow
+         * @description One factor in the XAI matrix, for the focus prediction.
+         */
+        MatrixRow: {
+            /** Name */
+            name: string;
+            /** Label */
+            label: string;
+            /** Meaning */
+            meaning: string;
+            /** Value */
+            value: number;
+            /** Display */
+            display: string;
+            /** Shap */
+            shap: number | null;
+            /** Lime */
+            lime: number | null;
+            /** Lrp */
+            lrp: number | null;
+            /**
+             * Direction
+             * @enum {string}
+             */
+            direction: "raises" | "lowers" | "neutral";
+            /** Consistent */
+            consistent: boolean | null;
+            /** Recent Shap */
+            recent_shap: number | null;
+        };
         /** MethodAttribution */
         MethodAttribution: {
             /** Method */
@@ -906,6 +1150,18 @@ export interface components {
             contributions: {
                 [key: string]: number;
             };
+        };
+        /** MethodStatus */
+        MethodStatus: {
+            /**
+             * Method
+             * @enum {string}
+             */
+            method: "shap" | "lime" | "lrp" | "dice" | "shap_recent" | "lrp_recent";
+            /** Ok */
+            ok: boolean;
+            /** Detail */
+            detail?: string | null;
         };
         /** ModelInsight */
         ModelInsight: {
@@ -982,6 +1238,23 @@ export interface components {
             rate_limiter_enabled: boolean;
         };
         /**
+         * PredictionColumn
+         * @description One recent prediction: the question's concept, when, and how it turned out.
+         */
+        PredictionColumn: {
+            /** Concept */
+            concept: string;
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** Correct */
+            correct: boolean;
+            /** P Correct */
+            p_correct: number;
+        };
+        /**
          * PublicItem
          * @description Item as sent to the frontend: the answer is never included.
          */
@@ -1002,6 +1275,16 @@ export interface components {
              * @default []
              */
             options: string[];
+        };
+        /** Quality */
+        Quality: {
+            /** Shap Additivity Error */
+            shap_additivity_error: number | null;
+            /** Lrp Conservation Error */
+            lrp_conservation_error: number | null;
+            /** Lime R2 */
+            lime_r2: number | null;
+            dice: components["schemas"]["DiceQuality"] | null;
         };
         /** QuestionnaireAnswersIn */
         QuestionnaireAnswersIn: {
@@ -1031,6 +1314,24 @@ export interface components {
              * @default
              */
             source: string;
+        };
+        /** Radar */
+        Radar: {
+            /** Traits */
+            traits: components["schemas"]["RadarAxis"][];
+            /** Clusters */
+            clusters: components["schemas"]["RadarAxis"][];
+        };
+        /** RadarAxis */
+        RadarAxis: {
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /** Value */
+            value: number;
+            /** Detail */
+            detail: string;
         };
         /**
          * Rationale
@@ -1284,6 +1585,34 @@ export interface components {
             /** Display Name */
             display_name: string;
         };
+        /** UserReport */
+        UserReport: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            model: components["schemas"]["ModelSummary"];
+            /** Disclaimer */
+            disclaimer: string;
+            /** Summary */
+            summary: string;
+            focus: components["schemas"]["Focus"] | null;
+            /** Matrix */
+            matrix: components["schemas"]["MatrixRow"][];
+            /** Agreement */
+            agreement: components["schemas"]["AgreementPair"][];
+            quality: components["schemas"]["Quality"];
+            waterfall: components["schemas"]["Waterfall"] | null;
+            decision: components["schemas"]["DecisionPlot"] | null;
+            heatmap: components["schemas"]["Heatmap"] | null;
+            counterfactuals: components["schemas"]["CounterfactualTable"] | null;
+            radar: components["schemas"]["Radar"];
+            /** Recent Predictions */
+            recent_predictions: number;
+            /** Methods */
+            methods: components["schemas"]["MethodStatus"][];
+        };
         /** UserResponse */
         UserResponse: {
             /**
@@ -1333,6 +1662,26 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** Waterfall */
+        Waterfall: {
+            /** Base */
+            base: number;
+            /** Output */
+            output: number;
+            /** Steps */
+            steps: components["schemas"]["WaterfallStep"][];
+        };
+        /** WaterfallStep */
+        WaterfallStep: {
+            /** Name */
+            name: string;
+            /** Label */
+            label: string;
+            /** Display */
+            display: string;
+            /** Value */
+            value: number;
         };
     };
     responses: never;
@@ -1895,6 +2244,97 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_report_api_v1_learners_me_report_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserReport"];
+                };
+            };
+        };
+    };
+    list_learners_api_v1_admin_learners_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearnerListing"][];
+                };
+            };
+        };
+    };
+    learner_report_api_v1_admin_learners__learner_pseudonym__report_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                learner_pseudonym: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserReport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    global_view_api_v1_admin_xai_global_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GlobalAttributions"];
                 };
             };
         };

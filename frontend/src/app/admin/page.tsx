@@ -9,6 +9,7 @@ import { Button, ButtonLink, Spinner } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { fadeUp, Stagger } from "@/components/ui/motion";
 import { Progress } from "@/components/ui/Progress";
+import { AdminXai } from "@/components/report/AdminXai";
 import { AdminMetricsResponse, api } from "@/lib/api";
 import { useLearnerGuard } from "@/lib/guards";
 
@@ -254,6 +255,10 @@ export default function AdminPage() {
                   ))}
                 </div>
               </Card>
+            </motion.div>
+
+            <motion.div variants={fadeUp}>
+              <AdminXai />
             </motion.div>
           </>
         )}

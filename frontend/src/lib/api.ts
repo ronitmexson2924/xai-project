@@ -104,6 +104,14 @@ export interface ModelCard {
   limitations: string[];
 }
 
+// The learner report's Explainability section (backend app/xai): learner and admin views
+export type UserReport = Json<"/api/v1/learners/me/report", "get", 200>;
+export type ReportMatrixRow = UserReport["matrix"][number];
+export type ReportPrediction = NonNullable<UserReport["decision"]>["predictions"][number];
+export type RadarAxis = UserReport["radar"]["traits"][number];
+export type LearnerListing = Json<"/api/v1/admin/learners", "get", 200>[number];
+export type GlobalAttributions = Json<"/api/v1/admin/xai/global", "get", 200>;
+
 // Learner state, graph, tests, admin
 export type LearnerState = Json<"/api/v1/learners/me/state", "get", 200>;
 export type StateUpdateView = Json<"/api/v1/learners/me/history", "get", 200>[number];
@@ -231,6 +239,7 @@ export const api = {
   learners: {
     getState: () => get<LearnerState>("/api/v1/learners/me/state"),
     getHistory: (limit = 50) => get<StateUpdateView[]>(`/api/v1/learners/me/history?limit=${limit}`),
+    getReport: () => get<UserReport>("/api/v1/learners/me/report"),
   },
 
   graph: {
@@ -246,6 +255,10 @@ export const api = {
   admin: {
     getMetrics: () => get<AdminMetricsResponse>("/api/v1/admin/metrics"),
     getOps: () => get<OpsStatus>("/api/v1/ops/status"),
+    learners: () => get<LearnerListing[]>("/api/v1/admin/learners"),
+    learnerReport: (learnerPseudonym: string) =>
+      get<UserReport>(`/api/v1/admin/learners/${encodeURIComponent(learnerPseudonym)}/report`),
+    globalXai: () => get<GlobalAttributions>("/api/v1/admin/xai/global"),
     downloadCsv: async (table: "users" | "assignments" | "attempts") => {
       const token = getStoredToken();
       const res = await fetch(`${API_BASE_URL}/api/v1/admin/export.csv?table=${table}`, {

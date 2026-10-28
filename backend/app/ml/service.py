@@ -123,6 +123,19 @@ def summarise(e: explain.Explanation) -> str:
     return f"The model put your chance of answering correctly at {e.p_correct:.0%}: {reason}."
 
 
+def model_summary(model: PerformanceModel) -> ModelSummary:
+    """The model's name and headline test results, from its model card."""
+    card = model.card
+    metrics = card.get("test_metrics", {})
+    return ModelSummary(
+        name=card.get("name", "Performance model"),
+        architecture=card.get("architecture", ""),
+        trained_on=card.get("trained_on", ""),
+        test_auc=metrics.get("neural network (this model)", {}).get("auc", float("nan")),
+        bkt_auc=metrics.get("BKT (the learner model)", {}).get("auc", float("nan")),
+    )
+
+
 def _to_insight(
     e: explain.Explanation,
     recommendation_id: UUID,
@@ -130,8 +143,6 @@ def _to_insight(
     concept_name: str,
     model: PerformanceModel,
 ) -> ModelInsight:
-    card = model.card
-    metrics = card.get("test_metrics", {})
     return ModelInsight(
         recommendation_id=recommendation_id,
         concept_id=concept_id,
@@ -170,13 +181,7 @@ def _to_insight(
         agreement=e.agreement,
         notes=e.notes,
         answered_correctly=None,
-        model=ModelSummary(
-            name=card.get("name", "Performance model"),
-            architecture=card.get("architecture", ""),
-            trained_on=card.get("trained_on", ""),
-            test_auc=metrics.get("neural network (this model)", {}).get("auc", float("nan")),
-            bkt_auc=metrics.get("BKT (the learner model)", {}).get("auc", float("nan")),
-        ),
+        model=model_summary(model),
     )
 
 

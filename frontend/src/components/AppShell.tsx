@@ -14,6 +14,7 @@ import { cn } from "./ui/cn";
 const LINKS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/session", label: "Learn" },
+  { href: "/report", label: "Report" },
   { href: "/tests", label: "Tests" },
   { href: "/model", label: "Model" },
 ];

@@ -143,3 +143,46 @@ When LIME fits poorly or the methods disagree, the panel says so.
 **Scope:** these explain the performance model's prediction, not the planner's choice (that is
 E1–E2), and not causes in the learner.
 
+
+## 8. The learner report's Explainability section (R13)
+
+Each learner has a report (`/report`; admins open any learner's by pseudonym from `/admin`) with
+their profile and an Explainability section built by `backend/app/xai/explain_user`.
+
+**What is explained.** The performance model's predictions about this learner, not their mastery
+or trait estimates. Those come from transparent Bayesian models with an exact evidence trail
+(E4) and are shown as radar charts, not re-explained.
+
+- The *focus prediction*: the latest recommended question (inputs as they were when it was
+  recommended); without one, the latest answered question.
+- The *recent predictions*: the learner's last 30 answered questions, for the person-level views.
+
+**Which methods, and why (chosen for this model, a NumPy MLP on 13 tabular features):**
+
+| Method | Used for | Why this variant |
+|---|---|---|
+| SHAP | Focus prediction (waterfall, matrix); recent predictions (decision plot, "typical" column); admin beeswarm | Permutation explainer: model-agnostic and exact (base + values = prediction, checked). TreeExplainer does not apply; Deep/GradientExplainer need PyTorch or TensorFlow; KernelExplainer is slower and approximate. One batched call for 30 predictions takes about 0.3 s. |
+| LIME | Focus prediction (top-10 bars, matrix, SHAP-vs-LIME) | Tabular explainer with its R² shown. The text explainer does not apply: the model has no free-text input. |
+| LRP | Focus prediction (matrix); recent predictions (heatmap) | Valid because the model is a neural network. Epsilon rule in NumPy on the network's own weights (conservation tested); Captum and zennit would need PyTorch. |
+| DiCE | Focus prediction (counterfactual table) | 4 diverse counterfactuals that move only actionable features: questionnaire traits, difficulty and guess rate fixed; answered questions never decrease; a misconception can only be cleared. NumPy implementation of DiCE's loss (`dice-ml` would add about 430 MB). |
+
+**Trust measures in every report:**
+- agreement between methods (Spearman ρ and top-5 overlap for each pair);
+- SHAP completeness error;
+- LRP relevance absorbed by biases;
+- LIME R²;
+- DiCE validity, proximity (MAD units), sparsity and diversity (Mothilal et al., 2020).
+
+**Robustness.**
+- Each method runs on its own: one failing leaves the others, and the report lists what is missing.
+- Reports are cached until the learner answers again or gets a new question.
+- The explainers are warmed in a background thread at start-up, so the first report is not slow.
+
+**Responsible reporting.**
+- Every report carries a visible note: it describes the model's reasoning about answers in this
+  app, not a clinical, psychological or diagnostic assessment, and attributions describe the
+  model, not causes in the learner.
+- The summary paragraph is impersonal and neutral, and a test rejects judgemental words.
+- No other learner's data appears in a learner's report. The cross-learner beeswarm is on the
+  admin page only and carries no identifiers.
+- Admins see learners only by pseudonym.

@@ -1,4 +1,5 @@
 import logging
+import threading
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -8,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
-from app import __version__
+from app import __version__, xai
 from app.api import api_router
 from app.api.errors import UNPROCESSABLE
 from app.api.middleware import (
@@ -27,6 +28,9 @@ logger = logging.getLogger("pcg")
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     if settings.environment == "production" and (problems := check_production_settings(settings)):
         raise RuntimeError("unsafe production settings: " + "; ".join(problems))
+    if settings.environment != "test":
+        # import and exercise the explainers in the background, so the first report is not slow
+        threading.Thread(target=xai.warm_up, name="xai-warm-up", daemon=True).start()
     yield
 
 

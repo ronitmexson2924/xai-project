@@ -69,7 +69,7 @@ design and its analysis code ship with it.
   - pre-registered hypotheses H1–H5;
   - pseudonymised exports.
 - **Production hygiene.**
-  - 242 backend tests, including an adversarial security suite;
+  - 249 backend tests, including an adversarial security suite;
   - Playwright end-to-end tests against the real stack;
   - load tested at 100 concurrent learners;
   - WCAG 2 AA audited UI in light and dark themes.
@@ -220,6 +220,26 @@ Explanation quality:
   random factors.
 
 Full report: [`research/reports/performance_model.md`](research/reports/performance_model.md).
+
+### The learner report
+
+Each learner has a report at `/report`, which also exports to PDF. It has two parts:
+
+- **Profile:** their profile as two radar charts: the five traits, and mastery for each topic.
+- **Explainability:** why the model predicts what it does for them:
+  - an **XAI matrix**: SHAP, LIME and LRP for each factor, its direction, a plain meaning, and
+    whether the methods agree;
+  - **method agreement:** Spearman ρ and top-5 overlap for each pair of methods;
+  - **explanation quality:** LIME R², SHAP and LRP completeness, and DiCE validity, proximity,
+    sparsity and diversity;
+  - **a neutral summary paragraph**;
+  - **charts:** a SHAP waterfall, a SHAP decision plot, LIME bars, SHAP vs LIME, a DiCE
+    counterfactual table and an LRP heatmap.
+
+Every report notes that it describes the model, not a clinical or diagnostic assessment. Admins
+can open any learner's report by pseudonym, and a cross-learner SHAP beeswarm appears on the
+admin page only. The method choices are explained in
+[`docs/XAI_DESIGN.md`](docs/XAI_DESIGN.md) §8.
 Retrain with `python -m app.ml.train` (simulated learners) or `--source db` (pilot data).
 
 ---
@@ -297,9 +317,10 @@ docs/               Brief, architecture, data model, API contract, model spec, e
 | `/dashboard` | Next step, the concept map with "why we think this" for every estimate, how explanations adapt |
 | `/session` | The learning loop: explanation → micro-check → result → "Why this?" and the model's prediction |
 | `/tests` | The pre-test and post-test (parallel forms, never scored to the learner) |
+| `/report` | The learner's report: profile radars and the Explainability section (XAI matrix, method agreement and quality, SHAP/LIME/LRP/DiCE charts), exportable to PDF |
 | `/model` | How the AI model works: metrics against BKT, global importance, explanation-quality checks |
 | `/account` | Data and privacy, withdrawal with deletion |
-| `/admin` | Study metrics and pseudonymised CSV exports (admins only) |
+| `/admin` | Study metrics, pseudonymised CSV exports, learners' reports by pseudonym and the cross-learner SHAP beeswarm (admins only) |
 
 **Design system.**
 - Semantic colour tokens for light and dark themes. The theme follows the system and can be
@@ -372,10 +393,10 @@ cd frontend && PYTHON=../backend/.venv/bin/python npx playwright test   # starts
 
 | Suite | Scope |
 |---|---|
-| **Backend: 242 tests** | Learner model maths, planner policy and rationale, explainer grounding, telemetry idempotency, API contracts, the ML explainers' formal properties (SHAP additivity, LRP conservation, LIME recovery, DiCE validity and feasibility) |
+| **Backend: 249 tests** | Learner model maths, planner policy and rationale, explainer grounding, telemetry idempotency, API contracts, the ML explainers' formal properties (SHAP additivity, LRP conservation, LIME recovery, DiCE validity and feasibility) |
 | **Security** (`test_security.py`, `abuse.spec.ts`) | Forged and revoked tokens, access to other learners' data, replayed answers, injection, oversized payloads, login lockout |
 | **End to end: 20 Playwright tests** | The whole study journey in a real browser against Postgres, the API and the production build, plus keyboard-only, dark-mode and phone-width accessibility checks |
-| **Frontend unit: 15 tests** | Learner-facing copy generators and the code highlighter |
+| **Frontend unit: 24 tests** | Learner-facing copy generators, the code highlighter and the report charts' geometry |
 | **Load** (`research/load_test.py`) | 100 concurrent learners: `session/next` p95 35 ms (budget 300 ms), `attempts` p95 54 ms (budget 200 ms) |
 
 CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs four jobs on every PR:

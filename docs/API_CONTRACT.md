@@ -35,6 +35,10 @@ against the caller. Another learner's id answers `404`, exactly like an id that 
 | `GET /recommendations/{id}/why` | → `RecommendationWhy` | XAI E1–E3 ("Why this?"), exactly as stored when the planner decided |
 | `GET /recommendations/{id}/model` | → `ModelInsight` | The performance model's P(correct) for that question, from the features as they were when it was recommended. Includes the SHAP, LIME (with R²) and LRP attributions, DiCE counterfactuals, method agreement, notes, and `answered_correctly` once answered. Own recommendations only (404 otherwise); about 0.5 s the first time, then cached |
 | `GET /model/card` | → model card | The model's training data, test metrics against BKT and logistic regression, global SHAP and LRP importance, and explanation-quality checks. Any signed-in user |
+| `GET /learners/me/report` | → `UserReport` | The learner's report (XAI_DESIGN §8): profile radars, the XAI matrix (SHAP, LIME, LRP, direction, agreement per factor), method agreement, explanation quality (LIME R², SHAP/LRP completeness, DiCE validity/proximity/sparsity/diversity), a neutral summary, a disclaimer, and the data for the waterfall, decision plot, LRP heatmap and DiCE table. Each method runs on its own; `methods` lists any that failed. Own data only; cached until the next answer |
+| `GET /admin/learners` | → `LearnerListing[]` | Admins only: learners by pseudonym (HMAC with `ANALYSIS_SALT`), arm, answers and last activity; never names or emails. 503 without a salt |
+| `GET /admin/learners/{pseudonym}/report` | → `UserReport` | Admins only: one learner's report, by pseudonym; 404 for an unknown one |
+| `GET /admin/xai/global` | → `GlobalAttributions` | Admins only: SHAP for recent predictions across learners (at most 60 learners × 8 answers), for the beeswarm; no identifiers. Cached for 10 minutes |
 | `GET /learners/me/state` | → `LearnerState` | Open learner model |
 | `GET /learners/me/history?limit=&before_id=` | → `list[StateUpdateView]` | Newest first, at most 200 per page |
 | `GET /learners/me/explain?subject=` | → `BeliefExplanation` | XAI E4. `subject` = concept id or trait name |

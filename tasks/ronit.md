@@ -294,6 +294,25 @@
     showed reliance on the questionnaire traits and on difficulty, which the simulator's ground
     truth does not use: overfitting. Selection cut that about fivefold._
 
+## R13: The learner report's Explainability section
+- **Do:** add an Explainability section to each learner's report: an XAI matrix (SHAP, LIME,
+  LRP per factor, with direction, plain meaning and whether the methods agree), agreement and
+  quality metrics, a neutral summary paragraph, and charts. Show the cross-learner view to admins
+  only (XAI_DESIGN §8).
+- [x] `backend/app/xai/`: `explain_user` (one entry point), per-method failure isolation, cache,
+  start-up warm-up; `global_attributions` for admins
+- [x] Endpoints: `GET /learners/me/report`, `GET /admin/learners`,
+  `GET /admin/learners/{pseudonym}/report`, `GET /admin/xai/global`
+- [x] Report page (`/report`) and admin view, with SVG charts and print-to-PDF:
+  - trait and mastery radars;
+  - SHAP waterfall and decision plot;
+  - LIME bars and SHAP vs LIME;
+  - DiCE table;
+  - LRP heatmap;
+  - admin-only beeswarm.
+- [x] Tests: `tests/test_xai_report.py`, `src/lib/report-charts.test.ts`, E2E in `journey.spec.ts`
+- [x] **R13 done**
+
 ---
 
 ## I1: Integration (agreed with Ronit, done by his agent on `ronit-integration`)
