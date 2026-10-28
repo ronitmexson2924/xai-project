@@ -11,6 +11,7 @@ from fastapi import APIRouter
 
 from app.api.deps import GraphDep
 from app.api.errors import not_found
+from app.api.heavy import heavy_work
 from app.auth import DbDep, LearnerDep, UserDep
 from app.ml.service import ModelInsight, insight_for_recommendation, model_card
 
@@ -27,7 +28,8 @@ def recommendation_model(
     recommendation_id: UUID, current: LearnerDep, session: DbDep, graph: GraphDep
 ) -> ModelInsight:
     try:
-        return insight_for_recommendation(session, graph, current.id, recommendation_id)
+        with heavy_work(current.id):
+            return insight_for_recommendation(session, graph, current.id, recommendation_id)
     except LookupError:
         raise not_found("recommendation") from None
 

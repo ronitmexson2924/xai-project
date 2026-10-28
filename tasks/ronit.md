@@ -315,6 +315,24 @@
 
 ---
 
+## R14: Fixes from the security review
+- **Do:** fix the nine findings of the codebase security review (asked for by Ronit). Most files
+  are Mit's (API, auth, frontend, deploy config), so Mit reviews the PR.
+- [x] Session token in an httpOnly, `SameSite=Strict` cookie, held by the web app's server, which
+  forwards `/api/v1/*` (`frontend/src/app/api/[...path]/route.ts`); CSP `connect-src 'self'`
+- [x] CPU-heavy explanation and report endpoints: per-user limit and a concurrency cap
+  (`app/api/heavy.py`)
+- [x] Rate-limit and login counters shared through Redis when `REDIS_URL` is set
+- [x] `X-Forwarded-For` only from `TRUSTED_PROXY_IPS`; the web app names the browser with
+  `PROXY_SECRET`
+- [x] Sign-ups limited per client and closable (`ALLOW_REGISTRATION`)
+- [x] Security headers on every response (429 and 413 too); HSTS and no version in production
+- [x] Docker Compose: ports on 127.0.0.1, secrets overridable; Render: paid database, Key Value
+- [x] Tests: `tests/test_security_review.py`, `src/lib/proxy.test.ts`, `abuse.spec.ts`
+- [x] **R14 done**
+
+---
+
 ## I1: Integration (agreed with Ronit, done by his agent on `ronit-integration`)
 - **Do:** merge `mit` and `ronit`, run the API on Postgres and the real services, build M9/M10,
   and test the app the way a hostile user would.

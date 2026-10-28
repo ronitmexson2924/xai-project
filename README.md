@@ -69,7 +69,7 @@ design and its analysis code ship with it.
   - pre-registered hypotheses H1–H5;
   - pseudonymised exports.
 - **Production hygiene.**
-  - 249 backend tests, including an adversarial security suite;
+  - 264 backend tests, including an adversarial security suite;
   - Playwright end-to-end tests against the real stack;
   - load tested at 100 concurrent learners;
   - WCAG 2 AA audited UI in light and dark themes.
@@ -373,12 +373,17 @@ hard-coded.
 | `ENVIRONMENT` | `development` | `production` refuses to start with a weak `JWT_SECRET`, `CORS_ORIGINS=*` or draft items |
 | `DATABASE_URL` | local Postgres | SQLAlchemy URL (`postgresql+psycopg://…`) |
 | `JWT_SECRET`, `JWT_EXPIRE_HOURS` | — / `24` | Token signing; 32+ random characters in production |
-| `CORS_ORIGINS` | `http://localhost:3000` | The frontend origin(s), comma separated |
+| `CORS_ORIGINS` | `http://localhost:3000` | Browser origins allowed to call the API directly (the web app goes through its own server, so it needs none) |
+| `TRUST_FORWARDED_FOR`, `TRUSTED_PROXY_IPS` | `false`, private networks | Use `X-Forwarded-For` only behind a proxy, and only from that proxy (`*` where every request is proxied, as on Render) |
+| `PROXY_SECRET` | — | Shared by the API and the web app's server, which then names each browser's address for rate limiting |
+| `REDIS_URL` | — | Rate-limit counters shared by every API instance; without it, each process counts alone |
+| `ALLOW_REGISTRATION`, `REGISTER_MAX_PER_HOUR` | `true`, `10` | Self sign-up (off for a study with issued accounts) and sign-ups per client per hour |
+| `XAI_MAX_CONCURRENT`, `XAI_WAIT_SECONDS`, `XAI_REQUESTS_PER_MINUTE` | `2`, `10`, `20` | Limits on the CPU-heavy explanation and report endpoints |
 | `ANALYSIS_SALT` | — | HMAC salt for pseudonymous research exports; fixed for a study |
 | `INCLUDE_DRAFT_ITEMS` | `false` | Serve unreviewed items (demos only) |
 | `RATE_LIMIT_*`, `LOGIN_MAX_FAILURES`, `LOGIN_LOCKOUT_SECONDS` | `120/min`, `5`, `900 s` | Abuse protection |
 | `GEMINI_API_KEY`, `GEMINI_MODEL_EXPLAIN`, `GEMINI_MODEL_OFFLINE`, `LLM_TIMEOUT_SECONDS` | — | Optional LLM rephrasing |
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | API base URL compiled into the frontend |
+| `API_URL` (frontend server) | `http://localhost:8000` | Where the web app's server forwards `/api/v1/*`; read at run time (falls back to `NEXT_PUBLIC_API_URL`) |
 | `NEXT_PUBLIC_ENGAGEMENT_UI`, `NEXT_PUBLIC_RECAP_EVERY` | `false`, `5` | Engagement extras and the recap interval |
 
 ---
@@ -393,10 +398,10 @@ cd frontend && PYTHON=../backend/.venv/bin/python npx playwright test   # starts
 
 | Suite | Scope |
 |---|---|
-| **Backend: 249 tests** | Learner model maths, planner policy and rationale, explainer grounding, telemetry idempotency, API contracts, the ML explainers' formal properties (SHAP additivity, LRP conservation, LIME recovery, DiCE validity and feasibility) |
-| **Security** (`test_security.py`, `abuse.spec.ts`) | Forged and revoked tokens, access to other learners' data, replayed answers, injection, oversized payloads, login lockout |
-| **End to end: 20 Playwright tests** | The whole study journey in a real browser against Postgres, the API and the production build, plus keyboard-only, dark-mode and phone-width accessibility checks |
-| **Frontend unit: 24 tests** | Learner-facing copy generators, the code highlighter and the report charts' geometry |
+| **Backend: 264 tests** | Learner model maths, planner policy and rationale, explainer grounding, telemetry idempotency, API contracts, the ML explainers' formal properties (SHAP additivity, LRP conservation, LIME recovery, DiCE validity and feasibility) |
+| **Security** (`test_security.py`, `test_security_review.py`, `abuse.spec.ts`, `proxy.test.ts`) | Forged and revoked tokens, access to other learners' data, replayed answers, injection, oversized payloads, login lockout, spoofed client addresses, shared rate limits, limits on the heavy endpoints, the httpOnly session cookie |
+| **End to end: 21 Playwright tests** | The whole study journey in a real browser against Postgres, the API and the production build, plus keyboard-only, dark-mode and phone-width accessibility checks |
+| **Frontend unit: 31 tests** | Learner-facing copy generators, the code highlighter, the report charts' geometry and the API proxy |
 | **Load** (`research/load_test.py`) | 100 concurrent learners: `session/next` p95 35 ms (budget 300 ms), `attempts` p95 54 ms (budget 200 ms) |
 
 CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs four jobs on every PR:
@@ -446,8 +451,21 @@ The pre-registration and analysis code are in [`research/`](research/). The rule
 
 | Component | Target | Notes |
 |---|---|---|
-| API + PostgreSQL | Render ([`render.yaml`](render.yaml)) | Runs with `ENVIRONMENT=production`; migrations and content seeding run on start |
-| Frontend | Vercel ([`frontend/vercel.json`](frontend/vercel.json)) | Set `NEXT_PUBLIC_API_URL` to the API URL, and put the frontend URL in the API's `CORS_ORIGINS` |
+| API + PostgreSQL + Redis | Render ([`render.yaml`](render.yaml)) | Runs with `ENVIRONMENT=production`; migrations and content seeding run on start. Generates `JWT_SECRET`, `ANALYSIS_SALT` and `PROXY_SECRET`; the database is on a paid plan (free ones expire) |
+| Frontend | Vercel ([`frontend/vercel.json`](frontend/vercel.json)) | Set `API_URL` to the API's URL and `PROXY_SECRET` to the value Render generated |
+
+Steps:
+
+1. Render → **New → Blueprint** → this repository. It creates the API, Postgres and a Key Value
+   (Redis) store. Optionally fill in the Gemini variables for live explanations.
+2. Vercel → import the repository with root directory `frontend`; set `API_URL`
+   (`https://pcg-engine-backend.onrender.com`) and `PROXY_SECRET` (copied from Render).
+3. In the Render shell: `python -m app.auth.onboard admin --email you@example.com`.
+4. Review the item bank (`python -m app.graph.review`), commit, and redeploy: production serves only
+   `approved` items. For a study, set `ALLOW_REGISTRATION=false` and issue accounts with
+   `onboard cohort`.
+5. Schedule `python -m app.auth.purge` daily (a Render cron job), and back up `ANALYSIS_SALT`:
+   regenerating it changes every pseudonym.
 
 Operations:
 

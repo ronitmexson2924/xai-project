@@ -43,7 +43,8 @@ app = FastAPI(
     redoc_url=None,
 )
 
-app.add_middleware(SecurityHeadersMiddleware)
+# the last one added runs first: body limit, CORS and rate limit sit inside the security headers,
+# so their own responses (413, 429) carry the headers too
 app.add_middleware(RateLimitMiddleware)
 app.add_middleware(
     CORSMiddleware,
@@ -53,6 +54,7 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 app.add_middleware(BodySizeLimitMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
 
 
 @app.exception_handler(HTTPException)
@@ -90,9 +92,17 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     )
 
 
+def _status(status_word: str) -> dict[str, str]:
+    """A health answer; the version only outside production, where it helps attackers more than
+    operators."""
+    if settings.environment == "production":
+        return {"status": status_word}
+    return {"status": status_word, "version": __version__}
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "version": __version__}
+    return _status("ok")
 
 
 @app.get("/health/ready")
@@ -104,7 +114,7 @@ def ready() -> JSONResponse:
     except Exception:
         logger.exception("database not reachable")
         return JSONResponse(status_code=503, content={"status": "unavailable"})
-    return JSONResponse(content={"status": "ready", "version": __version__})
+    return JSONResponse(content=_status("ready"))
 
 
 app.include_router(auth_router, prefix="/api/v1")

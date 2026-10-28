@@ -1,18 +1,20 @@
 # The whole app with one command:   docker compose up --build
 # then open http://localhost:3000 (API on http://localhost:8000, Postgres on localhost:5432).
 #
-# For local development and demos only: fixed development secrets, and unreviewed (draft) items
-# are served because the item bank is still in review. Never deploy this file; production uses
-# render.yaml (API) and Vercel (frontend). `docker compose up -d db` still starts just Postgres.
+# For local development and demos only: the secrets below are development defaults (override any
+# of them in .env or the shell), every port listens on this machine only (127.0.0.1), and
+# unreviewed (draft) items are served because the item bank is still in review. Never deploy this
+# file; production uses render.yaml (API) and Vercel (frontend). `docker compose up -d db` still
+# starts just Postgres.
 services:
   db:
     image: postgres:16
     environment:
       POSTGRES_USER: pcg
-      POSTGRES_PASSWORD: pcg
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pcg}
       POSTGRES_DB: pcg
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -30,10 +32,10 @@ services:
         required: false
     environment:
       ENVIRONMENT: development
-      DATABASE_URL: postgresql+psycopg://pcg:pcg@db:5432/pcg
-      JWT_SECRET: local-docker-compose-only-secret-not-for-production
+      DATABASE_URL: postgresql+psycopg://pcg:${POSTGRES_PASSWORD:-pcg}@db:5432/pcg
+      JWT_SECRET: ${JWT_SECRET:-local-docker-compose-only-secret-not-for-production}
       CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
-      ANALYSIS_SALT: local-docker-compose-salt
+      ANALYSIS_SALT: ${ANALYSIS_SALT:-local-docker-compose-salt}
       INCLUDE_DRAFT_ITEMS: "true"
       DEMO_PASSWORD: Demo-pass-1
       ADMIN_EMAIL: admin@example.com
@@ -45,7 +47,7 @@ services:
       sh -c "alembic upgrade head && python -m app.devstack /content &&
       uvicorn app.main:app --host 0.0.0.0 --port 8000"
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
       interval: 5s
@@ -57,13 +59,15 @@ services:
     build:
       context: ./frontend
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:8000
         NEXT_PUBLIC_ENGAGEMENT_UI: ${NEXT_PUBLIC_ENGAGEMENT_UI:-false}
+    environment:
+      # the frontend server forwards the browser's API calls (src/app/api) over the compose network
+      API_URL: http://api:8000
     depends_on:
       api:
         condition: service_healthy
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
 
 volumes:
   pgdata:

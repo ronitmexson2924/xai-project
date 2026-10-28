@@ -71,6 +71,10 @@ export async function answerCurrentQuestion(page: Page) {
   await expect(page.getByTestId("attempt-result")).toBeVisible();
 }
 
+/** The session token, from the httpOnly cookie (the test can read it; page scripts cannot). */
 export async function token(page: Page): Promise<string> {
-  return (await page.evaluate(() => localStorage.getItem("pcg_token"))) ?? "";
+  const cookies = await page.context().cookies();
+  return cookies.find((c) => c.name === SESSION_COOKIE)?.value ?? "";
 }
+
+export const SESSION_COOKIE = "pcg_session";

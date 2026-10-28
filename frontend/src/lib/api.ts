@@ -1,7 +1,10 @@
 import type { paths } from "./api.d";
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const TOKEN_KEY = "pcg_token";
+/**
+ * Every call goes to this app's own /api/v1 route (src/app/api/[...path]/route.ts), which forwards
+ * it to the API server. The login token lives in an httpOnly cookie that this code never sees.
+ */
+const LEGACY_TOKEN_KEY = "pcg_token";
 
 export interface ApiError {
   code: string;
@@ -33,9 +36,10 @@ type Body<P extends keyof paths, M extends keyof paths[P]> = paths[P][M] extends
 
 // Auth
 export type RegisterRequest = Body<"/api/v1/auth/register", "post">;
-export type RegisterResponse = Json<"/api/v1/auth/register", "post", 201>;
+// the token itself stays in the session cookie (src/app/api/[...path]/route.ts)
+export type RegisterResponse = Omit<Json<"/api/v1/auth/register", "post", 201>, "token">;
 export type LoginRequest = Body<"/api/v1/auth/login", "post">;
-export type LoginResponse = Json<"/api/v1/auth/login", "post", 200>;
+export type LoginResponse = Omit<Json<"/api/v1/auth/login", "post", 200>, "token">;
 export type ConsentResponse = Json<"/api/v1/auth/consent", "post", 200>;
 export type UserResponse = Json<"/api/v1/auth/me", "get", 200>;
 
@@ -124,46 +128,31 @@ export type TestSubmitted = Json<"/api/v1/tests/{phase}", "post", 201>;
 export type AdminMetricsResponse = Json<"/api/v1/admin/metrics", "get", 200>;
 export type OpsStatus = Json<"/api/v1/ops/status", "get", 200>;
 
-export function getStoredToken(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return localStorage.getItem(TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-export function setStoredToken(token: string | null): void {
+/** Earlier versions kept the token in localStorage: remove any that is left there. */
+export function forgetLegacyToken(): void {
   if (typeof window === "undefined") return;
   try {
-    if (token) localStorage.setItem(TOKEN_KEY, token);
-    else localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(LEGACY_TOKEN_KEY);
   } catch {
-    // storage unavailable (private mode): the session lasts until the tab closes
+    // storage unavailable: nothing was stored either
   }
 }
 
-/** Called when the server says the token is no longer valid, so the UI can return to login. */
+/** Called when the server says the session is no longer valid, so the UI can return to login. */
 let onUnauthorized: (() => void) | null = null;
 export function setUnauthorizedHandler(handler: (() => void) | null): void {
   onUnauthorized = handler;
 }
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {},
-  tokenOverride?: string | null
-): Promise<T> {
-  const token = tokenOverride !== undefined ? tokenOverride : getStoredToken();
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
 
   let res: Response;
   try {
-    res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+    res = await fetch(path, { ...options, headers, credentials: "same-origin" });
   } catch {
     throw new ApiException(0, {
       code: "NETWORK_ERROR",
@@ -178,10 +167,8 @@ async function request<T>(
       code: "UNKNOWN_ERROR",
       message: res.statusText || "An unexpected error occurred",
     };
-    if (res.status === 401 && token && !path.startsWith("/api/v1/auth/login")) {
-      setStoredToken(null);
-      onUnauthorized?.();
-    }
+    // a wrong password is not a lost session
+    if (res.status === 401 && !/^\/api\/v1\/auth\/(login|register)$/.test(path)) onUnauthorized?.();
     throw new ApiException(res.status, error);
   }
   return data as T;
@@ -197,7 +184,7 @@ export const api = {
       post<RegisterResponse>("/api/v1/auth/register", payload),
     login: (payload: LoginRequest) => post<LoginResponse>("/api/v1/auth/login", payload),
     consent: () => post<ConsentResponse>("/api/v1/auth/consent"),
-    me: (token?: string) => request<UserResponse>("/api/v1/auth/me", { method: "GET" }, token),
+    me: () => get<UserResponse>("/api/v1/auth/me"),
     logout: () => post<void>("/api/v1/auth/logout"),
     deleteMe: () => request<void>("/api/v1/me", { method: "DELETE" }),
   },
@@ -260,10 +247,7 @@ export const api = {
       get<UserReport>(`/api/v1/admin/learners/${encodeURIComponent(learnerPseudonym)}/report`),
     globalXai: () => get<GlobalAttributions>("/api/v1/admin/xai/global"),
     downloadCsv: async (table: "users" | "assignments" | "attempts") => {
-      const token = getStoredToken();
-      const res = await fetch(`${API_BASE_URL}/api/v1/admin/export.csv?table=${table}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const res = await fetch(`/api/v1/admin/export.csv?table=${table}`, { credentials: "same-origin" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new ApiException(res.status, data?.error || { code: "EXPORT_FAILED", message: "Export failed" });
@@ -271,22 +255,20 @@ export const api = {
       return await res.blob();
     },
   },
-
-  health: () => request<{ status: string; version: string }>("/health", { method: "GET" }),
 };
 
 /**
- * Send telemetry while the page is being closed. sendBeacon cannot carry the Authorization
- * header, so this uses fetch with keepalive, which can.
+ * Send telemetry while the page is being closed: fetch with keepalive outlives the page and, being
+ * same-origin, carries the session cookie.
  */
 export function sendEventsOnUnload(explanationId: string, events: ExplanationEvent[]): void {
-  const token = getStoredToken();
-  if (!token || events.length === 0) return;
+  if (events.length === 0) return;
   try {
-    void fetch(`${API_BASE_URL}/api/v1/explanations/${encodeURIComponent(explanationId)}/events`, {
+    void fetch(`/api/v1/explanations/${encodeURIComponent(explanationId)}/events`, {
       method: "POST",
       keepalive: true,
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ events: events.slice(0, 100) }),
     });
   } catch {

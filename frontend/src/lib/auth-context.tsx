@@ -6,9 +6,8 @@ import {
   ApiException,
   LoginRequest,
   RegisterRequest,
-  setStoredToken,
+  forgetLegacyToken,
   setUnauthorizedHandler,
-  getStoredToken,
   UserResponse,
 } from "./api";
 
@@ -34,17 +33,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [signedOut, setSignedOut] = useState(false);
 
   const refreshUser = useCallback(async () => {
-    const saved = getStoredToken();
-    if (!saved) {
-      setUser(null);
-      setIsLoading(false);
-      return;
-    }
     try {
-      setUser(await api.auth.me(saved));
+      // the session is an httpOnly cookie this code cannot see: ask the server whose it is
+      setUser(await api.auth.me());
     } catch {
-      // a 401 has already cleared the stored token (api.ts); any other failure (offline, or the
-      // request cancelled by leaving the page) must not log the user out
+      // not signed in (401), or offline
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -52,8 +45,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // an expired or revoked token anywhere in the app logs the user out locally
+    // an expired or revoked session anywhere in the app logs the user out locally
     setUnauthorizedHandler(() => setUser(null));
+    forgetLegacyToken();
     const timer = setTimeout(() => void refreshUser(), 0);
     return () => {
       clearTimeout(timer);
@@ -64,7 +58,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (data: LoginRequest) => {
     const res = await api.auth.login(data);
     setSignedOut(false);
-    setStoredToken(res.token);
     setUser(res.user);
     return res.user;
   };
@@ -72,7 +65,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (data: RegisterRequest) => {
     const res = await api.auth.register(data);
     setSignedOut(false);
-    setStoredToken(res.token);
     setUser(res.user);
     return res.user;
   };
@@ -86,18 +78,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await api.auth.logout(); // revokes the token on the server too
+      await api.auth.logout(); // revokes the token on the server and clears the session cookie
     } catch {
-      // already invalid or offline: forgetting it locally is enough
+      // already invalid or offline: forgetting the user locally is enough
     }
-    setStoredToken(null);
     setSignedOut(true);
     setUser(null);
   };
 
   const withdraw = async () => {
     await api.auth.deleteMe();
-    setStoredToken(null);
     setSignedOut(true);
     setUser(null);
   };

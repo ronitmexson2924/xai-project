@@ -12,6 +12,7 @@ from sqlalchemy import func, select
 
 from app.api.deps import GraphDep, LearnerModelDep
 from app.api.errors import api_error, not_found
+from app.api.heavy import heavy_work
 from app.auth import AdminDep, DbDep, LearnerDep
 from app.config import settings
 from app.db import models as m
@@ -29,7 +30,8 @@ router = APIRouter(tags=["xai"])
 def my_report(
     current: LearnerDep, session: DbDep, graph: GraphDep, learner_model: LearnerModelDep
 ) -> UserReport:
-    return explain_user(session, graph, learner_model, current.id)
+    with heavy_work(current.id):
+        return explain_user(session, graph, learner_model, current.id)
 
 
 class LearnerListing(BaseModel):
@@ -85,7 +87,7 @@ def list_learners(_: AdminDep, session: DbDep) -> list[LearnerListing]:
 )
 def learner_report(
     learner_pseudonym: str,
-    _: AdminDep,
+    admin: AdminDep,
     session: DbDep,
     graph: GraphDep,
     learner_model: LearnerModelDep,
@@ -93,7 +95,8 @@ def learner_report(
     salt = _salt()
     for uid, *_rest in _learner_rows(session):
         if pseudonym(uid, salt) == learner_pseudonym:
-            return explain_user(session, graph, learner_model, uid)
+            with heavy_work(admin.id):
+                return explain_user(session, graph, learner_model, uid)
     raise not_found("learner")
 
 
@@ -102,5 +105,6 @@ def learner_report(
     response_model=GlobalAttributions,
     summary="SHAP across learners' recent predictions, for a beeswarm (admins only, anonymous)",
 )
-def global_view(_: AdminDep, session: DbDep, graph: GraphDep) -> GlobalAttributions:
-    return global_attributions(session, graph)
+def global_view(admin: AdminDep, session: DbDep, graph: GraphDep) -> GlobalAttributions:
+    with heavy_work(admin.id):
+        return global_attributions(session, graph)
